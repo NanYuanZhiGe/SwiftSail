@@ -1,0 +1,27 @@
+*/target/
+# Gradle 文件
+gradle/
+build/
+# 本地配置文件（如 SDK 路径等）
+local.properties
+# 日志文件
+*.log
+# Android Studio 生成的文件和文件夹
+captures/
+externalNativeBuild/
+cxx/
+*.apk
+output.json
+# IntelliJ IDEA 相关文件
+*.iml
+idea/
+misc.xml
+deploymentTargetDropDown.xml
+render.experimental.xml
+# 密钥库文件
+*.jks
+*.keystore
+# Google 服务文件（如 API 或 Firebase）
+google-services.json
+# Android Profiling 文件
+*.hprof
