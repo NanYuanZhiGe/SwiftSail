@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nyzg.user.mapper.UserTableMapper">
+    <select id="isEmailExists">
+        SELECT 1
+        FROM userTable
+        WHERE email = #{email};
+    </select>
+    <select id="isNickNameExists">
+        SELECT 1
+        FROM userTable
+        WHERE nickName = #{nickName};
+    </select>
+    <select id="isHaveEmailAndSecretWord">
+        SELECT 1
+        FROM userTable
+        WHERE email = #{email}
+          AND secretWord = #{secretWord};
+    </select>
+    <select id="getSecretPubKey">
+        SELECT secretWord
+        FROM userTable
+        WHERE email = #{email};
+    </select>
+    <insert id="insertUserIfNotExists" parameterType="com.nyzg.user.dbobj.User">
+        INSERT IGNORE INTO `userTable` (id, nickName, email, secretWord)
+        VALUES (#{id}, #{nickName}, #{email}, #{secretWord});
+    </insert>
+</mapper>
