@@ -36,6 +36,7 @@ import com.nyzg.swiftsail.netobj.RegisterVerifyMailReq;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -50,18 +51,23 @@ import okhttp3.Response;
 
 public class LoginFragment extends Fragment {
     private final Handler handler = new Handler(Looper.getMainLooper());
+    static private final String USER_LIST_KEY = "user_list";
     List<User> userList;
 
-    //！！！！！！！！
-    //这个代码这里式有问题的，需要用静态方法+工厂方法来保证它的正确
-    //不然用户旋转了屏幕之后应用及进行重建，这里就会有问题
-    public LoginFragment(List<User> userList) {
-        this.userList = userList;
+    public static Fragment newInstance(ArrayList<User> userList) {
+        Fragment fragment = new LoginFragment();
+        if (userList != null) {
+            Bundle bundle = new Bundle();
+            bundle.putParcelableArrayList(USER_LIST_KEY, userList);
+            fragment.setArguments(bundle);
+        }
+        return fragment;
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.userList = getArguments() != null ? getArguments().getParcelableArrayList(USER_LIST_KEY) : null;
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {

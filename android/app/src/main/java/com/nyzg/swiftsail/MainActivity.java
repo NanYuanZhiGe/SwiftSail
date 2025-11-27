@@ -14,30 +14,24 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
 
-import com.nyzg.swiftsail.bean.SQLiteDB;
 import com.nyzg.swiftsail.dbobj.User;
 import com.nyzg.swiftsail.fragment.LoginFragment;
-import com.nyzg.swiftsail.obj.Pair;
 import com.nyzg.swiftsail.worker.LoginWorker;
 
 import java.lang.ref.WeakReference;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 public class MainActivity extends AppCompatActivity {
     static public final int SHOW_REGISTER_MSG = 0;
     static public final int SHOW_LOGIN_MSG = 1;
     static public final int DO_RUNNABLE = 2;
-    static public final int ADD_FRAGMENT=3;
+    static public final int ADD_FRAGMENT = 3;
     private static volatile Handler handler;
 
     @Override
@@ -111,18 +105,18 @@ public class MainActivity extends AppCompatActivity {
             }
             switch (msg.what) {
                 case SHOW_REGISTER_MSG:
-                    mainActivity.addFragmentToStackTop(new LoginFragment(null));
+                    mainActivity.addFragmentToStackTop(LoginFragment.newInstance(null));
                     break;
                 case SHOW_LOGIN_MSG:
                     List<User> userList = (List<User>) msg.obj;
-                    mainActivity.addFragmentToStackTop(new LoginFragment(userList));
+                    mainActivity.addFragmentToStackTop(LoginFragment.newInstance(new ArrayList<>(userList)));
                     break;
                 case DO_RUNNABLE:
                     Runnable r = (Runnable) msg.obj;
                     r.run();
                     break;
                 case ADD_FRAGMENT:
-                    Fragment fragment=(Fragment)msg.obj;
+                    Fragment fragment = (Fragment) msg.obj;
                     mainActivity.addFragmentToStackTop(fragment);
                 default:
             }
