@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 按下状态：使用渐变背景 -->
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <corners android:radius="5dp" />
+            <gradient android:angle="270" android:endColor="#FF444444" android:startColor="#FF777777" />
+        </shape>
+    </item>
+
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="5dp" />
+            <solid android:color="@color/liteWhite" />
+        </shape>
+    </item>
+
+</selector>

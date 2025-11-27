@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:focusableInTouchMode="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/loginMainPage"
+        android:layout_width="260dp"
+        android:layout_height="wrap_content"
+        android:focusableInTouchMode="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/loginText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="登录"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/changeLoginText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="1sp"
+            android:text="| 点我进行注册"
+            android:textColor="@color/linkBlue"
+            app:layout_constraintBottom_toBottomOf="@id/loginText"
+            app:layout_constraintStart_toEndOf="@id/loginText" />
+
+        <LinearLayout
+            android:id="@+id/registerLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:focusableInTouchMode="true"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/loginText">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="昵称："
+                android:textSize="16sp" />
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/registerNickName"
+                android:layout_width="240dp"
+                android:layout_height="56dp"
+                android:background="@drawable/register_input"
+                android:inputType="text" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="邮箱："
+                android:textSize="16sp" />
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/registerEmail"
+                android:layout_width="240dp"
+                android:layout_height="56dp"
+                android:background="@drawable/register_input"
+                android:inputType="textEmailAddress" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="密码："
+                android:textSize="16sp" />
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/registerPassword"
+                android:layout_width="240dp"
+                android:layout_height="56dp"
+                android:background="@drawable/register_input"
+                android:inputType="textPassword" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="验证码："
+                android:textSize="16sp" />
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/registerVerifyCode"
+                android:layout_width="240dp"
+                android:layout_height="56dp"
+                android:background="@drawable/register_input"
+                android:inputType="number" />
+
+            <TextView
+                android:id="@+id/getVerifyNumber"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/verify_code_button"
+                android:backgroundTint="@null"
+                android:padding="15dp"
+                android:text="点我获取验证码" />
+
+            <TextView
+                android:id="@+id/registerButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/register_button"
+                android:backgroundTint="@null"
+                android:padding="15dp"
+                android:text="点击进行注册" />
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/accountList"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:maxHeight="1200dp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/loginText" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
