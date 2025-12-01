@@ -13,7 +13,7 @@ import okhttp3.OkHttpClient;
 public class GlobalInstance {
     public final static OkHttpClient okHttpClient = new OkHttpClient.Builder()
             .connectTimeout(Duration.ofSeconds(5))
-            .readTimeout(Duration.ofSeconds(15))
+            .readTimeout(Duration.ofSeconds(30))
             .build();
     public final static Handler mainHandler = new Handler(Looper.getMainLooper());
 

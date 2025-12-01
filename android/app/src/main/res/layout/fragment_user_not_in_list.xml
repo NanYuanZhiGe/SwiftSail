@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="请输入您的邮箱："
+        app:layout_constraintBottom_toTopOf="@id/inputMail"
+        app:layout_constraintStart_toStartOf="@id/inputMail" />
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/inputMail"
+        android:layout_width="240dp"
+        android:layout_height="60dp"
+        android:background="@drawable/register_input"
+        android:inputType="textEmailAddress"
+        app:layout_constraintBottom_toTopOf="@id/nextStep"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <TextView
+        android:id="@+id/nextStep"
+        android:layout_width="240dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/verify_code_button"
+        android:gravity="center"
+        android:text="下一步"
+        android:textAlignment="center"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/inputMail" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
