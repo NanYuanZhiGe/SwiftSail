@@ -1,5 +1,6 @@
 package com.nyzg.swiftsail.adapter;
 
+import android.annotation.SuppressLint;
 import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -38,9 +39,7 @@ public class AccountListAdapter extends RecyclerView.Adapter<AccountListAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        User user = userList.get(position);
-        holder.setNickName(user.getNickName());
-        holder.setEmail(user.getEmail());
+        holder.bind(userList.get(position));
     }
 
     @Override
@@ -56,32 +55,32 @@ public class AccountListAdapter extends RecyclerView.Adapter<AccountListAdapter.
             super(itemView);
             nickName = itemView.findViewById(R.id.accountNickName);
             email = itemView.findViewById(R.id.accountEmail);
-            itemView.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View view, MotionEvent motionEvent) {
-                    if (motionEvent.getAction() == MotionEvent.ACTION_DOWN || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
-                        itemView.setPressed(true);
-                        return true;
-                    }
-                    if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                        itemView.setPressed(false);
-                        Message message = Message.obtain();
-                        message.what = MainActivity.ADD_FRAGMENT;
-                        message.obj = new LoginTypeSelectFragment();
-                        MainActivity.getHandler().sendMessage(message);
-                        return true;
-                    }
+        }
+
+        @SuppressLint("ClickableViewAccessibility")
+        public void bind(User user) {
+            nickName.setText(user.getNickName());
+            email.setText(user.getEmail());
+
+            itemView.setOnTouchListener((view, motionEvent) -> {
+                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    itemView.setPressed(true);
                     return true;
                 }
+                if (motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
+                    itemView.setPressed(false);
+                    return true;
+                }
+                if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                    itemView.setPressed(false);
+                    Message message = Message.obtain();
+                    message.what = MainActivity.ADD_FRAGMENT;
+                    message.obj = LoginTypeSelectFragment.newInstance(user);
+                    MainActivity.getHandler().sendMessage(message);
+                    return true;
+                }
+                return true;
             });
-        }
-
-        public void setNickName(String nickName) {
-            this.nickName.setText(nickName);
-        }
-
-        public void setEmail(String email) {
-            this.email.setText(email);
         }
     }
 }

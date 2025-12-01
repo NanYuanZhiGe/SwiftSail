@@ -24,12 +24,15 @@ import com.nyzg.swiftsail.GlobalApplication;
 import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.adapter.AccountListAdapter;
 import com.nyzg.swiftsail.bean.GlobalConf;
+import com.nyzg.swiftsail.bean.GlobalFunction;
 import com.nyzg.swiftsail.bean.GlobalInstance;
 import com.nyzg.swiftsail.bean.GlobalToast;
 import com.nyzg.swiftsail.bean.JsonSerializer;
 import com.nyzg.swiftsail.bean.MatchUtils;
+import com.nyzg.swiftsail.bean.SQLiteDB;
+import com.nyzg.swiftsail.dbobj.LastLogin;
 import com.nyzg.swiftsail.dbobj.User;
-import com.nyzg.swiftsail.netobj.HttpResp;
+import com.nyzg.swiftsail.listener.LoginCountingListener;
 import com.nyzg.swiftsail.netobj.MailVerifyReq;
 import com.nyzg.swiftsail.netobj.RegisterVerifyMailReq;
 
@@ -38,12 +41,11 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 
-import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -53,6 +55,11 @@ public class LoginFragment extends Fragment {
     private final Handler handler = new Handler(Looper.getMainLooper());
     static private final String USER_LIST_KEY = "user_list";
     List<User> userList;
+    Runnable waitingLastLogin;
+    volatile boolean cancelLastLogin = false;
+    static final String[] LAST_LOGIN_TEXT = {"检查上一次的登录账户中.", "检查上一次的登录账户中..", "检查上一次的登录账户中..."};
+    int lastLoginTextPointer = 0;
+    volatile boolean cancelAll = false;
 
     public static Fragment newInstance(ArrayList<User> userList) {
         Fragment fragment = new LoginFragment();
@@ -76,6 +83,7 @@ public class LoginFragment extends Fragment {
                         .setMessage("您还没有登录，要回到主界面吗")
                         .setPositiveButton("确定", (dialog, which) -> {
                             setEnabled(false);//禁用自己，避免无限递归
+                            cancelAll = true;//取消所有操作
                             requireActivity().getOnBackPressedDispatcher().onBackPressed();
                         })
                         .setNegativeButton("取消", null) // 取消则什么也不做
@@ -89,23 +97,84 @@ public class LoginFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_login, container, false);
-        if (userList == null) {
-            switchToRegister(view);
-        } else {
-            putUserIntoRecycleView(view.findViewById(R.id.accountList), userList);
-            switchToLogin(view);
-        }
-        onClickGetVerifyCode(view);
-        onClickSubmitRegister(view);
-        onClickChangeMainPage(view);
-        return view;
+        View father = inflater.inflate(R.layout.fragment_login, container, false);
+        tryLastLogin(father);
+        onClickGetVerifyCode(father);
+        onClickSubmitRegister(father);
+        onClickChangeMainPage(father);//点击切换登录和注册的点击事件逻辑
+        return father;
     }
 
+    //尝试进行上一次登录的流程
+    private void tryLastLogin(View father) {
+        if (waitingLastLogin != null) {
+            return;
+        }
+        father.findViewById(R.id.loginMainPage).setVisibility(View.GONE);
+        father.findViewById(R.id.checkLastLogin).setVisibility(View.VISIBLE);
+        //主界面动画
+        waitingLastLogin = () -> {
+            if (cancelLastLogin || cancelAll) {
+                cancelLastLogin = false;
+                waitingLastLogin = null;
+                return;
+            }
+            ((TextView) father.findViewById(R.id.checkLastLogin))
+                    .setText(LAST_LOGIN_TEXT[lastLoginTextPointer]);
+            ++lastLoginTextPointer;
+            if (lastLoginTextPointer == LAST_LOGIN_TEXT.length) {
+                lastLoginTextPointer = 0;
+            }
+            handler.postDelayed(waitingLastLogin, 1000);
+        };
+        handler.post(waitingLastLogin);
+        CompletableFuture.supplyAsync(() -> {
+            //从数据库中读取上一次的登录用户
+            SQLiteDB sqLiteDB = SQLiteDB.getDatabase(GlobalApplication.getAppContext());
+            List<LastLogin> lastLoginList = sqLiteDB.lastLoginTable().selectAllFromLastLoginTable();
+            if (lastLoginList.isEmpty()) {//没有上一次的登录用户
+                return Optional.empty();
+            }
+            LastLogin lastLogin = lastLoginList.get(0);
+            //从数据库中读取旧的数据
+            String token = sqLiteDB.userTable().selectTokenFromUserTable(lastLogin.userId);
+            User currentUser = new User();
+            currentUser.setId(lastLogin.userId);
+            GlobalInstance.currentUser.set(currentUser);
+            if (token == null) {//过期的token
+                return Optional.empty();
+            }
+            //然后向服务端进行验签
+            return GlobalFunction.acquireNewTokenSyncNullAtFail(token);
+        }).thenAccept(token -> {
+            cancelLastLogin = true;
+            //没有上次登录用户或者登录token过期，显示登录页面
+            if (!token.isPresent()) {
+                showLoginPage(father);
+                return;
+            }
+            //更新和保存token
+            GlobalFunction.onSuccessLoginSync(GlobalInstance.currentUser.get().getId(), (String) token.get());
+            GlobalFunction.goBackToMainPage();//返回主界面
+        });
+    }
 
+    private void showLoginPage(View father) {
+        handler.post(() -> {
+            father.findViewById(R.id.checkLastLogin).setVisibility(View.GONE);
+            father.findViewById(R.id.loginMainPage).setVisibility(View.VISIBLE);
+            if (userList == null) {
+                switchToRegister(father);
+            } else {
+                putUserIntoRecycleView(father.findViewById(R.id.accountList), userList);
+                switchToLogin(father);
+            }
+        });
+    }
+
+    //点击按钮注册用户点击事件逻辑
     @SuppressLint("ClickableViewAccessibility")
     private void onClickSubmitRegister(View father) {
-        //点击按钮注册用户点击事件逻辑
         TextView registerButton = father.findViewById(R.id.registerButton);
         registerButton.setOnTouchListener(new View.OnTouchListener() {
             private Runnable waiting = null;
@@ -175,7 +244,10 @@ public class LoginFragment extends Fragment {
                         OkHttpClient httpClient = GlobalInstance.okHttpClient;
                         Request request = new Request.Builder()
                                 .url(new URL(GlobalConf.URL_REGISTER_SUBMIT))
-                                .method("POST", RequestBody.create(JsonSerializer.serialize(req), MediaType.get("application/json;charset=utf-8")))
+                                .method("POST",
+                                        RequestBody.create(JsonSerializer.serialize(req),
+                                                GlobalConf.APPLICATION_JSON
+                                        ))
                                 .build();
                         return Optional.of(httpClient.newCall(request).execute());
                     } catch (Exception e) {
@@ -183,10 +255,22 @@ public class LoginFragment extends Fragment {
                     }
                 }).thenAccept(result -> {
                     stopWaiting.set(true);
-                    handleNetResp((Response) result.orElse(null), resp -> {
+                    GlobalFunction.handleNetResp((Response) result.orElse(null), () -> {
+                    }, resp -> {
                         GlobalToast.RESPONSE_SUCCESS.accept(resp.getMessage());
-                        //保存JWT的信息
-
+                        try {
+                            User user = JsonSerializer.mapToObject(resp.getContent(), User.class).orElse(null);
+                            if (user == null) {
+                                GlobalToast.SERVER_RESP_UNACCEPTABLE.run();
+                                return;
+                            }
+                            //把这个注册用户写入数据库
+                            GlobalFunction.safeInsertRegisterUserSync(user);
+                            //成功登录
+                            GlobalFunction.onSuccessLoginSync(user.getId(), user.getToken());
+                        } catch (Exception e) {
+                            GlobalToast.SERVER_RESP_UNACCEPTABLE.run();
+                        }
                     });
                 });
                 return true;
@@ -194,63 +278,38 @@ public class LoginFragment extends Fragment {
         });
     }
 
+    //点击按钮获取验证码点击事件逻辑
     @SuppressLint("ClickableViewAccessibility")
     private void onClickGetVerifyCode(View view) {
-        //点击按钮获取验证码点击事件逻辑
         TextView verifyCodeButton = view.findViewById(R.id.getVerifyNumber);
         TextInputEditText mailAddr = view.findViewById(R.id.registerEmail);
-        verifyCodeButton.setOnTouchListener(new View.OnTouchListener() {
-            private final AtomicReference<Runnable> counting = new AtomicReference<>(null);
-            private final int MAX_TIME = 5;//5*60
-            private int timeLeft = MAX_TIME;
-
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                if (motionEvent.getAction() != MotionEvent.ACTION_DOWN) {
-                    return true;
-                }
-                view.setPressed(true);
-                String mail = mailAddr.getText() != null ? mailAddr.getText().toString() : null;
-                if (mail == null || mail.isEmpty() || MatchUtils.isMailAddrIllegal(mail)) {
-                    Toast.makeText(GlobalApplication.getAppContext(), "邮箱格式不正确", Toast.LENGTH_LONG).show();
-                    view.setPressed(false);
-                    return true;
-                }
-                if (counting.get() != null) {
-                    return true;
-                }
-                CompletableFuture.supplyAsync(() -> {
-                    OkHttpClient okHttpClient = GlobalInstance.okHttpClient;
-                    Request request = new Request.Builder()
-                            .url(GlobalConf.URL_REGISTER_VERIFY_CODE)
-                            .method("POST", RequestBody.create(JsonSerializer.serialize(new MailVerifyReq(mail)), MediaType.get("application/json;charset=utf-8")))
-                            .build();
-                    try {
-                        return Optional.of(okHttpClient.newCall(request).execute());
-                    } catch (Exception e) {
-                        return Optional.empty();
-                    }
-                }).thenAccept(result -> handleNetResp(((Response) result.orElse(null)), resp -> GlobalToast.RESPONSE_SUCCESS.accept(resp.getMessage())));
-                counting.set(() -> {
-                    if (timeLeft == 0) {
-                        timeLeft = MAX_TIME;
-                        verifyCodeButton.setText("点我获取验证码");
-                        counting.set(null);
-                        verifyCodeButton.setPressed(false);
-                        return;
-                    }
-                    --timeLeft;
-                    verifyCodeButton.setText(String.format("%ss", timeLeft));
-                    handler.postDelayed(counting.get(), 1000);
-                });
-                handler.post(counting.get());
-                return true;
+        verifyCodeButton.setOnTouchListener(new LoginCountingListener<>(verifyCodeButton, () -> {
+            String mail = mailAddr.getText() != null ? mailAddr.getText().toString() : null;
+            if (mail == null || mail.isEmpty() || MatchUtils.isMailAddrIllegal(mail)) {
+                Toast.makeText(GlobalApplication.getAppContext(), "邮箱格式不正确", Toast.LENGTH_LONG).show();
+                view.setPressed(false);
+                return Optional.empty();
             }
-        });
+            return Optional.of(mail);
+        }, strMailAddr -> {
+            OkHttpClient okHttpClient = GlobalInstance.okHttpClient;
+            try {
+                Request request = new Request.Builder()
+                        .url(GlobalConf.URL_REGISTER_VERIFY_CODE)
+                        .method("POST",
+                                RequestBody.create(JsonSerializer.serialize(new MailVerifyReq(strMailAddr)),
+                                        GlobalConf.APPLICATION_JSON
+                                ))
+                        .build();
+                return Optional.of(okHttpClient.newCall(request).execute());
+            } catch (Exception e) {
+                return Optional.empty();
+            }
+        }, resp -> GlobalToast.RESPONSE_SUCCESS.accept(resp.getMessage())));
     }
 
+    //点击切换登录和注册的点击事件逻辑
     private void onClickChangeMainPage(View view) {
-        //点击切换登录和注册的点击事件逻辑
         View registerLayout = view.findViewById(R.id.registerLayout);
         View accountList = view.findViewById(R.id.accountList);
         TextView loginText = view.findViewById(R.id.loginText);
@@ -288,30 +347,5 @@ public class LoginFragment extends Fragment {
     private void putUserIntoRecycleView(RecyclerView recyclerView, List<User> userList) {
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getContext()));
         recyclerView.setAdapter(new AccountListAdapter(userList));
-    }
-
-    private void handleNetResp(Response response, Consumer<HttpResp> onSuccess) {
-        if (response == null) {
-            GlobalToast.SERVER_NOT_RESPONSE.run();
-            return;
-        }
-        if (!response.isSuccessful()) {
-            GlobalToast.RESPONSE_ERROR.accept(response.code());
-            response.close();
-            return;
-        }
-        try {
-            HttpResp httpResp = JsonSerializer.deSerialize(response.body() != null ? response.body().string() : null, HttpResp.class);
-            if (httpResp == null || !httpResp.isSuccess()) {
-                GlobalToast.RESPONSE_NOT_SUCCESS.accept(httpResp == null ? null : httpResp.getMessage());
-                response.close();
-                return;
-            }
-            onSuccess.accept(httpResp);
-        } catch (Exception e) {
-            GlobalToast.CONTENT_UNACCEPTABLE.run();
-        } finally {
-            response.close();
-        }
     }
 }

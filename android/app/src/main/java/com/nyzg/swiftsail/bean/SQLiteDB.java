@@ -10,19 +10,22 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.sqlite.db.SupportSQLiteOpenHelper;
 
+import com.nyzg.swiftsail.dao.LastLoginTable;
 import com.nyzg.swiftsail.dao.UserTable;
+import com.nyzg.swiftsail.dbobj.LastLogin;
 import com.nyzg.swiftsail.dbobj.User;
 
 @Database(entities = {
-        User.class
-}, version = 1, exportSchema = false)
+        User.class, LastLogin.class
+}, version = 2, exportSchema = false)
 public abstract class SQLiteDB extends RoomDatabase {
-    private static SQLiteDB self;
+    private volatile static SQLiteDB self;
 
     public abstract UserTable userTable();
 
-    protected SQLiteDB() {
-    }
+    public abstract LastLoginTable lastLoginTable();
+
+    protected SQLiteDB() {}
 
     static public SQLiteDB getDatabase(final Context context) {
         if (self != null) {
@@ -37,7 +40,7 @@ public abstract class SQLiteDB extends RoomDatabase {
                     context.getApplicationContext(),
                     SQLiteDB.class,
                     "SwiftSailDB"
-            ).build();
+            ).fallbackToDestructiveMigration().build();
         }
         return self;
     }
@@ -45,17 +48,5 @@ public abstract class SQLiteDB extends RoomDatabase {
     @Override
     public void clearAllTables() {
 
-    }
-
-    @NonNull
-    @Override
-    protected InvalidationTracker createInvalidationTracker() {
-        return null;
-    }
-
-    @NonNull
-    @Override
-    protected SupportSQLiteOpenHelper createOpenHelper(@NonNull DatabaseConfiguration databaseConfiguration) {
-        return null;
     }
 }

@@ -1,19 +1,21 @@
 package com.nyzg.swiftsail.netobj;
 
 public class MailVerifyReq {
-    String mail;
+    String mailAddr;
 
 
-    public MailVerifyReq(){}
-    public MailVerifyReq(String mail) {
-        this.mail = mail;
+    public MailVerifyReq() {
     }
 
-    public String getMail() {
-        return mail;
+    public MailVerifyReq(String mailAddr) {
+        this.mailAddr = mailAddr;
     }
 
-    public void setMail(String mail) {
-        this.mail = mail;
+    public String getMailAddr() {
+        return mailAddr;
+    }
+
+    public void setMailAddr(String mailAddr) {
+        this.mailAddr = mailAddr;
     }
 }

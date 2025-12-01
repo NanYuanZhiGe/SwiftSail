@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     static public final int SHOW_LOGIN_MSG = 1;
     static public final int DO_RUNNABLE = 2;
     static public final int ADD_FRAGMENT = 3;
+    static public final int GO_BACK_TO_MAIN_PAGE=4;
     private static volatile Handler handler;
 
     @Override
@@ -56,6 +57,21 @@ public class MainActivity extends AppCompatActivity {
         transaction.replace(R.id.mainFragment, fragment);
         transaction.addToBackStack(null);
         transaction.commit();
+    }
+
+    protected  void clearAllFragment(){
+        FragmentManager manager = getSupportFragmentManager();
+        List<Fragment> fragments = new ArrayList<>(manager.getFragments());
+        manager.popBackStack(null,FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        if (!fragments.isEmpty()) {
+            FragmentTransaction transaction = manager.beginTransaction();
+            for (Fragment fragment : fragments) {
+                if (fragment != null) {
+                    transaction.remove(fragment);
+                }
+            }
+            transaction.commitAllowingStateLoss();
+        }
     }
 
     private void fullScreen() {
@@ -118,6 +134,10 @@ public class MainActivity extends AppCompatActivity {
                 case ADD_FRAGMENT:
                     Fragment fragment = (Fragment) msg.obj;
                     mainActivity.addFragmentToStackTop(fragment);
+                    break;
+                case GO_BACK_TO_MAIN_PAGE:
+                    mainActivity.clearAllFragment();
+                    break;
                 default:
             }
         }

@@ -5,6 +5,17 @@
     android:layout_height="match_parent"
     android:focusableInTouchMode="true">
 
+    <TextView
+        android:id="@+id/checkLastLogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        />
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/loginMainPage"
         android:layout_width="260dp"

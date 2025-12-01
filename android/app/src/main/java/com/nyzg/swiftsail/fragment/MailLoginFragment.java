@@ -1,6 +1,111 @@
 package com.nyzg.swiftsail.fragment;
 
+import android.annotation.SuppressLint;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.material.textfield.TextInputEditText;
+import com.nyzg.swiftsail.R;
+import com.nyzg.swiftsail.bean.GlobalConf;
+import com.nyzg.swiftsail.bean.GlobalFunction;
+import com.nyzg.swiftsail.bean.GlobalInstance;
+import com.nyzg.swiftsail.bean.GlobalToast;
+import com.nyzg.swiftsail.bean.JsonSerializer;
+import com.nyzg.swiftsail.listener.LoginWaitingListener;
+import com.nyzg.swiftsail.listener.LoginCountingListener;
+import com.nyzg.swiftsail.netobj.MailCodeVerifyReq;
+import com.nyzg.swiftsail.netobj.MailVerifyReq;
+
+import java.util.Optional;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+
+
 public class MailLoginFragment extends Fragment {
+    private String email;
+    private static final String EMAIL_KEY = "user_email";
+
+    public static Fragment newInstance(String email) {
+        Fragment fragment = new MailLoginFragment();
+        if (email != null) {
+            Bundle bundle = new Bundle();
+            bundle.putString(EMAIL_KEY, email);
+            fragment.setArguments(bundle);
+        }
+        return fragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        this.email = getArguments() != null ? getArguments().getString(EMAIL_KEY) : null;
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View father = inflater.inflate(R.layout.fragment_mail_login, container, false);
+        TextView getMailCode = father.findViewById(R.id.getMailCode);
+        onGetMailCodeClick(getMailCode);
+        TextView submitMailVerify = father.findViewById(R.id.submitMailVerify);
+        onSubmitMailVerifyClick(submitMailVerify, father.findViewById(R.id.mailInput));
+        return father;
+    }
+
+    //获取邮箱验证码的点击事件
+    @SuppressLint("ClickableViewAccessibility")
+    private void onGetMailCodeClick(TextView textView) {
+        textView.setOnTouchListener(new LoginCountingListener<>(
+                textView, () -> Optional.of(email), strEmail -> {
+            try {
+                OkHttpClient httpClient = GlobalInstance.okHttpClient;
+                Request request = new Request.Builder()
+                        .url(GlobalConf.URL_LOGIN_VERIFY_CODE)
+                        .method("POST",
+                                RequestBody.create(
+                                        JsonSerializer.serialize(new MailVerifyReq(strEmail)),
+                                        GlobalConf.APPLICATION_JSON
+                                ))
+                        .build();
+                return Optional.of(httpClient.newCall(request).execute());
+            } catch (Exception e) {
+                return Optional.empty();
+            }
+        }, success -> GlobalToast.COMMON_TOAST.accept("验证码已发送")));
+    }
+
+    //提交验证码的逻辑
+    @SuppressLint("ClickableViewAccessibility")
+    private void onSubmitMailVerifyClick(TextView textView, TextInputEditText inputEditText) {
+        textView.setOnTouchListener(new LoginWaitingListener(
+                textView, () -> {
+            String verifyCode = inputEditText.getText() != null ? inputEditText.getText().toString() : null;
+            if (verifyCode == null || verifyCode.length() != 6 || !verifyCode.matches("\\d+")) {
+                GlobalToast.COMMON_TOAST.accept("验证码格式不正确");
+                return Optional.empty();
+            }
+            try {
+                OkHttpClient httpClient = GlobalInstance.okHttpClient;
+                Request request = new Request.Builder()
+                        .url(GlobalConf.URL_LOGIN_WITH_MAIL)
+                        .method(GlobalConf.POST, RequestBody.create(
+                                JsonSerializer.serialize(new MailCodeVerifyReq(email, verifyCode)),
+                                GlobalConf.APPLICATION_JSON
+                        ))
+                        .build();
+                return Optional.of(httpClient.newCall(request).execute());
+            } catch (Exception e) {
+                return Optional.empty();
+            }
+        }, resp -> GlobalFunction.onSuccessLoginSync(email, resp.getContent())));
+    }
 }

@@ -1,10 +1,12 @@
 package com.nyzg.swiftsail.netobj;
 
-public class HttpResp {
+import java.util.Map;
+
+public class HttpResp{
     boolean success;
     int code;
     String message;
-    Object content;
+    Map<String,Object> content;
 
 
     public boolean isSuccess() {
@@ -31,11 +33,11 @@ public class HttpResp {
         this.message = message;
     }
 
-    public Object getContent() {
+    public Map<String, Object> getContent() {
         return content;
     }
 
-    public void setContent(Object content) {
+    public void setContent(Map<String, Object> content) {
         this.content = content;
     }
 }
