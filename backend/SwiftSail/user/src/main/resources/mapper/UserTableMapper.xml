@@ -3,17 +3,27 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.nyzg.user.mapper.UserTableMapper">
     <select id="isEmailExists">
-        SELECT 1
+        SELECT COUNT(*)
         FROM userTable
         WHERE email = #{email};
     </select>
     <select id="isNickNameExists">
-        SELECT 1
+        SELECT COUNT(*)
         FROM userTable
         WHERE nickName = #{nickName};
     </select>
+    <select id="getUserByEmail">
+        SELECT id, nickName, email
+        FROM userTable
+        WHERE email = #{email};
+    </select>
+    <select id="getUserIdByEmail">
+        SELECt id
+        FROM userTable
+        WHERE email = #{email};
+    </select>
     <select id="isHaveEmailAndSecretWord">
-        SELECT 1
+        SELECT COUNT(*)
         FROM userTable
         WHERE email = #{email}
           AND secretWord = #{secretWord};

@@ -5,12 +5,14 @@ import com.nyzg.user.dbobj.User;
 import com.nyzg.user.mapper.UserTableMapper;
 import com.nyzg.user.netobj.HttpResp;
 import com.nyzg.user.netobj.RegisterUserReq;
+import com.nyzg.user.remoteobj.RemoteUser;
 import jakarta.annotation.Resource;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
 import org.redisson.client.codec.StringCodec;
 import org.springframework.stereotype.Service;
 
+import java.rmi.Remote;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
@@ -33,14 +35,16 @@ public class DbService {
     @Resource
     UserTableMapper userTableMapper;
 
-    public Optional<HttpResp> onNullWhenUserInserted(RegisterUserReq req) {
-        //如果email存在，直接成功登录
-        if (userTableMapper.isEmailExists(req.getEmail()) != 0) {
-            return Optional.empty();
+    public HttpResp insertUserSuccessReturnUser(RegisterUserReq req) {
+        List<User> userList = userTableMapper.getUserByEmail(req.getEmail());
+        if (!userList.isEmpty()) {//如果email存在，直接成功登录
+            User user = userList.get(0);
+            return new HttpResp(true, new RemoteUser(user.getId(), user.getNickName(), user.getEmail()));
         }
+        //用户不存在，需要执行插入语句
         //保证用户名不重复
         if (userTableMapper.isNickNameExists(req.getNickName()) != 0) {
-            return Optional.of(NICK_NAME_SHOULD_UNIQUE);
+            return NICK_NAME_SHOULD_UNIQUE;
         }
         User user = new User(
                 idService.getId(),//线程安全
@@ -51,9 +55,10 @@ public class DbService {
         try {
             userTableMapper.insertUserIfNotExists(user);
         } catch (Exception e) {
-            return Optional.of(SERVER_CANNOT_WRITE_DB);
+            return SERVER_CANNOT_WRITE_DB;
         }
-        return Optional.empty();
+        RemoteUser safeUser = new RemoteUser(user.getId(), user.getNickName(), user.getEmail());
+        return new HttpResp(true, safeUser);
     }
 
     public Optional<HttpResp> onNullWhenPasswordCorrect(String email, byte[] secretWord) {
@@ -90,6 +95,19 @@ public class DbService {
             return Optional.of(SERVER_CANNOT_WRITE_DB);
         }
         return Optional.empty();
+    }
+
+    //根据email获取用户的id
+    public HttpResp getUserIdByEmailNullAtFail(String email) {
+        try {
+            Long id = userTableMapper.getUserIdByEmail(email);
+            if (id == null) {
+                return EMAIL_NOT_EXISTS;
+            }
+            return new HttpResp(true, HttpResp.COMMON_SUCCESS_CODE, "", id);
+        } catch (Exception e) {
+            return SERVER_CANNOT_WRITE_DB;
+        }
     }
 
     public HttpResp getSecretChallenge(String mail) {

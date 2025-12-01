@@ -3,11 +3,14 @@ package com.nyzg.common.ss_utils;
 
 import lombok.NonNull;
 import lombok.SneakyThrows;
+import org.jetbrains.annotations.TestOnly;
+import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Random;
 import java.util.stream.IntStream;
@@ -18,6 +21,19 @@ final public class EncryptThreadSafe {
     static private final Base64.Encoder BASE64_URL_ENCODER = Base64.getUrlEncoder();
     static private final Base64.Encoder BASE64_ENCODER = Base64.getEncoder();
     static private final Base64.Decoder BASE64_DECODER = Base64.getDecoder();
+
+    public static byte[] getSha256String(String str) {
+        if (str == null || str.isEmpty()) {
+            return null;
+        }
+        return getDigestThreadLocal().digest(str.getBytes(StandardCharsets.UTF_8));
+    }
+
+    @Test
+    public void testSha(){
+        String str="ACuteGril";
+        System.out.println(Arrays.toString(getSha256String(str)));
+    }
 
     public static boolean verifyRsa2048Sign(String pubKeyBase64, String challenge, String signBase64) {
         byte[] pubKeyBytes = BASE64_DECODER.decode(pubKeyBase64);

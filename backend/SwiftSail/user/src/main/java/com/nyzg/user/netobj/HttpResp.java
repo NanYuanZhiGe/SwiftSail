@@ -16,7 +16,12 @@ public class HttpResp {
     Object content;
 
 
-    public HttpResp(boolean success, int code,String message) {
+    public HttpResp(boolean success, Object content) {
+        this.success = success;
+        this.content = content;
+    }
+
+    public HttpResp(boolean success, int code, String message) {
         this.success = success;
         this.code=code;
         this.message = message;

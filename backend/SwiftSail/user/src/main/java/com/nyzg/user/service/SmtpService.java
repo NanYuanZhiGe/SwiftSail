@@ -5,6 +5,7 @@ import com.nyzg.user.netobj.HttpResp;
 import jakarta.annotation.Resource;
 import jakarta.mail.internet.MimeMessage;
 import org.redisson.api.RBucket;
+import org.redisson.api.RScript;
 import org.redisson.api.RedissonClient;
 import org.redisson.client.codec.StringCodec;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -12,6 +13,8 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.random.RandomGenerator;
 import java.util.stream.IntStream;
@@ -66,14 +69,29 @@ public class SmtpService {
     }
 
     public Optional<HttpResp> onNullWhenMailCodeVerifySuccess(String mail, String code) {
-        RBucket<String> sBucket = redissonClient.getBucket(
-                String.format(MAIL_VERIFY_KEY, mail), StringCodec.INSTANCE
+        RScript onDeleteWhenCorrect = redissonClient.getScript(StringCodec.INSTANCE);
+        Long result=onDeleteWhenCorrect.eval(
+                RScript.Mode.READ_WRITE,
+                """
+                        local val=redis.call('GET',KEYS[1])
+                        if not val then
+                            return 0
+                        end
+                        if val==ARGV[1] then
+                            redis.call('DEL',KEYS[1])
+                            return 1
+                        else
+                            return 2
+                        end
+                        """,
+                RScript.ReturnType.VALUE,
+                List.of(String.format(MAIL_VERIFY_KEY, mail)),
+                code
         );
-        String redisKey = sBucket.get();
-        if (redisKey == null) {
+        if (result==0){
             return Optional.of(CODE_HAVE_EXPIRED);
         }
-        return redisKey.equals(code) ? Optional.empty() : Optional.of(CODE_NOT_CORRECT);
+        return result==1? Optional.empty() : Optional.of(CODE_NOT_CORRECT);
     }
 
     //-1邮件没有发送过，0邮件发送过，可以重新发送，1邮件发送过，不能重新发送

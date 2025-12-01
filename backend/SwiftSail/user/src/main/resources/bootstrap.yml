@@ -17,6 +17,9 @@ spring:
           - data-id: swift-sail-smtp-dev.yaml
             group: DEFAULT_GROUP
             refresh: true
+          - data-id: swift_sail_share_dev.yaml
+            group: DEFAULT_GROUP
+            refresh: true
         namespace: 62d813f4-e610-4b31-8f87-24faeb0b8035
         username: swiftSailDeveloper
 
