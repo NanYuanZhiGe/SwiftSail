@@ -19,8 +19,9 @@ import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
 
+import com.nyzg.swiftsail.bean.NavManager;
 import com.nyzg.swiftsail.dbobj.User;
-import com.nyzg.swiftsail.fragment.LoginFragment;
+import com.nyzg.swiftsail.fragment.login.LoginFragment;
 import com.nyzg.swiftsail.worker.LoginWorker;
 
 import java.lang.ref.WeakReference;
@@ -32,8 +33,9 @@ public class MainActivity extends AppCompatActivity {
     static public final int SHOW_LOGIN_MSG = 1;
     static public final int DO_RUNNABLE = 2;
     static public final int ADD_FRAGMENT = 3;
-    static public final int GO_BACK_TO_MAIN_PAGE=4;
+    static public final int GO_BACK_TO_MAIN_PAGE = 4;
     private static volatile Handler handler;
+    private final NavManager navManager = NavManager.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
         handler = new InnerHandler(this.getMainLooper(), this);
         fullScreen();
         checkAndDoLogin();
+        initNavManager();
     }
 
     private void checkAndDoLogin() {
@@ -59,10 +62,10 @@ public class MainActivity extends AppCompatActivity {
         transaction.commit();
     }
 
-    protected  void clearAllFragment(){
+    protected void clearAllFragment() {
         FragmentManager manager = getSupportFragmentManager();
         List<Fragment> fragments = new ArrayList<>(manager.getFragments());
-        manager.popBackStack(null,FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        manager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         if (!fragments.isEmpty()) {
             FragmentTransaction transaction = manager.beginTransaction();
             for (Fragment fragment : fragments) {
@@ -96,6 +99,10 @@ public class MainActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             getWindow().getAttributes().layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
         }
+    }
+
+    private void initNavManager() {
+        navManager.addView(findViewById(R.id.mainViewPager), findViewById(R.id.nav), this);
     }
 
 

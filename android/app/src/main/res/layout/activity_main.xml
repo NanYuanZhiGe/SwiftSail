@@ -8,7 +8,7 @@
 
     <fragment
         android:id="@+id/mainFragment"
-        android:name="com.nyzg.swiftsail.fragment.MainFragment"
+        android:name="com.nyzg.swiftsail.fragment.login.MainFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

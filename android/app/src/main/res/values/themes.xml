@@ -5,5 +5,12 @@
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
 
+    <style name="Theme.SwiftSail.Fullscreen" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- 关键：让内容延伸到系统窗口（状态栏、导航栏） -->
+        <item name="android:windowTranslucentStatus">true</item>
+        <!-- 可选：如果底部也有导航栏，也透过去 -->
+        <!-- <item name="android:windowTranslucentNavigation">true</item> -->
+    </style>
+
     <style name="Theme.SwiftSail" parent="Base.Theme.SwiftSail" />
 </resources>

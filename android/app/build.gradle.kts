@@ -28,6 +28,7 @@ android {
     }
 }
 
+
 dependencies {
 
     implementation("androidx.appcompat:appcompat:1.6.1")
@@ -45,6 +46,12 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     implementation("com.google.code.gson:gson:2.10.1")
+    //底部滑出面板的组件
+    implementation("com.sothree.slidinguppanel:library:3.4.0")
 
+    //柱状图、折线图等报表组件
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
+    //私有云地图瓦片显示组件
+    implementation("org.maplibre.gl:android-sdk:11.11.0")
 }

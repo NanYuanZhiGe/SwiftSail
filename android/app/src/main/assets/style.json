@@ -1,0 +1,27 @@
+{
+  "version": 0,
+  "name": "Guangdong Map",
+  "sources": {
+    "raster-tiles": {
+      "type": "raster",
+      "tiles": [
+        "http://<YOUR_SERVER_IP>:6090/styles/basic-preview/#{z}/{x}/{y}"
+      ],
+      "tileSize": 256
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "#f0f0f0"
+      }
+    },
+    {
+      "id": "raster-layer",
+      "type": "raster",
+      "source": "raster-tiles"
+    }
+  ]
+}

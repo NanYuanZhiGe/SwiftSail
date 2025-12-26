@@ -1,4 +1,4 @@
-package com.nyzg.swiftsail.fragment;
+package com.nyzg.swiftsail.fragment.login;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -41,7 +41,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
@@ -60,6 +59,7 @@ public class LoginFragment extends Fragment {
     static final String[] LAST_LOGIN_TEXT = {"检查上一次的登录账户中.", "检查上一次的登录账户中..", "检查上一次的登录账户中..."};
     int lastLoginTextPointer = 0;
     volatile boolean cancelAll = false;
+    boolean haveFirstCheckLogin=false;
 
     public static Fragment newInstance(ArrayList<User> userList) {
         Fragment fragment = new LoginFragment();
@@ -107,6 +107,11 @@ public class LoginFragment extends Fragment {
 
     //尝试进行上一次登录的流程
     private void tryLastLogin(View father) {
+        if (haveFirstCheckLogin){
+            showLoginPage(father);
+            return;
+        }
+        haveFirstCheckLogin=true;
         if (waitingLastLogin != null) {
             return;
         }

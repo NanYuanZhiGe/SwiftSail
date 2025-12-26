@@ -14,8 +14,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.nyzg.swiftsail.MainActivity;
 import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.dbobj.User;
-import com.nyzg.swiftsail.fragment.LoginTypeSelectFragment;
-import com.nyzg.swiftsail.fragment.UserNotInListFragment;
+import com.nyzg.swiftsail.fragment.login.LoginTypeSelectFragment;
+import com.nyzg.swiftsail.fragment.login.UserNotInListFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,15 +23,15 @@ import java.util.List;
 public class AccountListAdapter extends RecyclerView.Adapter<AccountListAdapter.MyViewHolder> {
     List<User> userList;
 
-    public AccountListAdapter(List<User> userList) {
-        if (userList == null) {
-            this.userList = new ArrayList<>(1);
-        } else {
-            this.userList = userList;
+    public AccountListAdapter(List<User> originalUserList) {
+        // 创建副本，避免污染原始数据
+        this.userList = new ArrayList<>();
+        if (originalUserList != null) {
+            this.userList.addAll(originalUserList);
         }
-        User user = new User();
-        user.setId(-1);
-        this.userList.add(user);
+        User placeholder = new User();
+        placeholder.setId(-1);
+        this.userList.add(placeholder);
     }
 
     @NonNull

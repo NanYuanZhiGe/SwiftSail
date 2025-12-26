@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_record"
+        android:icon="@drawable/record"
+        android:iconTint="@color/transparent"
+        android:title="记录" />
+
+    <item
+        android:id="@+id/nav_report"
+        android:icon="@drawable/report"
+        android:iconTint="@color/transparent"
+        android:title="报表" />
+
+    <item
+        android:id="@+id/nac_comprehen"
+        android:icon="@drawable/comprehen"
+        android:iconTint="@color/transparent"
+        android:title="综合"
+        />
+    <item
+        android:id="@+id/nav_geo"
+        android:icon="@drawable/geo"
+        android:iconTint="@color/transparent"
+        android:title="附近" />
+
+    <item
+        android:id="@+id/nav_mine"
+        android:icon="@drawable/mine"
+        android:iconTint="@color/transparent"
+        android:title="自己" />
+</menu>

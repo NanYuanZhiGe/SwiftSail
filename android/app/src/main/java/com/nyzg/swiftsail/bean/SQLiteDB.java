@@ -2,22 +2,25 @@ package com.nyzg.swiftsail.bean;
 
 import android.content.Context;
 
-import androidx.annotation.NonNull;
 import androidx.room.Database;
-import androidx.room.DatabaseConfiguration;
-import androidx.room.InvalidationTracker;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
-import androidx.sqlite.db.SupportSQLiteOpenHelper;
 
 import com.nyzg.swiftsail.dao.LastLoginTable;
+import com.nyzg.swiftsail.dao.RecordTable;
 import com.nyzg.swiftsail.dao.UserTable;
 import com.nyzg.swiftsail.dbobj.LastLogin;
+import com.nyzg.swiftsail.dbobj.Record;
 import com.nyzg.swiftsail.dbobj.User;
 
-@Database(entities = {
-        User.class, LastLogin.class
-}, version = 2, exportSchema = false)
+@Database(
+        entities = {
+                User.class,
+                LastLogin.class,
+                Record.class
+        },
+        version = 3,
+        exportSchema = false)
 public abstract class SQLiteDB extends RoomDatabase {
     private volatile static SQLiteDB self;
 
@@ -25,7 +28,10 @@ public abstract class SQLiteDB extends RoomDatabase {
 
     public abstract LastLoginTable lastLoginTable();
 
-    protected SQLiteDB() {}
+    public abstract RecordTable recordTable();
+
+    protected SQLiteDB() {
+    }
 
     static public SQLiteDB getDatabase(final Context context) {
         if (self != null) {

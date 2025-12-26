@@ -3,6 +3,10 @@ package com.nyzg.swiftsail;
 import android.app.Application;
 import android.content.Context;
 
+import org.maplibre.android.MapLibre;
+import org.maplibre.android.maps.MapView;
+
+
 public class GlobalApplication extends Application {
     private static GlobalApplication self;
 
@@ -10,6 +14,11 @@ public class GlobalApplication extends Application {
     public void onCreate() {
         super.onCreate();
         self = this;
+        initMapBox();
+    }
+
+    private void initMapBox() {
+        MapLibre.getInstance(this);
     }
 
     public static GlobalApplication getInstance() {

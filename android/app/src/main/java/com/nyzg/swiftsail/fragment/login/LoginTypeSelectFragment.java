@@ -1,4 +1,4 @@
-package com.nyzg.swiftsail.fragment;
+package com.nyzg.swiftsail.fragment.login;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
