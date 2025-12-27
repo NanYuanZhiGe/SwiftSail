@@ -3,8 +3,16 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- 定位权限-->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- 后台定位权限-->
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <!-- 前台服务权限-->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <!-- 防止设备休眠，因为需要持续追踪用户的状态-->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:name=".GlobalApplication"
@@ -28,6 +36,11 @@
         </activity>
 
         <activity android:name=".RecordActivity" />
+
+        <service
+            android:name=".service.RecordRecordService"
+            android:exported="false"
+            android:foregroundServiceType="location" />
     </application>
 
 </manifest>
