@@ -12,7 +12,7 @@ public class GlobalConf {
     final public static String URL_VERIFY_AND_GET_TOKEN = BASE_HOST + "/login/verify/get/token";
     final public static String URL_LOGIN_CHALLENGE = BASE_HOST + "/login/get/secret/challenge";
     final public static String URL_LOGIN_WITH_KEY = BASE_HOST + "/login/verify/secret/key";
-    final public static String URL_TILE_SERVER = BASE_HOST + "/styles/basic-preview/style.json";
+    final public static String URL_TILE_SERVER = "https://tile.nyzghencute.top/styles/basic-preview/style.json";
     final public static String POST = "POST";
     final public static String GET = "GET";
 

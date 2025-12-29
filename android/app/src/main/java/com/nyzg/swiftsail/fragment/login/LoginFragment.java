@@ -59,7 +59,7 @@ public class LoginFragment extends Fragment {
     static final String[] LAST_LOGIN_TEXT = {"检查上一次的登录账户中.", "检查上一次的登录账户中..", "检查上一次的登录账户中..."};
     int lastLoginTextPointer = 0;
     volatile boolean cancelAll = false;
-    boolean haveFirstCheckLogin=false;
+    boolean haveFirstCheckLogin = false;
 
     public static Fragment newInstance(ArrayList<User> userList) {
         Fragment fragment = new LoginFragment();
@@ -82,6 +82,9 @@ public class LoginFragment extends Fragment {
                         .setTitle("")
                         .setMessage("您还没有登录，要回到主界面吗")
                         .setPositiveButton("确定", (dialog, which) -> {
+                            User unLoginUser = new User();
+                            unLoginUser.setId(0L);
+                            GlobalInstance.currentUser.set(unLoginUser);
                             setEnabled(false);//禁用自己，避免无限递归
                             cancelAll = true;//取消所有操作
                             requireActivity().getOnBackPressedDispatcher().onBackPressed();
@@ -107,11 +110,11 @@ public class LoginFragment extends Fragment {
 
     //尝试进行上一次登录的流程
     private void tryLastLogin(View father) {
-        if (haveFirstCheckLogin){
+        if (haveFirstCheckLogin) {
             showLoginPage(father);
             return;
         }
-        haveFirstCheckLogin=true;
+        haveFirstCheckLogin = true;
         if (waitingLastLogin != null) {
             return;
         }

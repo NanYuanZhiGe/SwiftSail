@@ -1,11 +1,10 @@
 package com.nyzg.swiftsail.fragment.main;
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,8 +23,10 @@ import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.nyzg.swiftsail.GlobalApplication;
 import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.listener.RecordBtnListener;
-import com.nyzg.swiftsail.viewmodel.RecordViewModel;
+import com.nyzg.swiftsail.obj.Pair;
+import com.nyzg.swiftsail.repository.RecordRepository;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,9 +39,11 @@ public class RecordFragment extends Fragment {
         }
     }
 
-    private RecordViewModel recordViewModel;
+    final private RecordRepository recordRepository = RecordRepository.INSTANCE;
     private BarChart barChart;
     private BarDataSet barDataSet;
+
+    private final static DecimalFormat DISTANCE_FORMATTER = new DecimalFormat("0.00");
 
     @Nullable
     @Override
@@ -48,17 +51,27 @@ public class RecordFragment extends Fragment {
         View father = inflater.inflate(R.layout.layout_record, container, false);
         father.findViewById(R.id.new_record).setOnTouchListener(new RecordBtnListener(requireContext()));
         this.barChart = father.findViewById(R.id.barChart);
-        recordViewModel = new ViewModelProvider(this).get(RecordViewModel.class);
         initBarChart();
-        recordViewModel.getMutableBarEntries().observe(
-                getViewLifecycleOwner(), this::updateBarChart
-        );
-        recordViewModel.initBarChart();
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            recordViewModel.updateBarChart(4, true, 10);
-            recordViewModel.updateBarChart(3, false, 13);
-            recordViewModel.updateBarChart(3, true, 200);
-        }, 2000);
+        //需要进行UI更新的组件
+        TextView numberDistance = father.findViewById(R.id.numberDistance);
+        TextView numberStep = father.findViewById(R.id.numberStep);
+        TextView numberKalo = father.findViewById(R.id.numberKa);
+        recordRepository.getLiveRecordData().observe(getViewLifecycleOwner(), recordData -> {
+            List<BarEntry> entries = new ArrayList<>(6);
+            Pair<float[], float[]> pair = recordData.getPercentage();
+            //更新柱状图
+            for (int i = 0; i < 6; ++i) {
+                entries.add(new BarEntry(i, new float[]{
+                        pair.getA()[i], pair.getB()[i]
+                }));
+            }
+            updateBarChart(entries);
+            //更新文字
+            numberDistance.setText(DISTANCE_FORMATTER.format(recordData.getKiloMeters()));
+            numberStep.setText(recordData.getSteps()+"");
+            //无所谓了都是保留两位小数
+            numberKalo.setText(DISTANCE_FORMATTER.format(recordData.getConsumption()));
+        });
         return father;
     }
 
@@ -69,7 +82,7 @@ public class RecordFragment extends Fragment {
                 ContextCompat.getColor(GlobalApplication.getAppContext(), R.color.linkBlue),
                 ContextCompat.getColor(GlobalApplication.getAppContext(), R.color.linkOrange)
         );
-        barDataSet.setStackLabels(new String[]{"跑步", "走路"}); // 图例标签
+        barDataSet.setStackLabels(new String[]{"走/跑", "骑行"}); // 图例标签
         barDataSet.setValueTextSize(12f);
         BarData barData = new BarData(barDataSet);
         barData.setDrawValues(false);//不要柱状图每个柱子得小字说明
