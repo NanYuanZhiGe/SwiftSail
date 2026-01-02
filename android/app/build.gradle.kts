@@ -17,6 +17,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            isDebuggable=true
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
@@ -54,5 +57,8 @@ dependencies {
 
     //私有云地图瓦片显示组件
     implementation("org.maplibre.gl:android-sdk:11.11.0")
+
+    //指纹识别
+    implementation("androidx.biometric:biometric:1.1.0")
 
 }

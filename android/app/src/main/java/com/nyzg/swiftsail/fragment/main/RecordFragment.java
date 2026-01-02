@@ -1,6 +1,8 @@
 package com.nyzg.swiftsail.fragment.main;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +13,9 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.work.Constraints;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.XAxis;
@@ -24,7 +29,9 @@ import com.nyzg.swiftsail.GlobalApplication;
 import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.listener.RecordBtnListener;
 import com.nyzg.swiftsail.obj.Pair;
+import com.nyzg.swiftsail.repository.LoginRepository;
 import com.nyzg.swiftsail.repository.RecordRepository;
+import com.nyzg.swiftsail.worker.RecordBarchartWorker;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -42,9 +49,10 @@ public class RecordFragment extends Fragment {
     final private RecordRepository recordRepository = RecordRepository.INSTANCE;
     private BarChart barChart;
     private BarDataSet barDataSet;
-
     private final static DecimalFormat DISTANCE_FORMATTER = new DecimalFormat("0.00");
+    private boolean hasInitBar = false;
 
+    @SuppressLint("DefaultLocale")
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -68,7 +76,7 @@ public class RecordFragment extends Fragment {
             updateBarChart(entries);
             //更新文字
             numberDistance.setText(DISTANCE_FORMATTER.format(recordData.getKiloMeters()));
-            numberStep.setText(recordData.getSteps()+"");
+            numberStep.setText(String.format("%d", recordData.getSteps()));
             //无所谓了都是保留两位小数
             numberKalo.setText(DISTANCE_FORMATTER.format(recordData.getConsumption()));
         });
@@ -76,6 +84,10 @@ public class RecordFragment extends Fragment {
     }
 
     private void initBarChart() {
+        if (hasInitBar) {
+            return;
+        }
+        hasInitBar = true;
         barDataSet = new BarDataSet(EMPTY_BARS, "运动时间段占比");
         //设置柱状图的样式
         barDataSet.setColors(
@@ -125,6 +137,17 @@ public class RecordFragment extends Fragment {
         barChart.setFitBars(true);                  // 防止柱子被裁剪
         barChart.setTouchEnabled(false);            // 禁用缩放/拖动
         barChart.invalidate();//刷新
+
+        //查询数据库，回调更新barChart
+        WorkManager workManager = WorkManager.getInstance(this.requireContext());
+        //由于LoginRepository的currentUser通过postValue的方式更新，所以执行的速度会比worker慢
+        //导致user为空然后就没有办法更新用户数据
+        LoginRepository.INSTANCE.getMutableCurrentUser().observe(getViewLifecycleOwner(), user -> {
+            workManager.enqueue(new OneTimeWorkRequest.Builder(
+                            RecordBarchartWorker.class
+                    ).setConstraints(new Constraints.Builder().build()).build()
+            );
+        });
     }
 
     private void updateBarChart(List<BarEntry> entries) {

@@ -19,7 +19,7 @@ import com.nyzg.swiftsail.dbobj.User;
                 LastLogin.class,
                 Record.class
         },
-        version = 3,
+        version = 4,
         exportSchema = false)
 public abstract class SQLiteDB extends RoomDatabase {
     private volatile static SQLiteDB self;

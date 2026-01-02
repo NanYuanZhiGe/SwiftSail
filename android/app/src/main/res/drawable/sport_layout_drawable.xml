@@ -3,13 +3,13 @@
     <item android:state_pressed="true">
         <shape>
             <corners android:radius="8dp" />
-            <gradient android:angle="270" android:endColor="@color/linkGray" android:startColor="#FFFFFF" />
+            <solid android:color="@color/linkGray"/>
         </shape>
     </item>
     <item>
         <shape>
             <corners android:radius="8dp" />
-            <gradient android:angle="270" android:endColor="@color/linkBlue" android:startColor="#FFFFFF" />
+            <solid android:color="@color/whitePurple"/>
         </shape>
     </item>
 </selector>

@@ -12,8 +12,12 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <!-- 防止设备休眠，因为需要持续追踪用户的状态-->
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-
+    <!-- 指纹登录权限需要-->
+    <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
+    <!-- 如果需要使用http作为测试-->
+    <!--android:usesCleartextTraffic="true"-->
     <application
         android:name=".GlobalApplication"
         android:allowBackup="true"
@@ -24,7 +28,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.SwiftSail.Fullscreen"
-        android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
             android:name=".MainActivity"

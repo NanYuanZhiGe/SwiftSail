@@ -2,24 +2,24 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:background="@color/white"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/white">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="请输入邮箱验证码"
         android:textColor="@color/black"
-        android:textSize="16sp"
+        android:textSize="18sp"
         app:layout_constraintBottom_toTopOf="@id/mailInput"
         app:layout_constraintStart_toStartOf="@id/mailInput" />
 
     <com.google.android.material.textfield.TextInputEditText
         android:id="@+id/mailInput"
         android:layout_width="240dp"
-        android:layout_height="80dp"
-        android:inputType="number"
+        android:layout_height="40dp"
         android:background="@drawable/register_input"
+        android:inputType="number"
         app:layout_constraintBottom_toTopOf="@id/getMailCode"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -28,31 +28,28 @@
 
     <TextView
         android:id="@+id/getMailCode"
-        android:layout_width="wrap_content"
+        android:layout_width="120dp"
         android:layout_height="40dp"
-        android:layout_margin="3dp"
+        android:layout_marginTop="12dp"
         android:background="@drawable/verify_code_button"
         android:gravity="center"
-        android:padding="3dp"
-        android:text="点击获取邮箱验证码"
+        android:text="获取验证码"
         android:textAlignment="center"
         app:layout_constraintBottom_toTopOf="@id/submitMailVerify"
         app:layout_constraintEnd_toEndOf="@id/mailInput"
-        app:layout_constraintStart_toStartOf="@id/mailInput"
         app:layout_constraintTop_toBottomOf="@id/mailInput" />
 
     <TextView
         android:id="@+id/submitMailVerify"
-        android:layout_width="200dp"
+        android:layout_width="120dp"
         android:layout_height="40dp"
-        android:layout_margin="3dp"
-        android:background="@drawable/verify_code_button"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/register_button"
         android:gravity="center"
         android:text="登录"
         android:textAlignment="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@id/mailInput"
-        app:layout_constraintStart_toStartOf="@id/mailInput"
         app:layout_constraintTop_toBottomOf="@id/getMailCode" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

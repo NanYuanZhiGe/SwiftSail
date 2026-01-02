@@ -39,6 +39,7 @@ public class NavManager {
     public void addView(ViewPager2 viewPager2, BottomNavigationView view, FragmentActivity activity) {
         viewPager2.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
         viewPager2.setAdapter(new MainPagerAdapter(activity));
+        viewPager2.setOffscreenPageLimit(4);
         viewPager2.setUserInputEnabled(false);
         this.bottomNavigationView = view;
         view.setOnItemSelectedListener(item -> {

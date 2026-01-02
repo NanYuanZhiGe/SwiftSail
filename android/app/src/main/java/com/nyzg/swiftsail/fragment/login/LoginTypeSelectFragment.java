@@ -64,10 +64,10 @@ public class LoginTypeSelectFragment extends Fragment {
                 case MotionEvent.ACTION_CANCEL:
                 case MotionEvent.ACTION_UP:
                     view.setPressed(false);
-                    Message message = Message.obtain();
-                    message.what = MainActivity.ADD_FRAGMENT;
-                    message.obj = fragment;
-                    MainActivity.getHandler().sendMessage(message);
+                    MainActivity.addFragmentToStackTop(
+                            requireActivity().getSupportFragmentManager(),
+                            fragment
+                    );
                     break;
             }
             return true;

@@ -23,6 +23,28 @@ public class RecordData {
         this.consumption = data.consumption;
     }
 
+    public void setFeetData(int startHour, int endHour, float meters, float durationSecond) {
+        startHour /= 4;
+        endHour /= 4;
+        for (int i = startHour; i <= endHour; ++i) {
+            useFeetHour[i] += 1;
+        }
+        useFeetMeters = meters;
+        consumption = (float) (600 * durationSecond / 3600.0);
+        float AVERAGE_STEP_LEN = 0.76f;
+        steps = (int) (meters / AVERAGE_STEP_LEN);
+    }
+
+    public void setWheelData(int startHour, int endHour, float meters, float durationSecond) {
+        startHour /= 4;
+        endHour /= 4;
+        for (int i = startHour; i <= endHour; ++i) {
+            useWheelHour[i] += 1;
+        }
+        useWheelMeters = meters;
+        consumption = (float) (400 * durationSecond / 3600.0);
+    }
+
     public void updateFeetData(int startHour, int endHour, float meters, float durationSecond) {
         /*
         假设有一个人从8:34运动到13:02，那么startHour就是8，endHour就是13

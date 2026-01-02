@@ -1,79 +1,87 @@
 package com.nyzg.swiftsail;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.work.Constraints;
 import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
 
-import com.nyzg.swiftsail.bean.NavManager;
-import com.nyzg.swiftsail.dbobj.User;
 import com.nyzg.swiftsail.fragment.login.LoginFragment;
+import com.nyzg.swiftsail.fragment.login.MainFragment;
 import com.nyzg.swiftsail.worker.LoginWorker;
 
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    static public final int SHOW_REGISTER_MSG = 0;
-    static public final int SHOW_LOGIN_MSG = 1;
-    static public final int DO_RUNNABLE = 2;
-    static public final int ADD_FRAGMENT = 3;
-    static public final int GO_BACK_TO_MAIN_PAGE = 4;
-    private static volatile Handler handler;
-    private final NavManager navManager = NavManager.getInstance();
+    private static boolean onCheckLogin = false;
 
+    //MainActivity的onCreate和App的生命周期是一致的
+    //一般在一次使用应用时只会初始化一次
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        handler = new InnerHandler(this.getMainLooper(), this);
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.mainFragment, new MainFragment())
+                .commit();
         fullScreen();
         checkAndDoLogin();
-        initNavManager();
     }
 
     private void checkAndDoLogin() {
+        if (onCheckLogin) {
+            return;
+        }
+        onCheckLogin = true;
+        OneTimeWorkRequest request = new OneTimeWorkRequest
+                .Builder(LoginWorker.class)
+                .setConstraints(new Constraints.Builder().build())
+                .build();
         WorkManager workManager = WorkManager.getInstance(this);
-        workManager.enqueue(new OneTimeWorkRequest.Builder(LoginWorker.class).setConstraints(
-                new Constraints.Builder().build()
-        ).build());
+        workManager.enqueue(request);
+        workManager.getWorkInfoByIdLiveData(request.getId())
+                .observe(this, workInfo -> {
+                    if (workInfo == null || (workInfo.getState() != WorkInfo.State.FAILED && workInfo.getState() != WorkInfo.State.SUCCEEDED)) {
+                        return;
+                    }
+                    //如果上一次的登录依旧是有效的，就不要进入登录页面，什么都不做
+                    //只有上一次没有登录，或者上一次的登录无法验证，才进入登录页面
+                    if (workInfo.getState()==WorkInfo.State.FAILED){
+                        addFragmentToStackTop(getSupportFragmentManager(),LoginFragment.newInstance());
+                    }
+                    onCheckLogin = false;
+                });
     }
 
-    protected void addFragmentToStackTop(Fragment fragment) {
-        FragmentManager manager = getSupportFragmentManager();
+    public static void addFragmentToStackTop(FragmentManager manager, Fragment fragment) {
+        Fragment current = manager.findFragmentById(R.id.mainFragment);
+        //不要重复添加
+        if (current != null && current.getClass().equals(fragment.getClass())) {
+            return;
+        }
         FragmentTransaction transaction = manager.beginTransaction();
         transaction.replace(R.id.mainFragment, fragment);
         transaction.addToBackStack(null);
         transaction.commit();
     }
 
-    protected void clearAllFragment() {
-        FragmentManager manager = getSupportFragmentManager();
-        List<Fragment> fragments = new ArrayList<>(manager.getFragments());
-        manager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-        if (!fragments.isEmpty()) {
-            FragmentTransaction transaction = manager.beginTransaction();
-            for (Fragment fragment : fragments) {
-                if (fragment != null) {
-                    transaction.remove(fragment);
-                }
-            }
-            transaction.commitAllowingStateLoss();
+    public static void popUntilTheInitOne(FragmentManager manager) {
+        if (manager.isStateSaved()) {
+            return;
+        }
+        int count = manager.getBackStackEntryCount();
+        if (count > 0) {
+            manager.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         }
     }
 
@@ -98,55 +106,6 @@ public class MainActivity extends AppCompatActivity {
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             getWindow().getAttributes().layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-        }
-    }
-
-    private void initNavManager() {
-        navManager.addView(findViewById(R.id.mainViewPager), findViewById(R.id.nav), this);
-    }
-
-
-    public static Handler getHandler() {
-        return handler;
-    }
-
-    public static class InnerHandler extends Handler {
-        WeakReference<MainActivity> activityWeakReference;
-
-        public InnerHandler(Looper looper, MainActivity activity) {
-            super(looper);
-            activityWeakReference = new WeakReference<>(activity);
-        }
-
-        @Override
-        @SuppressWarnings("unchecked")
-        public void handleMessage(@NonNull Message msg) {
-            super.handleMessage(msg);
-            MainActivity mainActivity = activityWeakReference.get();
-            if (mainActivity == null) {
-                return;
-            }
-            switch (msg.what) {
-                case SHOW_REGISTER_MSG:
-                    mainActivity.addFragmentToStackTop(LoginFragment.newInstance(null));
-                    break;
-                case SHOW_LOGIN_MSG:
-                    List<User> userList = (List<User>) msg.obj;
-                    mainActivity.addFragmentToStackTop(LoginFragment.newInstance(new ArrayList<>(userList)));
-                    break;
-                case DO_RUNNABLE:
-                    Runnable r = (Runnable) msg.obj;
-                    r.run();
-                    break;
-                case ADD_FRAGMENT:
-                    Fragment fragment = (Fragment) msg.obj;
-                    mainActivity.addFragmentToStackTop(fragment);
-                    break;
-                case GO_BACK_TO_MAIN_PAGE:
-                    mainActivity.clearAllFragment();
-                    break;
-                default:
-            }
         }
     }
 }

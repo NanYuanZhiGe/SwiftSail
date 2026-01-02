@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -31,7 +32,7 @@ public class UserNotInListFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View father;
         father = inflater.inflate(R.layout.fragment_user_not_in_list, container, false);
-        TextView nextStep = father.findViewById(R.id.nextStep);
+        ImageView nextStep = father.findViewById(R.id.nextStep);
         TextInputEditText inputMail = father.findViewById(R.id.inputMail);
         nextStep.setOnTouchListener((view, motionEvent) -> {
             switch (motionEvent.getAction()) {
@@ -48,12 +49,12 @@ public class UserNotInListFragment extends Fragment {
                         GlobalToast.COMMON_TOAST.accept("邮箱格式不合法");
                         break;
                     }
-                    Message m = Message.obtain();
-                    m.what = MainActivity.ADD_FRAGMENT;
                     User user = new User();
                     user.setEmail(str);
-                    m.obj = LoginTypeSelectFragment.newInstance(user);
-                    MainActivity.getHandler().sendMessage(m);
+                    MainActivity.addFragmentToStackTop(
+                            requireActivity().getSupportFragmentManager(),
+                            LoginTypeSelectFragment.newInstance(user)
+                    );
             }
             return true;
         });

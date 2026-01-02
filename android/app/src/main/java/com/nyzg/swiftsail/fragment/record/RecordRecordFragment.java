@@ -32,6 +32,7 @@ import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.bean.GlobalConf;
 import com.nyzg.swiftsail.dbobj.Record;
 import com.nyzg.swiftsail.repository.RecordRecordRepository;
+import com.nyzg.swiftsail.repository.RecordRepository;
 import com.nyzg.swiftsail.service.RecordRecordService;
 
 import org.maplibre.android.camera.CameraPosition;
@@ -59,7 +60,7 @@ public class RecordRecordFragment extends Fragment {
     private ImageView submitButton;
     private boolean isUnSave=false;
     private static volatile RecordRecordService recordService;
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy:MM:dd hh:mm:ss");
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss");
     private static final ServiceConnection recordConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
@@ -162,7 +163,7 @@ public class RecordRecordFragment extends Fragment {
             map.setStyle(GlobalConf.URL_TILE_SERVER);
             map.setCameraPosition(new CameraPosition.Builder()
                     .target(new LatLng(23.1479, 113.2996))
-                    .zoom(10.84)
+                    .zoom(16.72)
                     .build()
             );
         });
@@ -188,7 +189,7 @@ public class RecordRecordFragment extends Fragment {
                 return;
             }
             mapLibreMap.easeCamera(
-                    CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 10.84),
+                    CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 16.72),
                     1000 // 动画时长（毫秒）
             );
         });
@@ -375,7 +376,10 @@ public class RecordRecordFragment extends Fragment {
      */
     private void saveSportData(Record record) {
         isUnSave=false;
-
+        if (record==null){
+            return;
+        }
+        RecordRepository.INSTANCE.submitRepositoryRecord(record);
     }
 
     @Override

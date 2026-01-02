@@ -1,7 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="SportLayout">
-        <attr name="sportName" format="string"/>
-        <attr name="sportIcon" format="reference"/>
+        <attr name="sportName" format="string" />
+        <attr name="sportIcon" format="reference" />
+    </declare-styleable>
+
+    <declare-styleable name="MineFuncSelectLayout">
+        <attr name="funcIcon" format="reference" />
+        <attr name="iconTint" format="color|reference" />
+        <attr name="funcName" format="string" />
+        <attr name="textColor" format="reference" />
+    </declare-styleable>
+
+    <declare-styleable name="MineUserDataSelectLayout">
+        <attr name="attributeName" format="string"/>
     </declare-styleable>
 </resources>

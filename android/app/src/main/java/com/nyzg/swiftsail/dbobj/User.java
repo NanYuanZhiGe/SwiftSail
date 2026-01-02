@@ -11,11 +11,11 @@ import androidx.room.PrimaryKey;
 @Entity(tableName = "userTable")
 public class User implements Parcelable {
     @PrimaryKey
-    long id;
-    String nickName;
-    String email;
+    public long id;
+    public String nickName;
+    public String email;
 
-    String token;
+    public String token;
 
     public User() {
     }

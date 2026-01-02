@@ -17,7 +17,7 @@ import androidx.room.PrimaryKey;
 public class Record {
     @PrimaryKey
     @NonNull
-    public byte[] id;
+    public String id="";
     public long userId;
     public String record;
     public long recordDate;//自1970年来的天数，避免时区问题

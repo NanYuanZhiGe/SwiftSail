@@ -15,26 +15,26 @@ import android.widget.Toast;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.nyzg.swiftsail.GlobalApplication;
+import com.nyzg.swiftsail.MainActivity;
 import com.nyzg.swiftsail.R;
-import com.nyzg.swiftsail.adapter.AccountListAdapter;
 import com.nyzg.swiftsail.bean.GlobalConf;
 import com.nyzg.swiftsail.bean.GlobalFunction;
 import com.nyzg.swiftsail.bean.GlobalInstance;
 import com.nyzg.swiftsail.bean.GlobalToast;
 import com.nyzg.swiftsail.bean.JsonSerializer;
 import com.nyzg.swiftsail.bean.MatchUtils;
-import com.nyzg.swiftsail.bean.SQLiteDB;
-import com.nyzg.swiftsail.dbobj.LastLogin;
 import com.nyzg.swiftsail.dbobj.User;
 import com.nyzg.swiftsail.listener.LoginCountingListener;
 import com.nyzg.swiftsail.netobj.MailVerifyReq;
 import com.nyzg.swiftsail.netobj.RegisterVerifyMailReq;
+import com.nyzg.swiftsail.repository.LoginRepository;
 
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -52,39 +52,29 @@ import okhttp3.Response;
 
 public class LoginFragment extends Fragment {
     private final Handler handler = new Handler(Looper.getMainLooper());
-    static private final String USER_LIST_KEY = "user_list";
-    List<User> userList;
-    Runnable waitingLastLogin;
-    volatile boolean cancelLastLogin = false;
-    static final String[] LAST_LOGIN_TEXT = {"检查上一次的登录账户中.", "检查上一次的登录账户中..", "检查上一次的登录账户中..."};
-    int lastLoginTextPointer = 0;
     volatile boolean cancelAll = false;
-    boolean haveFirstCheckLogin = false;
 
-    public static Fragment newInstance(ArrayList<User> userList) {
-        Fragment fragment = new LoginFragment();
-        if (userList != null) {
-            Bundle bundle = new Bundle();
-            bundle.putParcelableArrayList(USER_LIST_KEY, userList);
-            fragment.setArguments(bundle);
-        }
-        return fragment;
+    public static Fragment newInstance() {
+        return new LoginFragment();
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.userList = getArguments() != null ? getArguments().getParcelableArrayList(USER_LIST_KEY) : null;
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
+                if (LoginRepository.INSTANCE.getMutableCurrentUser().getValue() != null) {
+                    setEnabled(false);
+                    requireActivity().getOnBackPressedDispatcher().onBackPressed();
+                    return;
+                }
+                //当前用户为空
                 new AlertDialog.Builder(requireContext())
                         .setTitle("")
-                        .setMessage("您还没有登录，要回到主界面吗")
+                        .setMessage("您还没有登录，要回到主界面吗（将本地账户登录）？")
                         .setPositiveButton("确定", (dialog, which) -> {
-                            User unLoginUser = new User();
-                            unLoginUser.setId(0L);
-                            GlobalInstance.currentUser.set(unLoginUser);
+                            LoginRepository.INSTANCE.login(GlobalInstance.LOCAL_USER);
                             setEnabled(false);//禁用自己，避免无限递归
                             cancelAll = true;//取消所有操作
                             requireActivity().getOnBackPressedDispatcher().onBackPressed();
@@ -101,83 +91,32 @@ public class LoginFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View father = inflater.inflate(R.layout.fragment_login, container, false);
-        tryLastLogin(father);
-        onClickGetVerifyCode(father);
-        onClickSubmitRegister(father);
+        //这个动画已弃用，上一次登录用户的校验移交至MainActivity启动后来检验，
+        //现在LoginFragment的职能就是专职注册和登录，不会有其他任何的多余操作
+        father.findViewById(R.id.checkLastLogin).setVisibility(View.GONE);
+        showLoginPage(father, null);//先传一个空的，让它显示注册界面
+        //观察userList，如果查询到了用户数据，就更新为登录界面
+        LoginRepository.INSTANCE
+                .getMutableAvailableUserList()
+                .observe(
+                        getViewLifecycleOwner(),
+                        userList -> showLoginPage(father, userList)
+                );
+        onClickGetVerifyCode(father);//获取验证码的点击事件
+        onClickSubmitRegister(father);//提交注册信息的点击事件逻辑
         onClickChangeMainPage(father);//点击切换登录和注册的点击事件逻辑
         return father;
     }
 
-    //尝试进行上一次登录的流程
-    private void tryLastLogin(View father) {
-        if (haveFirstCheckLogin) {
-            showLoginPage(father);
-            return;
-        }
-        haveFirstCheckLogin = true;
-        if (waitingLastLogin != null) {
-            return;
-        }
-        father.findViewById(R.id.loginMainPage).setVisibility(View.GONE);
-        father.findViewById(R.id.checkLastLogin).setVisibility(View.VISIBLE);
-        //主界面动画
-        waitingLastLogin = () -> {
-            if (cancelLastLogin || cancelAll) {
-                cancelLastLogin = false;
-                waitingLastLogin = null;
-                return;
-            }
-            ((TextView) father.findViewById(R.id.checkLastLogin))
-                    .setText(LAST_LOGIN_TEXT[lastLoginTextPointer]);
-            ++lastLoginTextPointer;
-            if (lastLoginTextPointer == LAST_LOGIN_TEXT.length) {
-                lastLoginTextPointer = 0;
-            }
-            handler.postDelayed(waitingLastLogin, 1000);
-        };
-        handler.post(waitingLastLogin);
-        CompletableFuture.supplyAsync(() -> {
-            //从数据库中读取上一次的登录用户
-            SQLiteDB sqLiteDB = SQLiteDB.getDatabase(GlobalApplication.getAppContext());
-            List<LastLogin> lastLoginList = sqLiteDB.lastLoginTable().selectAllFromLastLoginTable();
-            if (lastLoginList.isEmpty()) {//没有上一次的登录用户
-                return Optional.empty();
-            }
-            LastLogin lastLogin = lastLoginList.get(0);
-            //从数据库中读取旧的数据
-            String token = sqLiteDB.userTable().selectTokenFromUserTable(lastLogin.userId);
-            User currentUser = new User();
-            currentUser.setId(lastLogin.userId);
-            GlobalInstance.currentUser.set(currentUser);
-            if (token == null) {//过期的token
-                return Optional.empty();
-            }
-            //然后向服务端进行验签
-            return GlobalFunction.acquireNewTokenSyncNullAtFail(token);
-        }).thenAccept(token -> {
-            cancelLastLogin = true;
-            //没有上次登录用户或者登录token过期，显示登录页面
-            if (!token.isPresent()) {
-                showLoginPage(father);
-                return;
-            }
-            //更新和保存token
-            GlobalFunction.onSuccessLoginSync(GlobalInstance.currentUser.get().getId(), (String) token.get());
-            GlobalFunction.goBackToMainPage();//返回主界面
-        });
-    }
 
-    private void showLoginPage(View father) {
-        handler.post(() -> {
-            father.findViewById(R.id.checkLastLogin).setVisibility(View.GONE);
-            father.findViewById(R.id.loginMainPage).setVisibility(View.VISIBLE);
-            if (userList == null) {
-                switchToRegister(father);
-            } else {
-                putUserIntoRecycleView(father.findViewById(R.id.accountList), userList);
-                switchToLogin(father);
-            }
-        });
+    private void showLoginPage(View father, List<User> userList) {
+        father.findViewById(R.id.loginMainPage).setVisibility(View.VISIBLE);
+        if (userList == null || userList.size() == 0) {
+            switchToRegister(father);
+        } else {
+            putUserIntoRecycleView(father.findViewById(R.id.accountList), userList);
+            switchToLogin(father);
+        }
     }
 
     //点击按钮注册用户点击事件逻辑
@@ -261,7 +200,7 @@ public class LoginFragment extends Fragment {
                     } catch (Exception e) {
                         return Optional.empty();
                     }
-                }).thenAccept(result -> {
+                }).thenAcceptAsync(result -> {
                     stopWaiting.set(true);
                     GlobalFunction.handleNetResp((Response) result.orElse(null), () -> {
                     }, resp -> {
@@ -273,14 +212,16 @@ public class LoginFragment extends Fragment {
                                 return;
                             }
                             //把这个注册用户写入数据库
-                            GlobalFunction.safeInsertRegisterUserSync(user);
+                            LoginRepository.INSTANCE.updateUserToLocalAccountAsync(user);
                             //成功登录
-                            GlobalFunction.onSuccessLoginSync(user.getId(), user.getToken());
+                            LoginRepository.INSTANCE.login(user);
+                            //返回主界面
+                            MainActivity.popUntilTheInitOne(requireActivity().getSupportFragmentManager());
                         } catch (Exception e) {
                             GlobalToast.SERVER_RESP_UNACCEPTABLE.run();
                         }
                     });
-                });
+                }, ContextCompat.getMainExecutor(requireContext()));
                 return true;
             }
         });
@@ -352,8 +293,82 @@ public class LoginFragment extends Fragment {
         view.findViewById(R.id.accountList).setVisibility(View.GONE);
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private void putUserIntoRecycleView(RecyclerView recyclerView, List<User> userList) {
-        recyclerView.setLayoutManager(new LinearLayoutManager(this.getContext()));
-        recyclerView.setAdapter(new AccountListAdapter(userList));
+        if (recyclerView.getAdapter() == null) {
+            recyclerView.setLayoutManager(new LinearLayoutManager(this.getContext()));
+            recyclerView.setAdapter(new MyAdapter(userList));
+        } else {
+            ((MyAdapter) recyclerView.getAdapter()).updateAllData(userList);
+            recyclerView.getAdapter().notifyDataSetChanged();
+        }
+    }
+
+    private class MyAdapter extends RecyclerView.Adapter<MyViewHolder> {
+        List<User> userList;
+
+        public MyAdapter(List<User> originalUserList) {
+            // 创建副本，避免污染原始数据
+            this.userList = new ArrayList<>();
+            if (originalUserList != null) {
+                this.userList.addAll(originalUserList);
+            }
+        }
+
+        public void updateAllData(List<User> newList) {
+            this.userList = new ArrayList<>(newList.size());
+            this.userList.addAll(newList);
+        }
+
+        @NonNull
+        @Override
+        public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+            return new MyViewHolder(inflater.inflate(R.layout.account_layout, parent, false));
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+            holder.bind(userList.get(position));
+        }
+
+        @Override
+        public int getItemCount() {
+            return userList.size();
+        }
+    }
+
+    private class MyViewHolder extends RecyclerView.ViewHolder {
+        TextView firstCharacter;
+        TextView nickName;
+        TextView email;
+
+        public MyViewHolder(@NonNull View itemView) {
+            super(itemView);
+            firstCharacter = itemView.findViewById(R.id.firstCharacter);
+            nickName = itemView.findViewById(R.id.accountNickName);
+            email = itemView.findViewById(R.id.accountEmail);
+        }
+
+        @SuppressLint("ClickableViewAccessibility")
+        public void bind(User user) {
+            if (user.getId() == -1) {
+                firstCharacter.setText("?");
+                nickName.setText("账户未列出？");
+                email.setText("点此添加登录账户");
+                itemView.setOnClickListener((view -> MainActivity.addFragmentToStackTop(
+                        requireActivity().getSupportFragmentManager(),
+                        UserNotInListFragment.newInstance()
+                )));
+                return;
+            }
+            firstCharacter.setText(user.getNickName().substring(0,1));
+            nickName.setText(user.getNickName());
+            email.setText(user.getEmail());
+            itemView.setOnClickListener(view -> MainActivity.addFragmentToStackTop(
+                    requireActivity().getSupportFragmentManager(),
+                    LoginTypeSelectFragment.newInstance(user)
+            ));
+        }
     }
 }

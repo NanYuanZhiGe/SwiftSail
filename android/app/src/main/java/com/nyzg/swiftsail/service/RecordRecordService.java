@@ -26,7 +26,9 @@ import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.RecordActivity;
 import com.nyzg.swiftsail.bean.GlobalInstance;
 import com.nyzg.swiftsail.dbobj.Record;
+import com.nyzg.swiftsail.dbobj.User;
 import com.nyzg.swiftsail.encrypt.Uuid;
+import com.nyzg.swiftsail.repository.LoginRepository;
 import com.nyzg.swiftsail.repository.RecordRecordRepository;
 import com.nyzg.swiftsail.repository.RecordRepository;
 
@@ -54,7 +56,7 @@ public class RecordRecordService extends Service {
         double lastSpeed = .0;
         private final DecimalFormat kilo = new DecimalFormat("0.000");
         private final DecimalFormat speed = new DecimalFormat("0.00");
-        private final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy:MM:dd hh:mm:ss");
+        private final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss");
 
         @SuppressLint("DefaultLocale")
         @Override
@@ -132,19 +134,23 @@ public class RecordRecordService extends Service {
 
         //summary不要重置信息，重置信息有cancel来确定
         public void summary() {
+            User currentUser = LoginRepository.INSTANCE.getMutableCurrentUser().getValue();
+            if (currentUser == null) {
+                currentUser = GlobalInstance.LOCAL_USER;
+            }
             RecordRecordRepository repository = RecordRecordRepository.INSTANCE;
             Record record = new Record();
             record.id = Uuid.getUuidBytes();//运动记录的id
             //运动记录绑定到当前用户
-            record.userId = GlobalInstance.currentUser.get().getId();
+            record.userId = currentUser.getId();
             record.recordDate = LocalDate.now().toEpochDay();
             Map<String, Object> map = new HashMap<>();
             /*
             "type":"useFeet",
             "duration":100,
             "distance":10,
-            "startTime":"yyyy:MM:dd hh:mm:ss",
-            "endTime":"yyyy:MM:dd hh:mm:ss"
+            "startTime":"yyyy:MM:dd HH:mm:ss",
+            "endTime":"yyyy:MM:dd HH:mm:ss"
              */
             LocalDateTime startTime = LocalDateTime.ofInstant(
                     Instant.ofEpochMilli(sportStartTime),
