@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">SwiftSail</string>
+
+    <array name="reportAddDeviceType">
+        <item>Fitbit</item>
+    </array>
 </resources>

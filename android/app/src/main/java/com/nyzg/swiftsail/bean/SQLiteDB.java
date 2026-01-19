@@ -7,19 +7,22 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
 import com.nyzg.swiftsail.dao.LastLoginTable;
-import com.nyzg.swiftsail.dao.RecordTable;
+import com.nyzg.swiftsail.dao.RecordBackUpTable;
 import com.nyzg.swiftsail.dao.UserTable;
+import com.nyzg.swiftsail.dao.WatchTable;
 import com.nyzg.swiftsail.dbobj.LastLogin;
-import com.nyzg.swiftsail.dbobj.Record;
+import com.nyzg.swiftsail.dbobj.RecordBackUp;
 import com.nyzg.swiftsail.dbobj.User;
+import com.nyzg.swiftsail.dbobj.Watch;
 
 @Database(
         entities = {
                 User.class,
                 LastLogin.class,
-                Record.class
+                RecordBackUp.class,
+                Watch.class
         },
-        version = 4,
+        version = 7,
         exportSchema = false)
 public abstract class SQLiteDB extends RoomDatabase {
     private volatile static SQLiteDB self;
@@ -28,7 +31,8 @@ public abstract class SQLiteDB extends RoomDatabase {
 
     public abstract LastLoginTable lastLoginTable();
 
-    public abstract RecordTable recordTable();
+    public abstract RecordBackUpTable recordBackUpTable();
+    public  abstract WatchTable watchTable();
 
     protected SQLiteDB() {
     }

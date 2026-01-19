@@ -2,7 +2,6 @@ package com.nyzg.swiftsail.fragment.login;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -17,29 +16,21 @@ import com.nyzg.swiftsail.GlobalApplication;
 import com.nyzg.swiftsail.MainActivity;
 import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.dbobj.User;
+import com.nyzg.swiftsail.repository.LoginRepository;
 
 
 @SuppressLint("ClickableViewAccessibility")
 public class LoginTypeSelectFragment extends Fragment {
     User user;
-    public static final String USER_KEY = "user_key";
 
-    public static Fragment newInstance(User user) {
-        Fragment fragment = new LoginTypeSelectFragment();
-        if (user != null) {
-            Bundle bundle = new Bundle();
-            bundle.putParcelable(USER_KEY, user);
-            fragment.setArguments(bundle);
-        }
-        return fragment;
+    public static Fragment newInstance() {
+        return new LoginTypeSelectFragment();
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            user = getArguments().getParcelable(USER_KEY);
-        }
+        user = LoginRepository.getInstance().getOnLoginUser().getValue();
     }
 
     @Nullable
@@ -49,9 +40,9 @@ public class LoginTypeSelectFragment extends Fragment {
             Toast.makeText(GlobalApplication.getAppContext(), "当前设备没有账户信息", Toast.LENGTH_LONG).show();
         }
         View father = inflater.inflate(R.layout.framgent_login_select, container, false);
-        onClickSwitchFragment(father.findViewById(R.id.mailLogin), MailLoginFragment.newInstance(user.getEmail()));
-        onClickSwitchFragment(father.findViewById(R.id.passwordLogin), PasswordLoginFragment.newInstance(user));
-        onClickSwitchFragment(father.findViewById(R.id.keyLogin), KeyLoginFragment.newInstance(user.getEmail()));
+        onClickSwitchFragment(father.findViewById(R.id.mailLogin), MailLoginFragment.newInstance());
+        onClickSwitchFragment(father.findViewById(R.id.passwordLogin), PasswordLoginFragment.newInstance());
+        onClickSwitchFragment(father.findViewById(R.id.keyLogin), KeyLoginFragment.newInstance());
         return father;
     }
 

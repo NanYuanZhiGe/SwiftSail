@@ -25,12 +25,12 @@ import com.google.gson.Gson;
 import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.RecordActivity;
 import com.nyzg.swiftsail.bean.GlobalInstance;
-import com.nyzg.swiftsail.dbobj.Record;
+import com.nyzg.swiftsail.dbobj.RecordBackUp;
 import com.nyzg.swiftsail.dbobj.User;
 import com.nyzg.swiftsail.encrypt.Uuid;
+import com.nyzg.swiftsail.bean.DateUtils;
 import com.nyzg.swiftsail.repository.LoginRepository;
 import com.nyzg.swiftsail.repository.RecordRecordRepository;
-import com.nyzg.swiftsail.repository.RecordRepository;
 
 import java.text.DecimalFormat;
 import java.time.Instant;
@@ -132,20 +132,26 @@ public class RecordRecordService extends Service {
             accumulateTime = 0L;
         }
 
-        //summary不要重置信息，重置信息有cancel来确定
+        /**
+         * summary不要重置信息，重置信息由cancel触发
+         */
         public void summary() {
-            User currentUser = LoginRepository.INSTANCE.getMutableCurrentUser().getValue();
+            User currentUser = LoginRepository.getInstance().getMutableCurrentUser().getValue();
             if (currentUser == null) {
                 currentUser = GlobalInstance.LOCAL_USER;
             }
-            RecordRecordRepository repository = RecordRecordRepository.INSTANCE;
-            Record record = new Record();
-            record.id = Uuid.getUuidBytes();//运动记录的id
+            RecordRecordRepository rRRepository = RecordRecordRepository.INSTANCE;
+            RecordBackUp recordBackUp = new RecordBackUp();
+            recordBackUp.recordId = Uuid.getUuidString36();//运动记录的id
             //运动记录绑定到当前用户
-            record.userId = currentUser.getId();
-            record.recordDate = LocalDate.now().toEpochDay();
+            recordBackUp.userId = currentUser.id;
+            LocalDate nowDate = LocalDate.now();
+            recordBackUp.epochDay = nowDate.toEpochDay();
+            recordBackUp.epochWeek = DateUtils.getEpochWeek(recordBackUp.epochDay);
+            recordBackUp.epochMonth = DateUtils.getEpochMonth(nowDate);
+            recordBackUp.epochYear = DateUtils.getEpochYear(nowDate);
             Map<String, Object> map = new HashMap<>();
-            /*
+            /*数据的格式
             "type":"useFeet",
             "duration":100,
             "distance":10,
@@ -162,20 +168,19 @@ public class RecordRecordService extends Service {
             map.put("distance", accumulateDistance);//秒
             map.put("startTime", startTime.format(DATE_TIME_FORMATTER));//yyyy:MM:dd hh:mm:ss
             map.put("endTime", endTime.format(DATE_TIME_FORMATTER));
-            record.record = new Gson().toJson(map);
-            record.startTime = sportStartTime;
-            record.sync = new byte[1];
-            if (record.userId == 0L) {//如果是本地用户，不会上传至云端，就直接标记为已同步
-                record.sync[0] = 1;
+            recordBackUp.detailValue = new Gson().toJson(map);
+            RecordRecordRepository.INSTANCE.getSportStartTime().setValue(sportStartTime);
+            recordBackUp.sync = 0;
+            if (currentUser.id == 0L) {//如果是本地用户，不会上传至云端，就直接标记为已同步
+                recordBackUp.sync = 1;
             }
-            record.createTime = System.currentTimeMillis();
             sportStartTime = 0L;
-            repository.setRecord(record);
-            //更新RecordFragment
-            RecordRepository recordRepository = RecordRepository.INSTANCE;
-            recordRepository.updateData(
-                    type.equals("useFeet"), startTime.getHour(), endTime.getHour(), (float) accumulateDistance, (int) accumulateTime
-            );
+            rRRepository.getRecordBackUp().setValue(recordBackUp);
+            //这里之前犯了错误，在这里更新了RecordFragment的柱状图
+            //这个是错误的，summary只能够返回总结的数据，不能做其他的事情
+            //因为用户是有可能取消summary的，如果你更新了，虽然数据库的数据没有影响，但是但钱的UI
+            //显示的数据就和数据库中的数据不一致了
+            //另外，由于这里更新了，后面用户submit了数据之后，又会提交一次，这就会导致数据是两倍
         }
     }
 
@@ -263,6 +268,10 @@ public class RecordRecordService extends Service {
         this.locationListener.reset();
     }
 
+    /**
+     * summary是做统计当前的记录的数据，
+     * 不会涉及到数据库的写操作
+     */
     public void summary() {
         this.locationListener.summary();
     }

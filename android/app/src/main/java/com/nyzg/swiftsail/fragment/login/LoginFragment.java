@@ -24,16 +24,16 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.nyzg.swiftsail.GlobalApplication;
 import com.nyzg.swiftsail.MainActivity;
 import com.nyzg.swiftsail.R;
-import com.nyzg.swiftsail.bean.GlobalConf;
-import com.nyzg.swiftsail.bean.GlobalFunction;
+import com.nyzg.swiftsail.bean.ServerURL;
+import com.nyzg.swiftsail.bean.NetWorkHandler;
 import com.nyzg.swiftsail.bean.GlobalInstance;
 import com.nyzg.swiftsail.bean.GlobalToast;
 import com.nyzg.swiftsail.bean.JsonSerializer;
 import com.nyzg.swiftsail.bean.MatchUtils;
 import com.nyzg.swiftsail.dbobj.User;
 import com.nyzg.swiftsail.listener.LoginCountingListener;
-import com.nyzg.swiftsail.netobj.MailVerifyReq;
-import com.nyzg.swiftsail.netobj.RegisterVerifyMailReq;
+import com.nyzg.swiftsail.netobj.login.MailVerifyReq;
+import com.nyzg.swiftsail.netobj.login.RegisterVerifyMailReq;
 import com.nyzg.swiftsail.repository.LoginRepository;
 
 import java.net.URL;
@@ -64,7 +64,7 @@ public class LoginFragment extends Fragment {
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                if (LoginRepository.INSTANCE.getMutableCurrentUser().getValue() != null) {
+                if (LoginRepository.getInstance().getMutableCurrentUser().getValue() != null) {
                     setEnabled(false);
                     requireActivity().getOnBackPressedDispatcher().onBackPressed();
                     return;
@@ -74,7 +74,7 @@ public class LoginFragment extends Fragment {
                         .setTitle("")
                         .setMessage("您还没有登录，要回到主界面吗（将本地账户登录）？")
                         .setPositiveButton("确定", (dialog, which) -> {
-                            LoginRepository.INSTANCE.login(GlobalInstance.LOCAL_USER);
+                            LoginRepository.getInstance().login(GlobalInstance.LOCAL_USER);
                             setEnabled(false);//禁用自己，避免无限递归
                             cancelAll = true;//取消所有操作
                             requireActivity().getOnBackPressedDispatcher().onBackPressed();
@@ -96,7 +96,7 @@ public class LoginFragment extends Fragment {
         father.findViewById(R.id.checkLastLogin).setVisibility(View.GONE);
         showLoginPage(father, null);//先传一个空的，让它显示注册界面
         //观察userList，如果查询到了用户数据，就更新为登录界面
-        LoginRepository.INSTANCE
+        LoginRepository.getInstance()
                 .getMutableAvailableUserList()
                 .observe(
                         getViewLifecycleOwner(),
@@ -188,12 +188,12 @@ public class LoginFragment extends Fragment {
                 handler.post(waiting);
                 CompletableFuture.supplyAsync(() -> {
                     try {
-                        OkHttpClient httpClient = GlobalInstance.okHttpClient;
+                        OkHttpClient httpClient = GlobalInstance.OK_HTTP_NO_PROXY;
                         Request request = new Request.Builder()
-                                .url(new URL(GlobalConf.URL_REGISTER_SUBMIT))
+                                .url(new URL(ServerURL.URL_REGISTER_SUBMIT))
                                 .method("POST",
                                         RequestBody.create(JsonSerializer.serialize(req),
-                                                GlobalConf.APPLICATION_JSON
+                                                ServerURL.APPLICATION_JSON
                                         ))
                                 .build();
                         return Optional.of(httpClient.newCall(request).execute());
@@ -202,7 +202,7 @@ public class LoginFragment extends Fragment {
                     }
                 }).thenAcceptAsync(result -> {
                     stopWaiting.set(true);
-                    GlobalFunction.handleNetResp((Response) result.orElse(null), () -> {
+                    NetWorkHandler.handleNetRespBeforeLogin((Response) result.orElse(null), () -> {
                     }, resp -> {
                         GlobalToast.RESPONSE_SUCCESS.accept(resp.getMessage());
                         try {
@@ -212,9 +212,9 @@ public class LoginFragment extends Fragment {
                                 return;
                             }
                             //把这个注册用户写入数据库
-                            LoginRepository.INSTANCE.updateUserToLocalAccountAsync(user);
+                            LoginRepository.getInstance().updateUserToLocalAccountAsync(user);
                             //成功登录
-                            LoginRepository.INSTANCE.login(user);
+                            LoginRepository.getInstance().login(user);
                             //返回主界面
                             MainActivity.popUntilTheInitOne(requireActivity().getSupportFragmentManager());
                         } catch (Exception e) {
@@ -241,13 +241,13 @@ public class LoginFragment extends Fragment {
             }
             return Optional.of(mail);
         }, strMailAddr -> {
-            OkHttpClient okHttpClient = GlobalInstance.okHttpClient;
+            OkHttpClient okHttpClient = GlobalInstance.OK_HTTP_NO_PROXY;
             try {
                 Request request = new Request.Builder()
-                        .url(GlobalConf.URL_REGISTER_VERIFY_CODE)
+                        .url(ServerURL.URL_REGISTER_VERIFY_CODE)
                         .method("POST",
                                 RequestBody.create(JsonSerializer.serialize(new MailVerifyReq(strMailAddr)),
-                                        GlobalConf.APPLICATION_JSON
+                                        ServerURL.APPLICATION_JSON
                                 ))
                         .build();
                 return Optional.of(okHttpClient.newCall(request).execute());
@@ -352,7 +352,7 @@ public class LoginFragment extends Fragment {
 
         @SuppressLint("ClickableViewAccessibility")
         public void bind(User user) {
-            if (user.getId() == -1) {
+            if (user.id == -1) {
                 firstCharacter.setText("?");
                 nickName.setText("账户未列出？");
                 email.setText("点此添加登录账户");
@@ -362,13 +362,16 @@ public class LoginFragment extends Fragment {
                 )));
                 return;
             }
-            firstCharacter.setText(user.getNickName().substring(0,1));
-            nickName.setText(user.getNickName());
-            email.setText(user.getEmail());
-            itemView.setOnClickListener(view -> MainActivity.addFragmentToStackTop(
-                    requireActivity().getSupportFragmentManager(),
-                    LoginTypeSelectFragment.newInstance(user)
-            ));
+            firstCharacter.setText(user.nickName.substring(0,1));
+            nickName.setText(user.nickName);
+            email.setText(user.email);
+            itemView.setOnClickListener(view -> {
+                LoginRepository.getInstance().getOnLoginUser().setValue(user);
+                MainActivity.addFragmentToStackTop(
+                        requireActivity().getSupportFragmentManager(),
+                        LoginTypeSelectFragment.newInstance()
+                );
+            });
         }
     }
 }

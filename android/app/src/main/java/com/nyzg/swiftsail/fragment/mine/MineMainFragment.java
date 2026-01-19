@@ -16,10 +16,8 @@ import androidx.fragment.app.Fragment;
 import com.nyzg.swiftsail.GlobalApplication;
 import com.nyzg.swiftsail.MainActivity;
 import com.nyzg.swiftsail.R;
-import com.nyzg.swiftsail.bean.GlobalFunction;
 import com.nyzg.swiftsail.bean.SQLiteDB;
 import com.nyzg.swiftsail.dao.LastLoginTable;
-import com.nyzg.swiftsail.dbobj.LastLogin;
 import com.nyzg.swiftsail.dbobj.User;
 import com.nyzg.swiftsail.fragment.login.LoginFragment;
 import com.nyzg.swiftsail.repository.LoginRepository;
@@ -38,7 +36,7 @@ public class MineMainFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View father = inflater.inflate(R.layout.fragment_mine_base, container, false);
         //设置点击事件
-        father.findViewById(R.id.userManagerEntrance).setOnClickListener(this::onUserEntranceClicked);
+        father.findViewById(R.id.accountName).setOnClickListener(this::onUserEntranceClicked);
         father.findViewById(R.id.funcSecurity).setOnClickListener(this::onSecurityClicked);
         father.findViewById(R.id.funcMailBox).setOnClickListener(this::onMailBoxClicked);
         father.findViewById(R.id.funcCollection).setOnClickListener(this::onCollectionClicked);
@@ -46,12 +44,12 @@ public class MineMainFragment extends Fragment {
         father.findViewById(R.id.funcBottle).setOnClickListener(this::onBottleClicked);
         father.findViewById(R.id.funcLogout).setOnClickListener(this::onLogoutClicked);
         //监听登录用户的变化，更新UI
-        LoginRepository.INSTANCE.getMutableCurrentUser().observe(getViewLifecycleOwner(), user -> {
+        LoginRepository.getInstance().getMutableCurrentUser().observe(getViewLifecycleOwner(), user -> {
             if (user == null) {
                 return;
             }
-            ((TextView) father.findViewById(R.id.accountName)).setText(user.getNickName());
-            ((TextView) father.findViewById(R.id.accountId)).setText(String.format("账户id：%d", user.getId()));
+            ((TextView) father.findViewById(R.id.accountName)).setText(user.nickName);
+            ((TextView) father.findViewById(R.id.accountId)).setText(String.format("账户id：%d", user.id));
         });
         return father;
     }
@@ -106,13 +104,13 @@ public class MineMainFragment extends Fragment {
                         List<User> availableUserList = sqLiteDB.userTable().selectAllUser();
                         //需要额外添加一个用户：“账号未列出？”
                         User unListUser = new User();
-                        unListUser.setId(-1L);
+                        unListUser.id=-1L;
                         availableUserList.add(unListUser);
-                        LoginRepository.INSTANCE.getMutableAvailableUserList().postValue(availableUserList);
+                        LoginRepository.getInstance().getMutableAvailableUserList().postValue(availableUserList);
                         return null;
                     }).thenAcceptAsync(action -> {
                         view.setOnClickListener(this::onLogoutClicked);
-                        LoginRepository.INSTANCE.setCurrentUser(null);
+                        LoginRepository.getInstance().setCurrentUser(null);
                         MainActivity.addFragmentToStackTop(
                                 requireActivity().getSupportFragmentManager(),
                                 LoginFragment.newInstance()

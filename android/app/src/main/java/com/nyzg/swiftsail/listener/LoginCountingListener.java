@@ -1,12 +1,11 @@
 package com.nyzg.swiftsail.listener;
 
 import android.annotation.SuppressLint;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 
-import com.nyzg.swiftsail.bean.GlobalFunction;
+import com.nyzg.swiftsail.bean.NetWorkHandler;
 import com.nyzg.swiftsail.bean.GlobalInstance;
 import com.nyzg.swiftsail.netobj.HttpResp;
 
@@ -64,7 +63,7 @@ public class LoginCountingListener<T> implements View.OnTouchListener {
                 //发送网络请求
                 CompletableFuture.supplyAsync(() -> handleSubmit.apply(result.get()))
                         .thenAccept(action ->
-                                GlobalFunction.handleNetResp(
+                                NetWorkHandler.handleNetRespBeforeLogin(
                                         action.orElse(null),
                                         () -> cancelCount = true,
                                         handleSuccess)

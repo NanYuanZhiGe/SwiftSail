@@ -5,7 +5,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 
-import com.nyzg.swiftsail.bean.GlobalFunction;
+import com.nyzg.swiftsail.bean.NetWorkHandler;
 import com.nyzg.swiftsail.bean.GlobalInstance;
 import com.nyzg.swiftsail.netobj.HttpResp;
 
@@ -61,7 +61,7 @@ public class LoginWaitingListener implements View.OnTouchListener {
                 cancelCount = false;
                 CompletableFuture.supplyAsync(() -> handleNetwork.get()).thenAccept(action -> {
                     isWaitingNetwork = false;
-                    GlobalFunction.handleNetResp(action.orElse(null), () -> cancelCount = true, handleSuccess);
+                    NetWorkHandler.handleNetRespBeforeLogin(action.orElse(null), () -> cancelCount = true, handleSuccess);
                 });
                 GlobalInstance.mainHandler.post(r);
         }

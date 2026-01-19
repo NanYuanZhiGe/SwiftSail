@@ -18,27 +18,63 @@
         app:layout_constraintVertical_chainStyle="packed" />
 
     <com.nyzg.swiftsail.view.SportLayout
-        android:layout_marginTop="4dp"
         android:id="@+id/walkOrRun"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
         app:layout_constraintBottom_toTopOf="@id/bike"
         app:layout_constraintEnd_toEndOf="parent"
-        app:sportName="走路/跑步"
-        app:sportIcon="@drawable/step"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/title" />
+        app:layout_constraintTop_toBottomOf="@id/title"
+        app:sportIcon="@drawable/step"
+        app:sportName="走路/跑步" />
 
     <com.nyzg.swiftsail.view.SportLayout
         android:id="@+id/bike"
-        android:layout_marginTop="8dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toTopOf="@id/jump"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/walkOrRun"
+        app:sportIcon="@drawable/bike"
+        app:sportName="骑行" />
+
+    <com.nyzg.swiftsail.view.SportLayout
+        android:id="@+id/jump"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toTopOf="@id/yoga"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/bike"
+        app:sportIcon="@drawable/jump"
+        app:sportName="跳绳" />
+
+    <com.nyzg.swiftsail.view.SportLayout
+        android:id="@+id/yoga"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toTopOf="@id/ball"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/jump"
+        app:sportIcon="@drawable/yoga"
+        app:sportName="瑜伽" />
+
+    <com.nyzg.swiftsail.view.SportLayout
+        android:id="@+id/ball"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:sportName="骑行"
-        app:sportIcon="@drawable/bike"
-        app:layout_constraintTop_toBottomOf="@id/walkOrRun" />
+        app:layout_constraintTop_toBottomOf="@id/yoga"
+        app:sportIcon="@drawable/ball"
+        app:sportName="球类运动" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -34,12 +34,11 @@ android {
 
 dependencies {
 
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.8.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("androidx.appcompat:appcompat:1.7.1")
+    implementation("androidx.constraintlayout:constraintlayout:2.2.1")
     testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    androidTestImplementation("androidx.test.ext:junit:1.3.0")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
 
     implementation("androidx.room:room-runtime:2.6.1")
     annotationProcessor("androidx.room:room-compiler:2.6.1")
@@ -61,4 +60,15 @@ dependencies {
     //指纹识别
     implementation("androidx.biometric:biometric:1.1.0")
 
+    //环形进度条
+    implementation("com.seosh817:circularseekbar:1.0.2")
+
+    //custom tabs用于站外导航
+    implementation("androidx.browser:browser:1.2.0")
+
+    //tab layout
+    implementation("com.google.android.material:material:1.13.0")
+
+    //新版recycler view，解决在nested scroll view下wrap content的问题
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
 }

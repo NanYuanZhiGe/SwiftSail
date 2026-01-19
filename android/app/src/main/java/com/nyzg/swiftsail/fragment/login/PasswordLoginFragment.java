@@ -16,14 +16,14 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.textfield.TextInputEditText;
 import com.nyzg.swiftsail.MainActivity;
 import com.nyzg.swiftsail.R;
-import com.nyzg.swiftsail.bean.GlobalConf;
+import com.nyzg.swiftsail.bean.ServerURL;
 import com.nyzg.swiftsail.bean.GlobalInstance;
 import com.nyzg.swiftsail.bean.GlobalToast;
 import com.nyzg.swiftsail.bean.JsonSerializer;
 import com.nyzg.swiftsail.dbobj.User;
 import com.nyzg.swiftsail.encrypt.Sha256;
 import com.nyzg.swiftsail.listener.LoginWaitingListener;
-import com.nyzg.swiftsail.netobj.PasswordVerifyReq;
+import com.nyzg.swiftsail.netobj.login.PasswordVerifyReq;
 import com.nyzg.swiftsail.repository.LoginRepository;
 
 import java.util.Optional;
@@ -34,25 +34,16 @@ import okhttp3.RequestBody;
 
 public class PasswordLoginFragment extends Fragment {
     User user;
-    private final static String USER_KEY = "pwdFraKey";
     private volatile boolean quitForbidden = false;
 
-    static Fragment newInstance(User user) {
-        Fragment fragment = new PasswordLoginFragment();
-        if (user != null) {
-            Bundle bundle = new Bundle();
-            bundle.putParcelable(USER_KEY, user);
-            fragment.setArguments(bundle);
-        }
-        return fragment;
+    static Fragment newInstance() {
+        return new PasswordLoginFragment();
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            this.user = getArguments().getParcelable(USER_KEY);
-        }
+        this.user = LoginRepository.getInstance().getOnLoginUser().getValue();
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -92,11 +83,11 @@ public class PasswordLoginFragment extends Fragment {
             try {
                 OkHttpClient httpClient = new OkHttpClient();
                 Request request = new Request.Builder()
-                        .url(GlobalConf.URL_LOGIN_WITH_PASSWORD)
-                        .method(GlobalConf.POST,
+                        .url(ServerURL.URL_LOGIN_WITH_PASSWORD)
+                        .method(ServerURL.POST,
                                 RequestBody.create(
-                                        JsonSerializer.serialize(new PasswordVerifyReq(user.getEmail(), Sha256.generateSha256ByteArray(pwd))),
-                                        GlobalConf.APPLICATION_JSON
+                                        JsonSerializer.serialize(new PasswordVerifyReq(user.email, Sha256.generateSha256ByteArray(pwd))),
+                                        ServerURL.APPLICATION_JSON
                                 ))
                         .build();
                 return Optional.of(httpClient.newCall(request).execute());
@@ -116,9 +107,9 @@ public class PasswordLoginFragment extends Fragment {
                     return;
                 }
                 //把这个更新用户
-                LoginRepository.INSTANCE.updateUserToLocalAccountAsync(tokenUser);
+                LoginRepository.getInstance().updateUserToLocalAccountAsync(tokenUser);
                 //成功登录
-                LoginRepository.INSTANCE.login(tokenUser);
+                LoginRepository.getInstance().login(tokenUser);
                 //返回主界面
                 GlobalInstance.mainHandler.post(() -> MainActivity.popUntilTheInitOne(requireActivity().getSupportFragmentManager()));
             } catch (Exception e) {

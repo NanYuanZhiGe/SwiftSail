@@ -1,7 +1,5 @@
 package com.nyzg.swiftsail.fragment.mine;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -9,20 +7,15 @@ import android.os.Build;
 import android.os.Bundle;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
-import android.util.Log;
 import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.PopupWindow;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -31,22 +24,20 @@ import androidx.fragment.app.FragmentActivity;
 import com.google.android.material.textfield.TextInputEditText;
 import com.nyzg.swiftsail.GlobalApplication;
 import com.nyzg.swiftsail.R;
-import com.nyzg.swiftsail.bean.GlobalConf;
-import com.nyzg.swiftsail.bean.GlobalFunction;
+import com.nyzg.swiftsail.bean.ServerURL;
+import com.nyzg.swiftsail.bean.NetWorkHandler;
 import com.nyzg.swiftsail.bean.GlobalInstance;
 import com.nyzg.swiftsail.bean.GlobalToast;
 import com.nyzg.swiftsail.bean.JsonSerializer;
 import com.nyzg.swiftsail.dbobj.User;
 import com.nyzg.swiftsail.encrypt.Biometric;
 import com.nyzg.swiftsail.encrypt.Sha256;
+import com.nyzg.swiftsail.fragment.BackPressQuitFragment;
 import com.nyzg.swiftsail.fragment.login.KeyLoginFragment;
-import com.nyzg.swiftsail.fragment.login.LoginFragment;
-import com.nyzg.swiftsail.netobj.BiometricAddReq;
-import com.nyzg.swiftsail.netobj.BiometricAddResp;
+import com.nyzg.swiftsail.netobj.login.BiometricAddReq;
+import com.nyzg.swiftsail.netobj.login.BiometricAddResp;
 import com.nyzg.swiftsail.repository.LoginRepository;
-import com.nyzg.swiftsail.view.MineUserDataSelectLayout;
 
-import java.net.Authenticator;
 import java.net.URL;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -56,7 +47,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class MineSecurityFragment extends Fragment {
+public class MineSecurityFragment extends BackPressQuitFragment {
     public static Fragment getInstance() {
         return new MineSecurityFragment();
     }
@@ -136,28 +127,28 @@ class MyPopupWindow extends PopupWindow {
             return;
         }
         BiometricAddReq req = new BiometricAddReq();
-        User user = LoginRepository.INSTANCE.getMutableCurrentUser().getValue();
-        if (user == null || user.getId() == 0L) {
+        User user = LoginRepository.getInstance().getMutableCurrentUser().getValue();
+        if (user == null || user.id == 0L) {
             GlobalToast.COMMON_TOAST.accept("本地用户无法使用指纹验证功能");
             return;
         }
-        req.email = user.getEmail();
+        req.email = user.email;
         req.deviceId = Biometric.getDeviceIdHash(GlobalApplication.getAppContext());
         req.deviceName = Build.MODEL;
         req.secretWord = Sha256.generateSha256ByteArray(pwd);
         CompletableFuture.supplyAsync(() -> {
             try {
-                OkHttpClient client = GlobalInstance.okHttpClient;
+                OkHttpClient client = GlobalInstance.OK_HTTP_NO_PROXY;
                 Request request = new Request.Builder()
-                        .url(new URL(GlobalConf.URL_REGISTER_BIOMETRIC))
-                        .method(GlobalConf.POST, RequestBody.create(
-                                JsonSerializer.serialize(req), GlobalConf.APPLICATION_JSON
+                        .url(new URL(ServerURL.URL_REGISTER_BIOMETRIC))
+                        .method(ServerURL.POST, RequestBody.create(
+                                JsonSerializer.serialize(req), ServerURL.APPLICATION_JSON
                         )).build();
                 return Optional.of(client.newCall(request).execute());
             } catch (Exception e) {
                 return Optional.empty();
             }
-        }).thenAcceptAsync(resp -> GlobalFunction.handleNetResp(
+        }).thenAcceptAsync(resp -> NetWorkHandler.handleNetRespBeforeLogin(
                 (Response) resp.orElse(null), () -> {
                     isLastRunning = false;
                 }, result -> {

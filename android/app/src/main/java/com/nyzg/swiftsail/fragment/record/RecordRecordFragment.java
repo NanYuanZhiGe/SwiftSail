@@ -1,6 +1,7 @@
 package com.nyzg.swiftsail.fragment.record;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -29,8 +30,8 @@ import androidx.fragment.app.Fragment;
 
 import com.nyzg.swiftsail.GlobalApplication;
 import com.nyzg.swiftsail.R;
-import com.nyzg.swiftsail.bean.GlobalConf;
-import com.nyzg.swiftsail.dbobj.Record;
+import com.nyzg.swiftsail.bean.ServerURL;
+import com.nyzg.swiftsail.dbobj.RecordBackUp;
 import com.nyzg.swiftsail.repository.RecordRecordRepository;
 import com.nyzg.swiftsail.repository.RecordRepository;
 import com.nyzg.swiftsail.service.RecordRecordService;
@@ -58,7 +59,7 @@ public class RecordRecordFragment extends Fragment {
     private ImageView pauseOrResumeButton;
     private ImageView cancelButton;
     private ImageView submitButton;
-    private boolean isUnSave=false;
+    private boolean isUnSave = false;
     private static volatile RecordRecordService recordService;
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss");
     private static final ServiceConnection recordConnection = new ServiceConnection() {
@@ -79,6 +80,8 @@ public class RecordRecordFragment extends Fragment {
             Manifest.permission.FOREGROUND_SERVICE,
             Manifest.permission.WAKE_LOCK
     };
+
+    @SuppressLint("InlinedApi")//api的问题后面会if区分
     private static final String[] LOCATION_PERMISSIONS_29 = {
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -86,6 +89,7 @@ public class RecordRecordFragment extends Fragment {
             Manifest.permission.FOREGROUND_SERVICE,
             Manifest.permission.WAKE_LOCK
     };
+    @SuppressLint("InlinedApi")//api的问题后面会if区分
     private static final String[] LOCATION_PERMISSIONS_34 = {
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -120,7 +124,7 @@ public class RecordRecordFragment extends Fragment {
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                if (!isUnSave){
+                if (!isUnSave) {
                     setEnabled(false);
                     requireActivity().getOnBackPressedDispatcher().onBackPressed();
                     return;
@@ -129,8 +133,8 @@ public class RecordRecordFragment extends Fragment {
                         .setTitle("")
                         .setMessage("您本次的运动记录未保存，需要保存它吗？")
                         .setPositiveButton("保存", (dialog, which) -> {
-                            Record record = RecordRecordRepository.INSTANCE.getRecord();
-                            saveSportData(record);
+                            RecordBackUp recordBackUp = RecordRecordRepository.INSTANCE.getRecordBackUp().getValue();
+                            saveSportData(recordBackUp);
                             setEnabled(false);//禁用自己，避免无限递归
                             requireActivity().getOnBackPressedDispatcher().onBackPressed();
                         })
@@ -160,7 +164,7 @@ public class RecordRecordFragment extends Fragment {
             //10.84/23.1497/113.2996 zoom lat long
             //"http://10.252.115.37:5070/styles/basic-preview/style.json"
             //初始点位是广州的一个地方
-            map.setStyle(GlobalConf.URL_TILE_SERVER);
+            map.setStyle(ServerURL.URL_TILE_SERVER);
             map.setCameraPosition(new CameraPosition.Builder()
                     .target(new LatLng(23.1479, 113.2996))
                     .zoom(16.72)
@@ -261,7 +265,7 @@ public class RecordRecordFragment extends Fragment {
 
 
     private void onRecordCancel(View view) {
-        isUnSave=false;
+        isUnSave = false;
         isPause = true;
         this.pauseOrResumeButton.setImageDrawable(ContextCompat.getDrawable(GlobalApplication.getAppContext(), R.drawable.play));
         if (recordService != null) {
@@ -283,7 +287,7 @@ public class RecordRecordFragment extends Fragment {
     }
 
     private void onRecordResume() {
-        isUnSave=true;
+        isUnSave = true;
         if (!this.premiseLocation) {
             Toast.makeText(GlobalApplication.getAppContext(), "应用权限不足，无法进行记录", Toast.LENGTH_LONG).show();
             return;
@@ -330,16 +334,20 @@ public class RecordRecordFragment extends Fragment {
         if (recordService != null) {
             recordService.pause();
             recordService.summary();
-            Record record = RecordRecordRepository.INSTANCE.getRecord();
+            RecordBackUp recordBackUp = RecordRecordRepository.INSTANCE.getRecordBackUp().getValue();
             //提示用户是否要保存，允许用户取消
-            if (record != null) {
+            String startTime="?";
+            if (RecordRecordRepository.INSTANCE.getSportStartTime().getValue()!=null){
+                startTime=LocalDateTime.ofInstant(Instant.ofEpochMilli(RecordRecordRepository.INSTANCE.getSportStartTime().getValue()), ZoneId.systemDefault()).format(DATE_TIME_FORMATTER);
+            }
+            if (recordBackUp != null) {
                 new AlertDialog.Builder(requireContext())
                         .setTitle("提交运动记录")
                         .setMessage(String.format("您要提交从 %s 到 %s 这段时间的运动记录吗?",
-                                LocalDateTime.ofInstant(Instant.ofEpochMilli(record.startTime), ZoneId.systemDefault()).format(DATE_TIME_FORMATTER),
+                                startTime,
                                 LocalDateTime.now().format(DATE_TIME_FORMATTER)))
                         .setPositiveButton("确定", (dialog, which) -> {
-                            saveSportData(record);
+                            saveSportData(recordBackUp);
                             recordService.cancel();
                         })
                         .setNegativeButton("取消", null)
@@ -374,12 +382,12 @@ public class RecordRecordFragment extends Fragment {
      * 容易出现异常的是网络请求，这部分如果失败了，后续就提醒一下用户错误信息
      * 下一次提交的时候，会自动尝试全部同步。
      */
-    private void saveSportData(Record record) {
-        isUnSave=false;
-        if (record==null){
+    private void saveSportData(RecordBackUp recordBackUp) {
+        isUnSave = false;
+        if (recordBackUp == null) {
             return;
         }
-        RecordRepository.INSTANCE.submitRepositoryRecord(record);
+        RecordRepository.getInstance().submitRepositoryRecordAsync(recordBackUp);
     }
 
     @Override

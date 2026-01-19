@@ -1,28 +1,33 @@
 package com.nyzg.swiftsail;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.work.Constraints;
-import androidx.work.OneTimeWorkRequest;
-import androidx.work.WorkInfo;
-import androidx.work.WorkManager;
 
+import android.app.AlertDialog;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
+import android.widget.Toast;
 
+import com.nyzg.swiftsail.bean.GlobalInstance;
 import com.nyzg.swiftsail.fragment.login.LoginFragment;
 import com.nyzg.swiftsail.fragment.login.MainFragment;
-import com.nyzg.swiftsail.worker.LoginWorker;
+import com.nyzg.swiftsail.fragment.main.WaitingFragment;
+import com.nyzg.swiftsail.obj.SucceedOrNot;
+import com.nyzg.swiftsail.repository.LoginRepository;
+import com.nyzg.swiftsail.repository.RecordRepository;
 
 
 public class MainActivity extends AppCompatActivity {
-    private static boolean onCheckLogin = false;
+    private long lastBackPressedTime = 0L;
+    private static final long BACK_PRESS_EXIT_INTERVAL = 2000;//2秒
 
     //MainActivity的onCreate和App的生命周期是一致的
     //一般在一次使用应用时只会初始化一次
@@ -30,37 +35,65 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        //显示加载界面
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.mainFragment, new MainFragment())
+                .replace(R.id.mainFragment, WaitingFragment.getInstance())
                 .commit();
         fullScreen();
         checkAndDoLogin();
+        doubleClickToQuitApp();
+    }
+
+
+    private void doubleClickToQuitApp() {
+        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                long currentPressedTime = System.currentTimeMillis();
+                if (lastBackPressedTime == 0L) {
+                    Toast.makeText(MainActivity.this, "再按一次退出应用", Toast.LENGTH_SHORT).show();
+                    lastBackPressedTime = currentPressedTime;
+                    return;
+                }
+                long interval = System.currentTimeMillis() - lastBackPressedTime;
+                if (interval <= BACK_PRESS_EXIT_INTERVAL) {
+                    setEnabled(false);//禁用自己，避免无限递归
+                    finishAffinity();//退出应用
+                    return;
+                }
+                Toast.makeText(MainActivity.this, "再按一次退出应用", Toast.LENGTH_SHORT).show();
+                lastBackPressedTime = currentPressedTime;
+            }
+        };
+        this.getOnBackPressedDispatcher().addCallback(this, callback);
     }
 
     private void checkAndDoLogin() {
-        if (onCheckLogin) {
-            return;
-        }
-        onCheckLogin = true;
-        OneTimeWorkRequest request = new OneTimeWorkRequest
-                .Builder(LoginWorker.class)
-                .setConstraints(new Constraints.Builder().build())
-                .build();
-        WorkManager workManager = WorkManager.getInstance(this);
-        workManager.enqueue(request);
-        workManager.getWorkInfoByIdLiveData(request.getId())
-                .observe(this, workInfo -> {
-                    if (workInfo == null || (workInfo.getState() != WorkInfo.State.FAILED && workInfo.getState() != WorkInfo.State.SUCCEEDED)) {
-                        return;
+        LoginRepository.getInstance()
+                .tryLastLoginAsync()
+                .thenAcceptAsync(result -> {
+                    if (result == SucceedOrNot.FAIL) {
+                        //使用上一次的登录账户登录失败，添加登录页面，
+                        MainActivity.this.getSupportFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.mainFragment, MainFragment.getInstance())
+                                .commit();
+                        MainActivity.this.getSupportFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.mainFragment, LoginFragment.newInstance())
+                                .addToBackStack(null)
+                                .commit();
+                    } else {
+                        //使用上一次的登录账户登录成功，直接进入主界面
+                        MainActivity.this.getSupportFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.mainFragment, MainFragment.getInstance())
+                                .commit();
                     }
-                    //如果上一次的登录依旧是有效的，就不要进入登录页面，什么都不做
-                    //只有上一次没有登录，或者上一次的登录无法验证，才进入登录页面
-                    if (workInfo.getState()==WorkInfo.State.FAILED){
-                        addFragmentToStackTop(getSupportFragmentManager(),LoginFragment.newInstance());
-                    }
-                    onCheckLogin = false;
-                });
+                    //此时LoginRepository已经成功更新了currentUser
+                    RecordRepository.getInstance().updateUserOnChange();
+                }, ContextCompat.getMainExecutor(this));
     }
 
     public static void addFragmentToStackTop(FragmentManager manager, Fragment fragment) {

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="inputWidth">240dp</dimen>
+    <dimen name="inputHeight">46dp</dimen>
+    <dimen name="textWithInput">18sp</dimen>
+    <dimen name="inputTextMarginTop">4dp</dimen>
+    <dimen name="submitBtnTextSize">18sp</dimen>
+    <dimen name="submitBtnPaddingHor">20dp</dimen>
+    <dimen name="submitBtnPaddingVer">12dp</dimen>
+</resources>

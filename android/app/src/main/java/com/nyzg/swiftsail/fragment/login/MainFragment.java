@@ -14,6 +14,9 @@ import com.nyzg.swiftsail.bean.NavManager;
 
 public class MainFragment extends Fragment {
     private final NavManager navManager = NavManager.getInstance();
+    public static Fragment getInstance(){
+        return new MainFragment();
+    }
 
     @Nullable
     @Override

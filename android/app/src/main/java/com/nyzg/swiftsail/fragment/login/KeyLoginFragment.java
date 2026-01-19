@@ -3,8 +3,6 @@ package com.nyzg.swiftsail.fragment.login;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +11,6 @@ import android.widget.TextView;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -21,15 +18,15 @@ import androidx.fragment.app.Fragment;
 import com.nyzg.swiftsail.GlobalApplication;
 import com.nyzg.swiftsail.MainActivity;
 import com.nyzg.swiftsail.R;
-import com.nyzg.swiftsail.bean.GlobalConf;
-import com.nyzg.swiftsail.bean.GlobalFunction;
+import com.nyzg.swiftsail.bean.ServerURL;
+import com.nyzg.swiftsail.bean.NetWorkHandler;
 import com.nyzg.swiftsail.bean.GlobalInstance;
 import com.nyzg.swiftsail.bean.GlobalToast;
 import com.nyzg.swiftsail.bean.JsonSerializer;
 import com.nyzg.swiftsail.dbobj.User;
 import com.nyzg.swiftsail.encrypt.Biometric;
-import com.nyzg.swiftsail.netobj.BiometricUser;
-import com.nyzg.swiftsail.netobj.KeyVerifyReq;
+import com.nyzg.swiftsail.netobj.login.BiometricUser;
+import com.nyzg.swiftsail.netobj.login.KeyVerifyReq;
 import com.nyzg.swiftsail.repository.LoginRepository;
 
 import java.net.URL;
@@ -38,8 +35,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 
-import javax.crypto.Cipher;
-
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -47,28 +42,21 @@ import okhttp3.Response;
 
 public class KeyLoginFragment extends Fragment {
     String email;
-    private final static String EMAIL_KEY = "keyLogin_key";
     private volatile boolean quitForbidden = false;
     private BiometricPrompt prompt;
     private BiometricPrompt.PromptInfo promptInfo;
     public static final String KEY_NAME = "SWIFT_SAIL_BIOMETRIC_KEY";
     public static final String PREFS_NAME = "SWIFT_SAIL_PREFS_NAME";
 
-    public static Fragment newInstance(String email) {
-        Fragment fragment = new KeyLoginFragment();
-        if (email != null) {
-            Bundle bundle = new Bundle();
-            bundle.putString(EMAIL_KEY, email);
-            fragment.setArguments(bundle);
-        }
-        return fragment;
+    public static Fragment newInstance() {
+        return new KeyLoginFragment();
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            this.email = getArguments().getString(EMAIL_KEY);
+        if (LoginRepository.getInstance().getOnLoginUser().getValue() != null) {
+            this.email = LoginRepository.getInstance().getOnLoginUser().getValue().email;
         }
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
@@ -115,13 +103,6 @@ public class KeyLoginFragment extends Fragment {
             public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
                 super.onAuthenticationSucceeded(result);
                 GlobalToast.COMMON_TOAST.accept("验证成功，等待服务器校验中");
-                /*
-                if (result.getCryptoObject() == null || result.getCryptoObject().getCipher() == null) {
-                    GlobalToast.COMMON_TOAST.accept("验证成功，但是无法获取解码器");
-                    quitForbidden = false;
-                    return;
-                }
-                 */
                 //从设备获取到加密的token，向服务进行验证
                 //返回的结果是如下：
                 //success , newToken
@@ -149,19 +130,19 @@ public class KeyLoginFragment extends Fragment {
                             GlobalToast.COMMON_TOAST.accept("您的设备不存在设备id！");
                             return Optional.empty();
                         }
-                        OkHttpClient httpClient = GlobalInstance.okHttpClient;
+                        OkHttpClient httpClient = GlobalInstance.OK_HTTP_NO_PROXY;
                         Request request = new Request.Builder()
-                                .url(new URL(GlobalConf.URL_LOGIN_WITH_KEY))
-                                .method(GlobalConf.POST,
+                                .url(new URL(ServerURL.URL_LOGIN_WITH_KEY))
+                                .method(ServerURL.POST,
                                         RequestBody.create(JsonSerializer.serialize(keyVerifyReq),
-                                                GlobalConf.APPLICATION_JSON))
+                                                ServerURL.APPLICATION_JSON))
                                 .build();
                         return Optional.of(httpClient.newCall(request).execute());
                     } catch (Exception e) {
                         return Optional.empty();
                     }
                 }).thenAccept(
-                        netRes -> GlobalFunction.handleNetResp((Response) netRes.orElse(null),
+                        netRes -> NetWorkHandler.handleNetRespBeforeLogin((Response) netRes.orElse(null),
                                 () -> {//网络请求成功，但是失败，里面会自动toast错误内容，这里只需要允许用户退出就行
                                     quitForbidden = false;
                                 },
@@ -179,9 +160,9 @@ public class KeyLoginFragment extends Fragment {
                                         //刷新内部的token
                                         Biometric.putData(newBioToken, PREFS_NAME, KEY_NAME, requireContext());
                                         //把这个用户写入数据库
-                                        LoginRepository.INSTANCE.updateUserToLocalAccountAsync(innerUser);
+                                        LoginRepository.getInstance().updateUserToLocalAccountAsync(innerUser);
                                         //成功登录
-                                        LoginRepository.INSTANCE.login(innerUser);
+                                        LoginRepository.getInstance().login(innerUser);
                                         //返回主界面
                                         ContextCompat.getMainExecutor(GlobalApplication.getAppContext()).execute(() -> MainActivity.popUntilTheInitOne(requireActivity().getSupportFragmentManager()));
                                     } catch (Exception e) {

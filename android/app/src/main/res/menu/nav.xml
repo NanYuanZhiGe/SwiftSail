@@ -4,20 +4,20 @@
         android:id="@+id/nav_record"
         android:icon="@drawable/record"
         android:iconTint="@color/transparent"
-        android:title="记录" />
+        android:title="运动" />
 
     <item
         android:id="@+id/nav_report"
         android:icon="@drawable/report"
         android:iconTint="@color/transparent"
-        android:title="报表" />
+        android:title="健康" />
 
     <item
         android:id="@+id/nac_comprehen"
         android:icon="@drawable/comprehen"
         android:iconTint="@color/transparent"
-        android:title="综合"
-        />
+        android:title="资料" />
+
     <item
         android:id="@+id/nav_geo"
         android:icon="@drawable/geo"

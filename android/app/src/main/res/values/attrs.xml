@@ -13,6 +13,19 @@
     </declare-styleable>
 
     <declare-styleable name="MineUserDataSelectLayout">
-        <attr name="attributeName" format="string"/>
+        <attr name="attributeName" format="string" />
+    </declare-styleable>
+
+    <declare-styleable name="ReportCircle">
+        <attr name="circleSize" format="dimension" />
+        <attr name="circleBk" format="color|reference" />
+        <attr name="circleBk2" format="color|reference" />
+        <attr name="imageSize" format="dimension" />
+        <attr name="imageBk" format="reference" />
+        <attr name="textSize" format="dimension" />
+    </declare-styleable>
+
+    <declare-styleable name="RoundedBarChart">
+        <attr name="radius" format="dimension" />
     </declare-styleable>
 </resources>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/outSideLayout"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <com.seosh817.circularseekbar.CircularSeekBar
+        android:id="@+id/circular_seek_bar"
+        android:layout_width="180dp"
+        android:layout_height="180dp"
+        app:circularSeekBar_animation="normal"
+        app:circularSeekBar_animationDurationMillis="1000"
+        app:circularSeekBar_barWidth="8dp"
+        app:circularSeekBar_interactive="false"
+        app:circularSeekBar_min="0"
+        app:circularSeekBar_progressGradientColors="@array/reportRecovery"
+        app:circularSeekBar_startAngle="45"
+        app:circularSeekBar_sweepAngle="270"
+        app:circularSeekBar_trackColor="@color/rainPurple"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <ImageView
+        android:id="@+id/innerImage"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:src="@drawable/moon"
+        app:layout_constraintBottom_toBottomOf="@+id/circular_seek_bar"
+        app:layout_constraintEnd_toEndOf="@id/circular_seek_bar"
+        app:layout_constraintStart_toStartOf="@id/circular_seek_bar"
+        app:layout_constraintTop_toTopOf="@id/circular_seek_bar"
+        app:tint="@color/darkPurple" />
+
+    <TextView
+        android:id="@+id/textDesc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="----"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="@id/circular_seek_bar"
+        app:layout_constraintStart_toStartOf="@id/circular_seek_bar"
+        app:layout_constraintTop_toBottomOf="@id/circular_seek_bar" />
+</androidx.constraintlayout.widget.ConstraintLayout>

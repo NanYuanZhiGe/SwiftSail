@@ -2,13 +2,12 @@ package com.nyzg.swiftsail.fragment.login;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextView;
+
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,6 +19,7 @@ import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.bean.GlobalToast;
 import com.nyzg.swiftsail.bean.MatchUtils;
 import com.nyzg.swiftsail.dbobj.User;
+import com.nyzg.swiftsail.repository.LoginRepository;
 
 public class UserNotInListFragment extends Fragment {
     static public Fragment newInstance() {
@@ -50,10 +50,11 @@ public class UserNotInListFragment extends Fragment {
                         break;
                     }
                     User user = new User();
-                    user.setEmail(str);
+                    user.email = str;
+                    LoginRepository.getInstance().getOnLoginUser().setValue(user);
                     MainActivity.addFragmentToStackTop(
                             requireActivity().getSupportFragmentManager(),
-                            LoginTypeSelectFragment.newInstance(user)
+                            LoginTypeSelectFragment.newInstance()
                     );
             }
             return true;

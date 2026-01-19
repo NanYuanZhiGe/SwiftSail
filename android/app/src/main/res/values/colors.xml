@@ -2,12 +2,15 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="veryLiteWhite">#F6F6F6</color>
     <color name="liteLiteWhite">#DFDFDF</color>
     <color name="liteWhite">#FFAAAAAA</color>
     <color name="darkGray">#2E2E2E</color>
     <color name="linkBlue">#FFAAAAFF</color>
     <color name="linkGray">#FF524C73</color>
+    <color name="noPurple">#EBE8FF</color>
     <color name="litePurple">#BFB9E6</color>
+    <color name="darkPurple">#5F5791</color>
     <color name="whitePurple">#EAE7FF</color>
     <color name="linkSkyOrage">#FFDAB9</color>
     <color name="golden">#D8B04C</color>
@@ -23,4 +26,33 @@
 
     <color name="nav_selected">#5AAE86</color>
     <color name="l_mainSelector">#DCDCDC</color>
+
+
+    <!-- colors for dock-->
+    <color name="rainPurple">#D4CEF1</color>     <!-- 浅薰衣草 -->
+    <color name="heavyPurple">#7A6BCC</color>    <!-- 饱满紫罗兰 -->
+
+    <!-- 绿色系：更鲜活自然 -->
+    <color name="rainGreen">#E8F8E8</color>      <!-- 薄荷青 -->
+    <color name="heavyGreen">#287C44</color>     <!-- 生态绿（对比度达标） -->
+
+    <!-- 蓝色系：更清爽通透 -->
+    <color name="rainBlue">#DDEEFF</color>       <!-- 天空蓝 -->
+    <color name="heavyBlue">#2A6791</color>      <!-- 深天蓝（经典科技蓝） -->
+
+    <!-- 粉色系：更温柔雅致 -->
+    <color name="rainPink">#F8D7DC</color>       <!-- 淡樱花粉 -->
+    <color name="heavyPink">#C25B70</color>      <!-- 玫瑰红（避免过暗） -->
+
+    <!-- 睡眠图标的颜色-->
+    <color name="sleepWake">#B8B8B8</color>
+    <color name="sleepRem">#8E88AF</color>
+    <color name="sleepLight">#574F83</color>
+    <color name="sleepDeep">#262339</color>
+
+
+    <array name="reportRecovery">
+        <item>@color/heavyPurple</item>
+        <item>@color/heavyPurple</item>
+    </array>
 </resources>

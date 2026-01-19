@@ -95,6 +95,14 @@
             app:attributeName="邮箱"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/id" />
+        <com.nyzg.swiftsail.view.MineUserDataSelectLayout
+            android:id="@+id/createTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="1px"
+            app:attributeName="创建时间"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/email" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

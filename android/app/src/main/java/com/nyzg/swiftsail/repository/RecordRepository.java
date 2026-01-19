@@ -8,9 +8,14 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.nyzg.swiftsail.GlobalApplication;
 import com.nyzg.swiftsail.bean.GlobalToast;
+import com.nyzg.swiftsail.bean.NetWorkBuilder;
+import com.nyzg.swiftsail.bean.NetWorkHandler;
 import com.nyzg.swiftsail.bean.SQLiteDB;
-import com.nyzg.swiftsail.dao.RecordTable;
-import com.nyzg.swiftsail.dbobj.Record;
+import com.nyzg.swiftsail.bean.ServerURL;
+import com.nyzg.swiftsail.dao.RecordBackUpTable;
+import com.nyzg.swiftsail.dbobj.RecordBackUp;
+import com.nyzg.swiftsail.dbobj.User;
+import com.nyzg.swiftsail.netobj.record.SyncRecordBackUpReq;
 import com.nyzg.swiftsail.obj.RecordData;
 
 import java.lang.reflect.Type;
@@ -21,90 +26,143 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class RecordRepository {
     private static final Type TYPE_MAP = new TypeToken<Map<String, Object>>() {
     }.getType();
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss");
-    public final static RecordRepository INSTANCE = new RecordRepository();
+    private volatile static RecordRepository INSTANCE=null;
+
+    //这个成员核心，它主要是用于RecordFragment的UI显示
     private final MutableLiveData<RecordData> mutableRecordData = new MutableLiveData<>();
+    private final ReadWriteLock recordLock = new ReentrantReadWriteLock();
+    private final AtomicBoolean OBSERVE_USER_LOCK = new AtomicBoolean(false);
+
+    public static RecordRepository getInstance() {
+        if (INSTANCE != null) {
+            return INSTANCE;
+        }
+        synchronized (RecordRepository.class) {
+            if (INSTANCE != null) {
+                return INSTANCE;
+            }
+            INSTANCE = new RecordRepository();
+        }
+        return INSTANCE;
+    }
 
     private RecordRepository() {
     }
 
-    public void refreshRecordAsync(long userId) {
+    public void updateUserOnChange() {
+        if (!OBSERVE_USER_LOCK.compareAndSet(false, true)) {
+            return;
+        }
+        //由于LoginRepository的currentUser通过postValue的方式更新，所以执行的速度会比worker慢
+        //导致user为空然后就没有办法更新用户数据，所以需要通过observe的方式进行数据更新
+        //然后每次observe的触发，都必须进行全量更新，此时应该锁住所有的写操作
+        LoginRepository.getInstance().getMutableCurrentUser().observeForever(this::initUserRecordDataAsync);
+    }
+
+    /**
+     * 根据当前用户重新加载一遍用户的运动记录
+     *
+     * @param user 当前用户
+     */
+    public void initUserRecordDataAsync(User user) {
+        if (user == null) {
+            return;
+        }
         CompletableFuture.supplyAsync(() -> {
-            SQLiteDB sqLiteDB = SQLiteDB.getDatabase(GlobalApplication.getAppContext());
-            RecordTable recordTable = sqLiteDB.recordTable();
-            List<Record> recordList = recordTable.selectTodayData(LocalDate.now().toEpochDay(), userId);
-            parseJsonAndSet(recordList);
+            //首先获取写锁
+            recordLock.writeLock().lock();
+            RecordBackUpTable recordBackUpTable = SQLiteDB.getDatabase(GlobalApplication.getAppContext()).recordBackUpTable();
+            try {
+                List<RecordBackUp> recordBackUpList = recordBackUpTable.selectTodayData(LocalDate.now().toEpochDay(), user.id);
+                parseJsonAndSet(recordLock, recordBackUpList);
+                //从数据库中查询该用户今天的所有数据，然后更新
+            } catch (Exception ignored) {//有异常就不理，提醒一下用户
+                GlobalToast.COMMON_TOAST.accept("读取RecordBackUpTable异常");
+            } finally {
+                recordLock.writeLock().unlock();
+            }
             return null;
         });
     }
 
-    //update是加上基础制
-    public void updateData(boolean useFeet, int startHour, int endHour, float meters, int durationSecond) {
-        RecordData recordData;
-        if (mutableRecordData.getValue() == null) {
-            recordData = new RecordData();
-        } else {
-            recordData = new RecordData(mutableRecordData.getValue());
-        }
-        if (useFeet) {
-            recordData.updateFeetData(startHour, endHour, meters, durationSecond);
-        } else {
-            recordData.updateWheelData(startHour, endHour, meters, durationSecond);
-        }
-        mutableRecordData.postValue(recordData);
-    }
-
-    //set是拿新值来替代旧值
-    public void setData(boolean useFeet, int startHour, int endHour, float meters, int durationSecond) {
-        RecordData recordData;
-        recordData = new RecordData();
-        if (useFeet) {
-            recordData.setFeetData(startHour, endHour, meters, durationSecond);
-        } else {
-            recordData.setWheelData(startHour, endHour, meters, durationSecond);
-        }
-        mutableRecordData.postValue(recordData);
-    }
-
-
-    public void submitRepositoryRecord(Record record) {
-        RecordTable recordTable = SQLiteDB.getDatabase(GlobalApplication.getAppContext()).recordTable();
+    public void submitRepositoryRecordAsync(RecordBackUp recordBackUp) {
+        RecordBackUpTable recordBackUpTable = SQLiteDB.getDatabase(GlobalApplication.getAppContext()).recordBackUpTable();
         CompletableFuture.supplyAsync(() -> {
             try {
-                recordTable.insertRecord(record);
+                recordBackUpTable.insertRecordBackUp(recordBackUp);
             } catch (Exception e) {
-                return 1;
-            }
-            return 0;
-        }).thenAccept(code -> {
-            if (code == 1) {
                 GlobalToast.COMMON_TOAST.accept("写入本地数据库失败，取消云同步");
-                return;
+                return null;
             }
             //更新UI数据
-            List<Record> newRecord = new ArrayList<>(1);
-            newRecord.add(record);
-            parseJsonAndUpdate(newRecord);
-            if (record.userId == 0L) {//是本地用户，直接返回就行了
-                return;
+            List<RecordBackUp> newRecord = new ArrayList<>(1);
+            newRecord.add(recordBackUp);
+            parseJsonAndUpdate(recordLock, newRecord);
+            //是本地用户，直接返回就行了
+            if (recordBackUp.userId == 0L) {
+                return null;
             }
             //否则就需要向云端同步数据
+            //同步数据时select所有sync=0的数据进行同步
+            List<RecordBackUp> recordList = recordBackUpTable.selectAllUnSync(recordBackUp.userId);
+            SyncRecordBackUpReq req = new SyncRecordBackUpReq();
+            req.recordList = recordList;
+            Request request = NetWorkBuilder.buildJsonRequestJwt(
+                    ServerURL.URL_SYNC_BACKUP_RECORD,
+                    ServerURL.POST,
+                    req
+            );
+            Response response = NetWorkBuilder.doChunkRequest(request);
+            NetWorkHandler.handleNetRespAfterLogin(
+                    null, response,
+                    () -> GlobalToast.COMMON_TOAST.accept("云同步运动记录失败，下次提交自动同步"),
+                    httpResp -> {
+                        //请求成功，更新本地数据为sync=1
+                        List<String> recordIds = new ArrayList<>(recordList.size());
+                        for (RecordBackUp temp : recordList) {
+                            recordIds.add(temp.recordId);
+                        }
+                        recordBackUpTable.updateDataAsSync(recordIds);
+                        GlobalToast.COMMON_TOAST.accept("运动记录云同步成功");
+                    }, Void.class);
+
+            return null;
         });
     }
 
-    public void parseJsonAndSet(List<Record> recordList) {
-        parseJsonAndDoFunction(recordList, true);
+
+    private void parseJsonAndSet(ReadWriteLock lock, List<RecordBackUp> recordBackUpList) {
+        lock.writeLock().lock();
+        try {
+            parseJsonAndDoFunction(recordBackUpList, true);
+        } catch (Exception ignore) {
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
 
-    public void parseJsonAndUpdate(List<Record> recordList) {
-        parseJsonAndDoFunction(recordList, false);
+    private void parseJsonAndUpdate(ReadWriteLock lock, List<RecordBackUp> recordBackUpList) {
+        lock.writeLock().lock();
+        try {
+            parseJsonAndDoFunction(recordBackUpList, false);
+        } catch (Exception ignore) {
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
 
-    private void parseJsonAndDoFunction(List<Record> recordList, boolean isSetData) {
+    private void parseJsonAndDoFunction(List<RecordBackUp> recordBackUpList, boolean isSetData) {
      /*
         {
             "type":"useFeet"/"useWheel",
@@ -114,8 +172,8 @@ public class RecordRepository {
             "endTime":"yyyy:MM:dd HH:mm:ss"
         }
          */
-        for (Record record : recordList) {
-            String json = record.record;
+        for (RecordBackUp recordBackUp : recordBackUpList) {
+            String json = recordBackUp.detailValue;
             if (json == null) {
                 continue;
             }
@@ -136,7 +194,7 @@ public class RecordRepository {
                     continue;
                 }
                 if (isSetData) {
-                    this.setData(type.equals("useFeet"),
+                    this.setChartData(type.equals("useFeet"),
                             startTime.getHour(),
                             endTime.getHour(),
                             meters.floatValue(),
@@ -144,16 +202,43 @@ public class RecordRepository {
                     //第一次就set，后面的就是update
                     isSetData = false;
                 } else {
-                    this.updateData(type.equals("useFeet"),
+                    this.updateChartData(type.equals("useFeet"),
                             startTime.getHour(),
                             endTime.getHour(),
                             meters.floatValue(),
                             duration.intValue());
                 }
-            } catch (Exception e) {
-                continue;
+            } catch (Exception ignore) {//一般是json解析出错，不用理，继续循环
             }
         }
+    }
+
+    //update是加上基础制
+    private void updateChartData(boolean useFeet, int startHour, int endHour, float meters, int durationSecond) {
+        RecordData recordData;
+        if (mutableRecordData.getValue() == null) {
+            recordData = new RecordData();
+        } else {
+            recordData = new RecordData(mutableRecordData.getValue());
+        }
+        if (useFeet) {
+            recordData.updateFeetData(startHour, endHour, meters, durationSecond);
+        } else {
+            recordData.updateWheelData(startHour, endHour, meters, durationSecond);
+        }
+        mutableRecordData.postValue(recordData);
+    }
+
+    //set是拿新值来替代旧值
+    private void setChartData(boolean useFeet, int startHour, int endHour, float meters, int durationSecond) {
+        RecordData recordData;
+        recordData = new RecordData();
+        if (useFeet) {
+            recordData.setFeetData(startHour, endHour, meters, durationSecond);
+        } else {
+            recordData.setWheelData(startHour, endHour, meters, durationSecond);
+        }
+        mutableRecordData.postValue(recordData);
     }
 
     public LiveData<RecordData> getLiveRecordData() {

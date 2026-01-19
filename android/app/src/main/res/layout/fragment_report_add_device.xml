@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <TextView
+        android:id="@+id/textDeviceName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="给您的设备取一个名字："
+        android:textSize="@dimen/textWithInput"
+        app:layout_constraintBottom_toTopOf="@id/inputDeviceName"
+        app:layout_constraintStart_toStartOf="@id/inputDeviceName"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/inputDeviceName"
+        android:layout_width="@dimen/inputWidth"
+        android:layout_height="@dimen/inputHeight"
+        android:background="@drawable/register_input"
+        android:inputType="text"
+        android:text="我的设备"
+        android:textColor="@color/liteWhite"
+        app:layout_constraintBottom_toTopOf="@id/textSelectDeviceType"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textDeviceName" />
+
+    <TextView
+        android:id="@+id/textSelectDeviceType"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/inputTextMarginTop"
+        android:text="选择受支持的设备："
+        android:textSize="@dimen/textWithInput"
+        app:layout_constraintBottom_toTopOf="@id/inputDeviceType"
+        app:layout_constraintStart_toStartOf="@id/textDeviceName"
+        app:layout_constraintTop_toBottomOf="@id/inputDeviceName" />
+
+    <Spinner
+        android:id="@+id/inputDeviceType"
+        android:layout_width="@dimen/inputWidth"
+        android:layout_height="@dimen/inputHeight"
+        android:background="@drawable/register_input"
+        app:layout_constraintBottom_toTopOf="@id/textClientId"
+        app:layout_constraintStart_toStartOf="@id/inputDeviceName"
+        app:layout_constraintTop_toBottomOf="@id/textSelectDeviceType" />
+
+    <TextView
+        android:id="@+id/textClientId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/inputTextMarginTop"
+        android:text="您手表的client_id："
+        android:textSize="@dimen/textWithInput"
+        app:layout_constraintBottom_toTopOf="@id/inputClientId"
+        app:layout_constraintStart_toStartOf="@id/textDeviceName"
+        app:layout_constraintTop_toBottomOf="@id/inputDeviceType" />
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/inputClientId"
+        android:layout_width="@dimen/inputWidth"
+        android:layout_height="@dimen/inputHeight"
+        android:background="@drawable/register_input"
+        android:inputType="text"
+        app:layout_constraintBottom_toTopOf="@id/textClientSecret"
+        app:layout_constraintStart_toStartOf="@id/inputDeviceName"
+        app:layout_constraintTop_toBottomOf="@id/textClientId" />
+
+    <TextView
+        android:id="@+id/textClientSecret"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/inputTextMarginTop"
+        android:text="您手表的client_secret"
+        android:textSize="@dimen/textWithInput"
+        app:layout_constraintBottom_toTopOf="@id/inputClientSecret"
+        app:layout_constraintStart_toStartOf="@id/inputDeviceName"
+        app:layout_constraintTop_toBottomOf="@id/inputClientId" />
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/inputClientSecret"
+        android:layout_width="@dimen/inputWidth"
+        android:layout_height="@dimen/inputHeight"
+        android:background="@drawable/register_input"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@id/inputDeviceName"
+        app:layout_constraintTop_toBottomOf="@id/textClientSecret" />
+
+    <TextView
+        android:id="@+id/submit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/inputTextMarginTop"
+        android:background="@drawable/register_button"
+        android:paddingHorizontal="@dimen/submitBtnPaddingHor"
+        android:paddingVertical="@dimen/submitBtnPaddingVer"
+        android:text="授权"
+        android:textSize="@dimen/submitBtnTextSize"
+        app:layout_constraintEnd_toEndOf="@id/inputClientSecret"
+        app:layout_constraintTop_toBottomOf="@id/inputClientSecret" />
+
+    <TextView
+        android:id="@+id/hasGranted"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/inputTextMarginTop"
+        android:background="@drawable/verify_code_button"
+        android:paddingHorizontal="@dimen/submitBtnPaddingHor"
+        android:paddingVertical="@dimen/submitBtnPaddingVer"
+        android:text="我已授权"
+        android:textSize="@dimen/textWithInput"
+        app:layout_constraintEnd_toEndOf="@id/submit"
+        app:layout_constraintTop_toBottomOf="@id/submit" />
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -4,25 +4,30 @@ import android.location.Location;
 
 import androidx.lifecycle.MutableLiveData;
 
-import com.nyzg.swiftsail.dbobj.Record;
+import com.nyzg.swiftsail.dbobj.RecordBackUp;
 
+/**
+ * 这个repo专门提供给RecordRecordFragment和RecordRecordService来使用
+ * 用于更新当前的运动的记录
+ */
 public class RecordRecordRepository {
     public static RecordRecordRepository INSTANCE = new RecordRecordRepository();
     private final MutableLiveData<String> mutableMinuteSecond = new MutableLiveData<>();
     final private MutableLiveData<String> mutableDistanceKilo = new MutableLiveData<>();
     final private MutableLiveData<String> mutableSpeedMeterSecond = new MutableLiveData<>();
     final private MutableLiveData<Location> mutableLocation = new MutableLiveData<>();
-    private Record record;
+    final private MutableLiveData<Long> sportStartTime=new MutableLiveData<>(System.currentTimeMillis());
+    private final MutableLiveData<RecordBackUp> recordBackUp=new MutableLiveData<>();
 
     private RecordRecordRepository() {
     }
 
-    public Record getRecord() {
-        return record;
+    public MutableLiveData<Long> getSportStartTime() {
+        return sportStartTime;
     }
 
-    public void setRecord(Record record) {
-        this.record = record;
+    public MutableLiveData<RecordBackUp> getRecordBackUp() {
+        return recordBackUp;
     }
 
     public MutableLiveData<String> getMutableMinuteSecond() {

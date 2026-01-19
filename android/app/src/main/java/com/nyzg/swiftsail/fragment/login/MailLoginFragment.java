@@ -16,15 +16,15 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.textfield.TextInputEditText;
 import com.nyzg.swiftsail.MainActivity;
 import com.nyzg.swiftsail.R;
-import com.nyzg.swiftsail.bean.GlobalConf;
+import com.nyzg.swiftsail.bean.ServerURL;
 import com.nyzg.swiftsail.bean.GlobalInstance;
 import com.nyzg.swiftsail.bean.GlobalToast;
 import com.nyzg.swiftsail.bean.JsonSerializer;
 import com.nyzg.swiftsail.dbobj.User;
 import com.nyzg.swiftsail.listener.LoginWaitingListener;
 import com.nyzg.swiftsail.listener.LoginCountingListener;
-import com.nyzg.swiftsail.netobj.MailCodeVerifyReq;
-import com.nyzg.swiftsail.netobj.MailVerifyReq;
+import com.nyzg.swiftsail.netobj.login.MailCodeVerifyReq;
+import com.nyzg.swiftsail.netobj.login.MailVerifyReq;
 import com.nyzg.swiftsail.repository.LoginRepository;
 
 import java.util.Optional;
@@ -39,14 +39,8 @@ public class MailLoginFragment extends Fragment {
     private static final String EMAIL_KEY = "user_email";
     private volatile boolean quitForbidden = false;
 
-    public static Fragment newInstance(String email) {
-        Fragment fragment = new MailLoginFragment();
-        if (email != null) {
-            Bundle bundle = new Bundle();
-            bundle.putString(EMAIL_KEY, email);
-            fragment.setArguments(bundle);
-        }
-        return fragment;
+    public static Fragment newInstance() {
+        return new MailLoginFragment();
     }
 
     @Override
@@ -91,13 +85,13 @@ public class MailLoginFragment extends Fragment {
         textView.setOnTouchListener(new LoginCountingListener<>(
                 textView, () -> Optional.of(email), strEmail -> {
             try {
-                OkHttpClient httpClient = GlobalInstance.okHttpClient;
+                OkHttpClient httpClient = GlobalInstance.OK_HTTP_NO_PROXY;
                 Request request = new Request.Builder()
-                        .url(GlobalConf.URL_LOGIN_VERIFY_CODE)
+                        .url(ServerURL.URL_LOGIN_VERIFY_CODE)
                         .method("POST",
                                 RequestBody.create(
                                         JsonSerializer.serialize(new MailVerifyReq(strEmail)),
-                                        GlobalConf.APPLICATION_JSON
+                                        ServerURL.APPLICATION_JSON
                                 ))
                         .build();
                 return Optional.of(httpClient.newCall(request).execute());
@@ -119,12 +113,12 @@ public class MailLoginFragment extends Fragment {
             }
             quitForbidden = true;
             try {
-                OkHttpClient httpClient = GlobalInstance.okHttpClient;
+                OkHttpClient httpClient = GlobalInstance.OK_HTTP_NO_PROXY;
                 Request request = new Request.Builder()
-                        .url(GlobalConf.URL_LOGIN_WITH_MAIL)
-                        .method(GlobalConf.POST, RequestBody.create(
+                        .url(ServerURL.URL_LOGIN_WITH_MAIL)
+                        .method(ServerURL.POST, RequestBody.create(
                                 JsonSerializer.serialize(new MailCodeVerifyReq(email, verifyCode)),
-                                GlobalConf.APPLICATION_JSON
+                                ServerURL.APPLICATION_JSON
                         ))
                         .build();
                 return Optional.of(httpClient.newCall(request).execute());
@@ -144,9 +138,9 @@ public class MailLoginFragment extends Fragment {
                     return;
                 }
                 //把这个注册用户写入数据库
-                LoginRepository.INSTANCE.updateUserToLocalAccountAsync(tokenUser);
+                LoginRepository.getInstance().updateUserToLocalAccountAsync(tokenUser);
                 //成功登录
-                LoginRepository.INSTANCE.login(tokenUser);
+                LoginRepository.getInstance().login(tokenUser);
                 //返回主界面
                 GlobalInstance.mainHandler.post(() -> MainActivity.popUntilTheInitOne(requireActivity().getSupportFragmentManager()));
             } catch (Exception e) {

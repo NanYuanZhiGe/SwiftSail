@@ -1,8 +1,8 @@
 package com.nyzg.swiftsail.obj;
 
 public class RecordData {
-    private int[] useFeetHour;
-    private int[] useWheelHour;
+    private final int[] useFeetHour;
+    private final int[] useWheelHour;
     private int steps = 0;
     private float useFeetMeters = 0f;
     private float useWheelMeters = 0f;
