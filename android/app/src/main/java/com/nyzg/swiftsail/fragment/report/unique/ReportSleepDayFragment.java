@@ -46,13 +46,6 @@ public class ReportSleepDayFragment extends ReportDetailBase {
         initBarChart(roundedBarChart);
     }
 
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Log.v("myTag", "i am destroy");
-    }
-
     private void initBarChart(RoundedBarChart barChart) {
         // 准备数据
         List<BarEntry> barEntries = new ArrayList<>();

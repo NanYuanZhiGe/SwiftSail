@@ -18,6 +18,7 @@
 
     <declare-styleable name="ReportCircle">
         <attr name="circleSize" format="dimension" />
+        <attr name="barWidth" format="float"/>
         <attr name="circleBk" format="color|reference" />
         <attr name="circleBk2" format="color|reference" />
         <attr name="imageSize" format="dimension" />

@@ -2,7 +2,7 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="veryLiteWhite">#F6F6F6</color>
+    <color name="veryLiteWhite">#F9F9F9</color>
     <color name="liteLiteWhite">#DFDFDF</color>
     <color name="liteWhite">#FFAAAAAA</color>
     <color name="darkGray">#2E2E2E</color>
@@ -25,23 +25,23 @@
     <color name="skyBlue">#5197CC</color>
 
     <color name="nav_selected">#5AAE86</color>
-    <color name="l_mainSelector">#DCDCDC</color>
+    <color name="l_mainSelector">#EDEDED</color>
 
 
     <!-- colors for dock-->
-    <color name="rainPurple">#D4CEF1</color>     <!-- 浅薰衣草 -->
+    <color name="rainPurple">#e0dfe5</color>     <!-- 浅薰衣草 -->
     <color name="heavyPurple">#7A6BCC</color>    <!-- 饱满紫罗兰 -->
 
     <!-- 绿色系：更鲜活自然 -->
-    <color name="rainGreen">#E8F8E8</color>      <!-- 薄荷青 -->
+    <color name="rainGreen">#cde2dd</color>      <!-- 薄荷青 -->
     <color name="heavyGreen">#287C44</color>     <!-- 生态绿（对比度达标） -->
 
     <!-- 蓝色系：更清爽通透 -->
-    <color name="rainBlue">#DDEEFF</color>       <!-- 天空蓝 -->
+    <color name="rainBlue">#cbdddf</color>       <!-- 天空蓝 -->
     <color name="heavyBlue">#2A6791</color>      <!-- 深天蓝（经典科技蓝） -->
 
     <!-- 粉色系：更温柔雅致 -->
-    <color name="rainPink">#F8D7DC</color>       <!-- 淡樱花粉 -->
+    <color name="rainPink">#FFE4EB</color>       <!-- 淡樱花粉 -->
     <color name="heavyPink">#C25B70</color>      <!-- 玫瑰红（避免过暗） -->
 
     <!-- 睡眠图标的颜色-->

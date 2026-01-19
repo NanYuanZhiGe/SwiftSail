@@ -2,9 +2,11 @@ package com.nyzg.swiftsail.fragment.report;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,6 +19,7 @@ import com.google.android.material.tabs.TabLayout;
 import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.adapter.ReportDetailAdapter;
 import com.nyzg.swiftsail.bean.DateUtils;
+import com.nyzg.swiftsail.bean.UnsafeButFixProb;
 import com.nyzg.swiftsail.fragment.report.unique.ReportSleepDayFragment;
 import com.nyzg.swiftsail.obj.Pair;
 import com.nyzg.swiftsail.obj.SumType;
@@ -59,29 +62,29 @@ public class ReportDetailSleepFragment extends Fragment {
                     switch (position) {
                         case 0:
                             return ReportSleepDayFragment.getInstance(R.layout.fragment_report_detail_sleep_day);
-                        case 1:
+                        case 1://week
                             return ReportDetailCommonFragment.getInstance(
-                                    ContextCompat.getColor(requireContext(), R.color.heavyPurple),
+                                    R.color.darkPurple,
                                     funcParam -> {
-                                        return getTestWeekData();
+                                        return new Pair<>(0L, new ArrayList<>());
                                     },
                                     "ReportDetailSleepWeek",
                                     SumType.WEEK,
                                     AVG_FORMATTER
                             );
-                        case 2:
+                        case 2://month
                             return ReportDetailCommonFragment.getInstance(
-                                    ContextCompat.getColor(requireContext(), R.color.heavyPurple),
+                                    R.color.darkPurple,
                                     funcParam -> {
-                                        return new Pair<>(0L, new ArrayList<>());
+                                        return getTestWeekData();
                                     },
                                     "ReportDetailSleepMonth",
                                     SumType.MONTH,
                                     AVG_FORMATTER
                             );
-                        case 3:
+                        case 3://year
                             return ReportDetailCommonFragment.getInstance(
-                                    ContextCompat.getColor(requireContext(), R.color.heavyPurple),
+                                    R.color.darkPurple,
                                     funcParam -> {
                                         return new Pair<>(0L, new ArrayList<>());
                                     },
@@ -89,9 +92,9 @@ public class ReportDetailSleepFragment extends Fragment {
                                     SumType.YEAR,
                                     AVG_FORMATTER
                             );
-                        default:
+                        default://total
                             return ReportDetailCommonFragment.getInstance(
-                                    ContextCompat.getColor(requireContext(), R.color.heavyPurple),
+                                    R.color.darkPurple,
                                     funcParam -> {
                                         return new Pair<>(0L, new ArrayList<>());
                                     },
@@ -123,12 +126,36 @@ public class ReportDetailSleepFragment extends Fragment {
         return father;
     }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        LinearLayout layout1 = view.findViewById(R.id.layout1);
+        TabLayout tabLayout = view.findViewById(R.id.summarySelector);
+        ViewPager2 viewPager2 = view.findViewById(R.id.summaries);
+        view.post(() -> {
+            int screenHeight = getResources().getDisplayMetrics().heightPixels;
+            int needHeight = UnsafeButFixProb.innerFragmentHeight;
+            if (needHeight < 0) {
+                needHeight = screenHeight;
+            }
+            // 获取 layout1 和 TabLayout 的实际高度
+            int layout1Height = layout1.getHeight();
+            int tabHeight = tabLayout.getHeight();
+            // 计算 ViewPager2 应该有的高度
+            int viewPagerHeight = needHeight - layout1Height - tabHeight;
+            // 设置 ViewPager2 的 LayoutParams
+            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) viewPager2.getLayoutParams();
+            params.height = Math.max(viewPagerHeight, 0); // 防止负数
+            viewPager2.setLayoutParams(params);
+        });
+    }
+
     /**
-     * 模拟从2025年1月31日到2025年3月1日的数据
+     * 模拟从2025年2月1日到2025年2月28日的数据
      */
     private static Pair<Long, List<BarEntry>> getTestWeekData() {
-        LocalDate startDate = LocalDate.of(2025, 1, 31);
-        LocalDate endDate = LocalDate.of(2025, 3, 1);
+        LocalDate startDate = LocalDate.of(2025, 2, 1);
+        LocalDate endDate = LocalDate.of(2025, 2, 28);
         long startDay = startDate.toEpochDay();
         long endDay = endDate.toEpochDay();
         List<BarEntry> entries = new ArrayList<>();
@@ -160,7 +187,7 @@ public class ReportDetailSleepFragment extends Fragment {
             }
             count += 1;
             if (i == endDay) {//最后一天了，不论如何，都要添加到BarEntry中
-                entries.add(new BarEntry(entryCount, (float) (sum/ 1000f / 3600f / (float) count)));
+                entries.add(new BarEntry(entryCount, (float) (sum / 1000f / 3600f / (float) count)));
             }
         }
         return new Pair<>(startDay, entries);

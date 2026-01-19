@@ -56,7 +56,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:text="平均每天7小时38分钟"
+            android:text="平均"
             android:textSize="12sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/dateSelectorContainer" />
@@ -65,6 +65,7 @@
             android:id="@+id/barChart"
             android:layout_width="match_parent"
             android:layout_height="300dp"
+            android:layout_marginHorizontal="8dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/avgTxt"
             app:radius="24dp" />
@@ -72,14 +73,14 @@
         <TextView
             android:id="@+id/listName"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:text="本周"
             android:textSize="16sp"
             app:layout_constraintStart_toStartOf="@id/avgTxt"
             app:layout_constraintTop_toBottomOf="@id/barChart" />
 
-        <androidx.recyclerview.widget.RecyclerView
+        <LinearLayout
             android:id="@+id/avgList"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

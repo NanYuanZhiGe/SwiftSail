@@ -27,6 +27,7 @@ public class ReportCircle extends ConstraintLayout {
             int circleBk = a.getResourceId(R.styleable.ReportCircle_circleBk, R.color.rainPurple);
             int circleBk2 = a.getResourceId(R.styleable.ReportCircle_circleBk2, R.color.darkPurple);
             int imageBk = a.getResourceId(R.styleable.ReportCircle_imageBk, R.drawable.moon);
+            float barWidth=a.getFloat(R.styleable.ReportCircle_barWidth,14f);
             CircularSeekBar circularSeekBar = findViewById(R.id.circular_seek_bar);
             ImageView imageView = findViewById(R.id.innerImage);
             TextView textView = findViewById(R.id.textDesc);
@@ -42,6 +43,7 @@ public class ReportCircle extends ConstraintLayout {
             seekBarParams.width = (int) circleSize;
             seekBarParams.height = (int) circleSize;
             circularSeekBar.setLayoutParams(seekBarParams);
+            circularSeekBar.setBarWidth(barWidth);
 
             LayoutParams imageParams = (LayoutParams) imageView.getLayoutParams();
             imageParams.width = (int) imageSize;
