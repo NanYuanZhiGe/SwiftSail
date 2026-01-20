@@ -7,12 +7,9 @@ import androidx.room.PrimaryKey;
 @Entity(
         tableName = "recordHeartRateTable",
         indices = {
-                @Index(value = "userId"),
-                @Index(value = "epochYear"),
-                @Index(value = "epochMonth"),
-                @Index(value = "epochWeek"),
-                @Index(value = "recordId"),
-                @Index(value = "exposeValue")
+                @Index(value = {"userId", "epochDay", "exposeValue"}),
+                @Index(value = {"userId", "epochYear", "epochMonth", "epochWeek", "exposeValue"}),
+                @Index(value = {"userId", "recordId"})
         }
 )
 public class RecordHeartRate {

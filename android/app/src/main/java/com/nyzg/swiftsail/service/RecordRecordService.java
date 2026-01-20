@@ -136,7 +136,7 @@ public class RecordRecordService extends Service {
          * summary不要重置信息，重置信息由cancel触发
          */
         public void summary() {
-            User currentUser = LoginRepository.getInstance().getMutableCurrentUser().getValue();
+            User currentUser = LoginRepository.getInstance().getCurrentUser().getValue();
             if (currentUser == null) {
                 currentUser = GlobalInstance.LOCAL_USER;
             }

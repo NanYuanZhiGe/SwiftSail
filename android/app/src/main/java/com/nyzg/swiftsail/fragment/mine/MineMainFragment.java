@@ -44,7 +44,7 @@ public class MineMainFragment extends Fragment {
         father.findViewById(R.id.funcBottle).setOnClickListener(this::onBottleClicked);
         father.findViewById(R.id.funcLogout).setOnClickListener(this::onLogoutClicked);
         //监听登录用户的变化，更新UI
-        LoginRepository.getInstance().getMutableCurrentUser().observe(getViewLifecycleOwner(), user -> {
+        LoginRepository.getInstance().getCurrentUser().observe(getViewLifecycleOwner(), user -> {
             if (user == null) {
                 return;
             }

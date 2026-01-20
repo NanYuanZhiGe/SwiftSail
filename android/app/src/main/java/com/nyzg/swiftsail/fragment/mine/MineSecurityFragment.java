@@ -127,7 +127,7 @@ class MyPopupWindow extends PopupWindow {
             return;
         }
         BiometricAddReq req = new BiometricAddReq();
-        User user = LoginRepository.getInstance().getMutableCurrentUser().getValue();
+        User user = LoginRepository.getInstance().getCurrentUser().getValue();
         if (user == null || user.id == 0L) {
             GlobalToast.COMMON_TOAST.accept("本地用户无法使用指纹验证功能");
             return;

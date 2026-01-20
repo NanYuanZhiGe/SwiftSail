@@ -64,7 +64,7 @@ public class LoginFragment extends Fragment {
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                if (LoginRepository.getInstance().getMutableCurrentUser().getValue() != null) {
+                if (LoginRepository.getInstance().getCurrentUser().getValue() != null) {
                     setEnabled(false);
                     requireActivity().getOnBackPressedDispatcher().onBackPressed();
                     return;

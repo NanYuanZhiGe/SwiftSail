@@ -31,7 +31,7 @@ public class MainUserDataFragment extends BackPressQuitFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View father = inflater.inflate(R.layout.fragment_mine_user_data, container, false);
-        LoginRepository.getInstance().getMutableCurrentUser().observe(getViewLifecycleOwner(), user -> {
+        LoginRepository.getInstance().getCurrentUser().observe(getViewLifecycleOwner(), user -> {
             ((TextView) father.findViewById(R.id.nickName).findViewById(R.id.content)).setText(user.nickName);
             ((TextView) father.findViewById(R.id.id).findViewById(R.id.content)).setText(user.id + "");
             ((TextView) father.findViewById(R.id.email).findViewById(R.id.content)).setText(user.email);

@@ -7,13 +7,7 @@ import androidx.room.PrimaryKey;
 @Entity(
         tableName = "recordBackUpTable",
         indices = {
-                @Index(value = "userId"),
-                @Index(value = "epochYear"),
-                @Index(value = "epochMonth"),
-                @Index(value = "epochWeek"),
-                @Index(value = "recordId"),
-                @Index(value = "exposeValue"),
-                @Index(value = "sync")
+                @Index(value = {"userId", "recordId", "sync"}),
         }
 )
 public class RecordBackUp {

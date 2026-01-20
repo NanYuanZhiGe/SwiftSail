@@ -67,7 +67,7 @@ public class RecordRepository {
         //由于LoginRepository的currentUser通过postValue的方式更新，所以执行的速度会比worker慢
         //导致user为空然后就没有办法更新用户数据，所以需要通过observe的方式进行数据更新
         //然后每次observe的触发，都必须进行全量更新，此时应该锁住所有的写操作
-        LoginRepository.getInstance().getMutableCurrentUser().observeForever(this::initUserRecordDataAsync);
+        LoginRepository.getInstance().getCurrentUser().observeForever(this::initUserRecordDataAsync);
     }
 
     /**

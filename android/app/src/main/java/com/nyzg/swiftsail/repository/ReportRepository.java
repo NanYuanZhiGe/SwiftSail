@@ -1,14 +1,15 @@
 package com.nyzg.swiftsail.repository;
 
-import androidx.core.content.ContextCompat;
+import android.annotation.SuppressLint;
+
 import androidx.lifecycle.MutableLiveData;
 
 import com.nyzg.swiftsail.GlobalApplication;
-import com.nyzg.swiftsail.dbobj.Report;
+import com.nyzg.swiftsail.bean.SQLiteDB;
+import com.nyzg.swiftsail.dbobj.User;
+import com.nyzg.swiftsail.obj.ParsedReport;
 
-import java.time.LocalDate;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
@@ -16,13 +17,30 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class ReportRepository {
-    public static ReportRepository INSTANCE = new ReportRepository();
+    volatile private static ReportRepository INSTANCE;
+
+    public static ReportRepository getInstance() {
+        if (INSTANCE != null) {
+            return INSTANCE;
+        }
+        synchronized (ReportRepository.class) {
+            if (INSTANCE != null) {
+                return INSTANCE;
+            }
+            INSTANCE = new ReportRepository();
+        }
+        return INSTANCE;
+    }
+
     private final static Executor THREAD_POOL = new ThreadPoolExecutor(
-            1, 3, 180, TimeUnit.SECONDS, new ArrayBlockingQueue<>(10),
+            2, 2,
+            5 * 60, TimeUnit.SECONDS,
+            new ArrayBlockingQueue<>(1),
             new ThreadFactory() {
                 final private AtomicInteger count = new AtomicInteger(0);
 
@@ -32,87 +50,129 @@ public class ReportRepository {
                     thread.setName("ReportRepository-thread-" + count.getAndIncrement());
                     return thread;
                 }
-            }, new ThreadPoolExecutor.DiscardOldestPolicy()
+            },
+            new ThreadPoolExecutor.DiscardOldestPolicy()
     );
 
     private ReportRepository() {
     }
 
-    private final MutableLiveData<Integer> pagerCapacity = new MutableLiveData<>(1);
-    private final AtomicBoolean isSync = new AtomicBoolean(false);
+    //ReportMain0Fragment用于展示信息的东西
+    public final MutableLiveData<ParsedReport> mainReport = new MutableLiveData<>();
 
-    public MutableLiveData<Integer> getPagerCapacity() {
-        return pagerCapacity;
-    }
-
-    //这个对象存储了用户全部的数据，
-    //但是不一定是完整的，它内部使用LRU缓存实现
-    //用以节省用户的内存
-    private final MutableLiveData<ReportLruCache> mutableReportList = new MutableLiveData<>();
-
-    public MutableLiveData<ReportLruCache> getMutableReportList() {
-        return mutableReportList;
-    }
+    //最多存储64天的ReportMain0Fragment的数据
+    private final LruParsedReportCache parsedReportCache = new LruParsedReportCache(32);
+    private final ReadWriteLock parsedReportCacheLock = new ReentrantReadWriteLock();
 
 
-    public CompletableFuture<Report> getDataAsync(Long day) {
-        return CompletableFuture.supplyAsync(() -> {
+    /**
+     * 有缓存优化，
+     * 通过线程池的设计，保证用户在快速的切换的时候不会过度堆积任务，而且能够保证响应速度
+     */
+    public void getReportMainAsync(Long day) {
+        CompletableFuture.supplyAsync(() -> {
+            ParsedReport parsedReport;
+            parsedReportCacheLock.readLock().lock();
+            try {
+                parsedReport = parsedReportCache.get(day);
+            } finally {
+                parsedReportCacheLock.readLock().unlock();
+            }
+            if (parsedReport != null) {//如果有数据
+                mainReport.postValue(parsedReport);
+                return null;
+            }
+            //没有数据就去数据库中查询，然后加写锁写入数据
+            /*
+            这里不用双重检查的原因如下：
+            1. 当用户连续选择同一天的时候DateSelector不会重复提交任务
+            2. 用户在大部分情况下是提交不同天的任务的，如果使用写锁+双重检查，命中率极低，
+            同时还降低了并发度
+            3. 对于极限情况，用户切到其他天，又快速切回来，可能在极端情况下会导致一点点性能问题，
+            但是无所谓，因为每次查询的数据是一致的，所以不怕写入脏数据，再者，这样子缓存很容易命中
+             */
+            parsedReport = getExposeValueAndParseNullAtFail(day);
+            if (parsedReport == null) {
+                return null;
+            }
+            parsedReportCacheLock.writeLock().lock();
+            try {
+                parsedReportCache.put(day, parsedReport);
+                mainReport.postValue(parsedReport);
+            } finally {
+                parsedReportCacheLock.writeLock().unlock();
+            }
             return null;
         }, THREAD_POOL);
     }
 
     /**
-     * 同步数据
-     * 这个函数是幂等的，而且其实例只能存在一个
+     * 从数据库中查询exposeValue，然后解析出来
      */
-    public void syncDataAsync() {
-        //如果正在同步数据就不要动了
-        if (!isSync.compareAndSet(false, true)) {
-            return;
+    @SuppressLint("DefaultLocale")
+    private ParsedReport getExposeValueAndParseNullAtFail(Long day) {
+        SQLiteDB sqLiteDB = SQLiteDB.getDatabase(GlobalApplication.getAppContext());
+        ParsedReport result = new ParsedReport();
+        User user = LoginRepository.getInstance().currentUser.getValue();
+        if (user == null) {
+            return result;
         }
-        //开始异步同步数据
-        CompletableFuture.supplyAsync(() -> {
-
+        long userId = user.id;
+        try {
+            Long caloric = sqLiteDB.recordConsumptionTable().getExposeValue(userId, day);
+            if (caloric != null) {
+                result.caloric = caloric + "卡";
+            }
+            Long distance = sqLiteDB.recordDistanceTable().getExposeValue(userId, day);
+            if (distance != null) {
+                result.stepDistance = distance + "公里";
+            }
+            Long heartRate = sqLiteDB.recordHeartRateTable().getExposeValue(userId, day);
+            if (heartRate != null && heartRate >= 1000000000L) {
+                //第三位为低心率，中三位为高心率，高三位为静息心率
+                int lowRate = (int) (heartRate % 1000);
+                int high = (int) (heartRate / 1000 % 1000);
+                int rest = (int) (heartRate / 1000000 % 1000);
+                result.heartRange = String.format("%d-%d bpm", lowRate, high);
+                result.restHeartBeat = String.format("%d bpm", rest);
+            }
+            Long nutrition = sqLiteDB.recordNutritionTable().getExposeValue(userId, day);
+            if (nutrition != null) {
+                result.nutrition = nutrition + "卡";
+            }
+            Long sleep = sqLiteDB.recordSleepTable().getExposeValue(userId, day);
+            if (sleep != null) {//sleep是毫秒
+                float time = sleep / 1000f / 3600f;
+                int hour = (int) time;
+                int minute = (int) ((time - hour) * 60);
+                int score = Math.max((int) (time / 8 * 100), 100);
+                result.sleepTime = String.format("%d小时%d分钟", hour, minute);
+                result.sleepScore = score + "";
+            }
+            Long step = sqLiteDB.recordStepTable().getExposeValue(userId, day);
+            if (step != null) {
+                result.stepCount = step + "";
+            }
+        } catch (Exception ignore) {
             return null;
-        }).thenAcceptAsync(action -> isSync.set(false));
+        }
+        return result;
     }
 
     /**
-     * key是日期，value是当天的报表数据
-     * 日期统一使用LocalDate.now().toEpochDay()
-     * 也就是从1970/1/1以来的计数日期
+     * key 是epoch day
      */
-    public static class ReportLruCache extends LinkedHashMap<Long, Report> {
-        //capacity就是用户当前的所有运动记录的数量.
+    private static class LruParsedReportCache extends LinkedHashMap<Long, ParsedReport> {
         private final int CAPACITY;
 
-        public ReportLruCache(int capacity) {
-            //调整accessOrder为true
-            super(64, 0.75f, true);
-            this.CAPACITY = capacity;
+        public LruParsedReportCache(int CAPACITY) {
+            super(16, 0.75f, true);
+            this.CAPACITY = CAPACITY;
         }
 
         @Override
-        protected boolean removeEldestEntry(Map.Entry<Long, Report> eldest) {
+        protected boolean removeEldestEntry(Map.Entry<Long, ParsedReport> eldest) {
             return size() > CAPACITY;
-        }
-
-        /**
-         * 获取这个日期的时候，尝试从内部的缓存中获取
-         * 如果拿不到，就尝试从磁盘中读取
-         */
-        @Override
-        public Report get(Object key) {
-            return super.get(key);
-        }
-
-        @Override
-        public Report put(Long key, Report value) {
-            return super.put(key, value);
-        }
-
-        public int getSize() {
-            return CAPACITY;
         }
     }
 }

@@ -7,12 +7,9 @@ import androidx.room.PrimaryKey;
 @Entity(
         tableName = "recordConsumptionTable",
         indices = {
-                @Index(value = "userId"),
-                @Index(value = "epochYear"),
-                @Index(value = "epochMonth"),
-                @Index(value = "epochWeek"),
-                @Index(value = "recordId"),
-                @Index(value = "exposeValue")
+                @Index(value = {"userId", "epochDay", "exposeValue"}),
+                @Index(value = {"userId", "epochYear", "epochMonth", "epochWeek", "exposeValue"}),
+                @Index(value = {"userId", "recordId"})
         }
 )
 public class RecordConsumption {
@@ -20,7 +17,7 @@ public class RecordConsumption {
     public long id;
     public long userId;
     public String recordId;
-    public long eposeValue;
+    public long exposeValue;
     public String detailValue;
     public long epochDay;
     public long epochWeek;

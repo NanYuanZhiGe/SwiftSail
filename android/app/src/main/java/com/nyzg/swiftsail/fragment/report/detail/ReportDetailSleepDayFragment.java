@@ -1,7 +1,6 @@
-package com.nyzg.swiftsail.fragment.report.unique;
+package com.nyzg.swiftsail.fragment.report.detail;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,15 +18,16 @@ import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.nyzg.swiftsail.R;
-import com.nyzg.swiftsail.fragment.report.ReportDetailBase;
 import com.nyzg.swiftsail.view.RoundedBarChart;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
-public class ReportSleepDayFragment extends ReportDetailBase {
+public class ReportDetailSleepDayFragment extends ReportDetailDayBaseFragment {
     public static Fragment getInstance(int layoutResource) {
-        Fragment fragment = new ReportSleepDayFragment();
+        Fragment fragment = new ReportDetailSleepDayFragment();
         Bundle bundle = new Bundle();
         bundle.putInt(LAYOUT_KEY, layoutResource);
         fragment.setArguments(bundle);
@@ -44,6 +44,18 @@ public class ReportSleepDayFragment extends ReportDetailBase {
         recyclerView.setAdapter(new MyRecyclerAdapter(testList));
         RoundedBarChart roundedBarChart = father.findViewById(R.id.sleepRange);
         initBarChart(roundedBarChart);
+    }
+
+    @Override
+    protected boolean hasDateSelector() {
+        return true;
+    }
+
+
+    //暂时留空
+    @Override
+    protected Consumer<LocalDate> getDateSelectorCallback() {
+        return super.getDateSelectorCallback();
     }
 
     private void initBarChart(RoundedBarChart barChart) {

@@ -1,4 +1,4 @@
-package com.nyzg.swiftsail.fragment.report;
+package com.nyzg.swiftsail.fragment.report.pull;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -36,6 +36,7 @@ import com.nyzg.swiftsail.dao.WatchTable;
 import com.nyzg.swiftsail.dbobj.User;
 import com.nyzg.swiftsail.dbobj.Watch;
 import com.nyzg.swiftsail.encrypt.Uuid;
+import com.nyzg.swiftsail.fragment.BackPressQuitFragment;
 import com.nyzg.swiftsail.netobj.report.WatchAddReq;
 import com.nyzg.swiftsail.obj.SucceedOrNot;
 import com.nyzg.swiftsail.obj.Tuple;
@@ -49,7 +50,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class ReportAddDeviceFragment extends Fragment {
+public class ReportAddDeviceFragment extends BackPressQuitFragment {
 
     public static Fragment getInstance() {
         return new ReportAddDeviceFragment();
@@ -129,7 +130,7 @@ public class ReportAddDeviceFragment extends Fragment {
         Watch watch = watchViewModel.getWatch().getValue();
         String codeVerifier = watchViewModel.getCodeVerifier().getValue();
         String state = watchViewModel.getState().getValue();
-        User user = LoginRepository.getInstance().getMutableCurrentUser().getValue();
+        User user = LoginRepository.getInstance().getCurrentUser().getValue();
         if (state == null) {
             GlobalToast.COMMON_TOAST.accept("请您先进行授权");
             return;
@@ -228,7 +229,7 @@ public class ReportAddDeviceFragment extends Fragment {
 
     private Watch getWatch() {
         //校验用户的输入
-        User currentUser = LoginRepository.getInstance().getMutableCurrentUser().getValue();
+        User currentUser = LoginRepository.getInstance().getCurrentUser().getValue();
         if (currentUser == null || currentUser.id == 0L) {
             GlobalToast.COMMON_TOAST.accept("未登录用户不支持添加手表");
             return null;

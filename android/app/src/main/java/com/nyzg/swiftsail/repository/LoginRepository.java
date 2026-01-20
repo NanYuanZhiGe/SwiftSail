@@ -41,7 +41,7 @@ public class LoginRepository {
         return INSTANCE;
     }
 
-    private final MutableLiveData<User> mutableCurrentUser = new MutableLiveData<>();
+    public final MutableLiveData<User> currentUser = new MutableLiveData<>();
     private final MutableLiveData<User> onLoginUser = new MutableLiveData<>();
     private final MutableLiveData<List<User>> mutableAvailableUserList = new MutableLiveData<>();
     private volatile boolean onLastLogin = false;
@@ -54,11 +54,11 @@ public class LoginRepository {
     }
 
     public void setCurrentUser(User user) {
-        mutableCurrentUser.setValue(user);
+        currentUser.setValue(user);
     }
 
-    public MutableLiveData<User> getMutableCurrentUser() {
-        return mutableCurrentUser;
+    public MutableLiveData<User> getCurrentUser() {
+        return currentUser;
     }
 
     public MutableLiveData<List<User>> getMutableAvailableUserList() {
@@ -84,7 +84,7 @@ public class LoginRepository {
             return null;
         });
         //第二件事，更新当前用户
-        LoginRepository.INSTANCE.getMutableCurrentUser().postValue(user);
+        LoginRepository.INSTANCE.getCurrentUser().postValue(user);
         //第三件事，从云端用户的运动记录
         if (user.id == 0L) {//如果是本地账户的话就不需要
             //第四件事，更新用户的运动记录

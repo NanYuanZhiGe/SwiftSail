@@ -1,6 +1,7 @@
 package com.nyzg.swiftsail.fragment;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;

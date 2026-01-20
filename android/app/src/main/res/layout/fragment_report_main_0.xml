@@ -23,14 +23,479 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <androidx.viewpager2.widget.ViewPager2
-                android:id="@+id/reportViewPager2"
-
+            <androidx.core.widget.NestedScrollView
+                android:id="@+id/reportMainView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:fillViewport="true"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent">
 
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="32dp"
+                    android:background="@color/white">
+
+                    <TextView
+                        android:id="@+id/reportText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="28dp"
+                        android:text="运动报表"
+                        android:textSize="18sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <com.nyzg.swiftsail.view.DateSelector
+                        android:id="@+id/date"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="今天"
+                        android:textSize="18sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/reportText" />
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/fourMainLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="32dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/date">
+
+                        <com.nyzg.swiftsail.view.ReportCircle
+                            android:id="@+id/sleep"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            app:circleBarWidth="20"
+                            app:circleSize="160dp"
+                            app:imageSize="70dp"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:textSize="12sp" />
+
+                        <com.nyzg.swiftsail.view.ReportCircle
+                            android:id="@+id/step"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            app:circleBk="@color/rainGreen"
+                            app:circleBk2="@color/heavyGreen"
+                            app:circleSize="90dp"
+                            app:imageBk="@drawable/step"
+                            app:imageSize="30dp"
+                            app:layout_constraintEnd_toStartOf="@id/heart"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/sleep"
+                            app:textSize="6sp" />
+
+                        <com.nyzg.swiftsail.view.ReportCircle
+                            android:id="@+id/heart"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:circleBk="@color/rainBlue"
+                            app:circleBk2="@color/heavyBlue"
+                            app:circleSize="90dp"
+                            app:imageBk="@drawable/heart"
+                            app:imageSize="30dp"
+                            app:layout_constraintEnd_toStartOf="@id/consumtion"
+                            app:layout_constraintStart_toEndOf="@id/step"
+                            app:layout_constraintTop_toTopOf="@id/step"
+                            app:textSize="6sp" />
+
+                        <com.nyzg.swiftsail.view.ReportCircle
+                            android:id="@+id/consumtion"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:circleBk="@color/rainGreen"
+                            app:circleBk2="@color/heavyGreen"
+                            app:circleSize="90dp"
+                            app:imageBk="@drawable/consumtion"
+                            app:imageSize="30dp"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toEndOf="@id/heart"
+                            app:layout_constraintTop_toTopOf="@id/step"
+                            app:textSize="6sp" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/outOfParentData"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/fourMainLayout">
+
+                        <TextView
+                            android:id="@+id/textRecovery"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="18dp"
+                            android:text="恢复"
+                            android:textSize="18sp"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:id="@+id/sleepLayout"
+                            android:layout_width="340dp"
+                            android:layout_height="110dp"
+                            android:layout_marginTop="12dp"
+                            android:background="@drawable/report_rect_circle_bk"
+                            android:padding="8dp"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/textRecovery">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="睡眠时长"
+                                android:textSize="14sp"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+                            <TextView
+                                android:id="@+id/sleepTime"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"
+                                android:text="无数据"
+                                android:textSize="28sp"
+                                app:layout_constraintBottom_toTopOf="@id/sleepScore"
+                                app:layout_constraintStart_toStartOf="parent" />
+
+                            <TextView
+                                android:id="@+id/sleepScore"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="睡眠得分：---"
+                                android:textSize="14sp"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintStart_toStartOf="parent" />
+
+                            <com.nyzg.swiftsail.view.ReportCircle
+                                android:id="@+id/sleepCircle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                app:circleBk="@color/rainPurple"
+                                app:circleBk2="@color/heavyPurple"
+                                app:circleSize="70dp"
+                                app:imageBk="@drawable/moon"
+                                app:imageSize="25dp"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:textSize="0sp" />
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+
+                        <TextView
+                            android:id="@+id/textExercise"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="18dp"
+                            android:layout_marginTop="16dp"
+                            android:text="活动"
+                            android:textSize="18sp"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/sleepLayout" />
+
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:id="@+id/stepLayout"
+                            android:layout_width="340dp"
+                            android:layout_height="110dp"
+                            android:layout_marginTop="12dp"
+                            android:background="@drawable/report_rect_circle_bk"
+                            android:padding="8dp"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/textExercise">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="步数"
+                                android:textSize="14sp"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+                            <TextView
+                                android:id="@+id/stepCount"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"
+                                android:text="无数据"
+                                android:textSize="28sp"
+                                app:layout_constraintBottom_toTopOf="@id/stepScore"
+                                app:layout_constraintStart_toStartOf="parent" />
+
+                            <TextView
+                                android:id="@+id/stepScore"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text=""
+                                android:textSize="14sp"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintStart_toStartOf="parent" />
+
+                            <com.nyzg.swiftsail.view.ReportCircle
+                                android:id="@+id/stepCircle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                app:circleBk="@color/rainGreen"
+                                app:circleBk2="@color/heavyGreen"
+                                app:circleSize="70dp"
+                                app:imageBk="@drawable/step"
+                                app:imageSize="25dp"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:textSize="0sp" />
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:id="@+id/distanceLayout"
+                            android:layout_width="340dp"
+                            android:layout_height="110dp"
+                            android:layout_marginTop="12dp"
+                            android:background="@drawable/report_rect_circle_bk"
+                            android:padding="8dp"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/stepLayout">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="运动距离"
+                                android:textSize="14sp"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+                            <TextView
+                                android:id="@+id/distanceCount"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"
+                                android:text="无数据"
+                                android:textSize="28sp"
+                                app:layout_constraintBottom_toTopOf="@id/distanceScore"
+                                app:layout_constraintStart_toStartOf="parent" />
+
+                            <TextView
+                                android:id="@+id/distanceScore"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text=""
+                                android:textSize="14sp"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintStart_toStartOf="parent" />
+
+                            <com.nyzg.swiftsail.view.ReportCircle
+                                android:id="@+id/distanceCircle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                app:circleBk="@color/rainGreen"
+                                app:circleBk2="@color/heavyGreen"
+                                app:circleSize="70dp"
+                                app:imageBk="@drawable/location"
+                                app:imageSize="25dp"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:textSize="0sp" />
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:id="@+id/fireLayout"
+                            android:layout_width="340dp"
+                            android:layout_height="110dp"
+                            android:layout_marginTop="12dp"
+                            android:background="@drawable/report_rect_circle_bk"
+                            android:padding="8dp"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/distanceLayout">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="消耗热量"
+                                android:textSize="14sp"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+                            <TextView
+                                android:id="@+id/fireCount"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"
+                                android:text="无数据"
+                                android:textSize="28sp"
+                                app:layout_constraintBottom_toTopOf="@id/fireScore"
+                                app:layout_constraintStart_toStartOf="parent" />
+
+                            <TextView
+                                android:id="@+id/fireScore"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text=""
+                                android:textSize="14sp"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintStart_toStartOf="parent" />
+
+                            <com.nyzg.swiftsail.view.ReportCircle
+                                android:id="@+id/fireCircle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                app:circleBk="@color/rainGreen"
+                                app:circleBk2="@color/heavyGreen"
+                                app:circleSize="70dp"
+                                app:imageBk="@drawable/consumtion"
+                                app:imageSize="25dp"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:textSize="0sp" />
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+
+                        <TextView
+                            android:id="@+id/textHealth"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="18dp"
+                            android:layout_marginTop="16dp"
+                            android:text="健康"
+                            android:textSize="18sp"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/fireLayout" />
+
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:id="@+id/heartLayout"
+                            android:layout_width="340dp"
+                            android:layout_height="110dp"
+                            android:layout_marginTop="12dp"
+                            android:background="@drawable/report_rect_circle_bk"
+                            android:padding="8dp"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/textHealth">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="心率"
+                                android:textSize="14sp"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+                            <TextView
+                                android:id="@+id/heartRange"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"
+                                android:text="无数据"
+                                android:textSize="28sp"
+                                app:layout_constraintBottom_toTopOf="@id/hearCalm"
+                                app:layout_constraintStart_toStartOf="parent" />
+
+                            <TextView
+                                android:id="@+id/hearCalm"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="静息心率：无数据"
+                                android:textSize="14sp"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintStart_toStartOf="parent" />
+
+                            <com.nyzg.swiftsail.view.ReportCircle
+                                android:id="@+id/heartCircle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                app:circleBk="@color/rainBlue"
+                                app:circleBk2="@color/heavyBlue"
+                                app:circleSize="70dp"
+                                app:imageBk="@drawable/heart"
+                                app:imageSize="25dp"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:textSize="0sp" />
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+
+                        <TextView
+                            android:id="@+id/textNutri"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="18dp"
+                            android:layout_marginTop="16dp"
+                            android:text="营养"
+                            android:textSize="18sp"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/heartLayout" />
+
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:id="@+id/foodLayout"
+                            android:layout_width="340dp"
+                            android:layout_height="110dp"
+                            android:layout_marginTop="12dp"
+                            android:background="@drawable/report_rect_circle_bk"
+                            android:padding="8dp"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/textNutri">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="饮食"
+                                android:textSize="14sp"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+                            <TextView
+                                android:id="@+id/foodCount"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"
+                                android:text="无数据"
+                                android:textSize="28sp"
+                                app:layout_constraintBottom_toTopOf="@id/foodScore"
+                                app:layout_constraintStart_toStartOf="parent" />
+
+                            <TextView
+                                android:id="@+id/foodScore"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text=""
+                                android:textSize="14sp"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintStart_toStartOf="parent" />
+
+                            <com.nyzg.swiftsail.view.ReportCircle
+                                android:id="@+id/foodCircle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                app:circleBk="@color/rainPink"
+                                app:circleBk2="@color/heavyPink"
+                                app:circleSize="70dp"
+                                app:imageBk="@drawable/nutrition"
+                                app:imageSize="25dp"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:textSize="0sp" />
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.core.widget.NestedScrollView>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -168,6 +633,7 @@
                     app:layout_constraintStart_toEndOf="@id/imageView"
                     app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
+
             <TextView
                 android:id="@+id/dataSync"
                 android:layout_width="wrap_content"
@@ -178,6 +644,7 @@
                 android:textSize="20sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/food" />
+
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/sync"
                 android:layout_width="140dp"

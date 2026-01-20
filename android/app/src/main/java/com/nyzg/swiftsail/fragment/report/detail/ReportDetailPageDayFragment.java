@@ -1,4 +1,4 @@
-package com.nyzg.swiftsail.fragment.report;
+package com.nyzg.swiftsail.fragment.report.detail;
 
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.AbsoluteSizeSpan;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,7 +31,6 @@ import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.nyzg.swiftsail.R;
-import com.nyzg.swiftsail.fragment.BackPressQuitFragment;
 import com.nyzg.swiftsail.obj.Pair;
 import com.nyzg.swiftsail.obj.SumType;
 import com.nyzg.swiftsail.view.RoundedBarChart;
@@ -41,7 +39,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -65,7 +62,7 @@ import java.util.function.Function;
  * 这个类对应的fragment被销毁后，会自动清理哈希表，避免内存泄漏
  * 这个逻辑在类里面是同步调用的，如果你需要进行异步操作，请注意
  */
-public class ReportDetailCommonFragment extends BackPressQuitFragment {
+public class ReportDetailPageDayFragment extends Fragment {
     /*
     我的代码保证下面：
     1. 每一个逻辑函数的key都是唯一的，所以插入和删除hash map的时候绝对不会发生冲突（逻辑上）
@@ -118,7 +115,7 @@ public class ReportDetailCommonFragment extends BackPressQuitFragment {
      * @return 返回这个类的一个新的实例
      */
     public static Fragment getInstance(int themeColor, Function<FuncParam, Pair<Long, List<BarEntry>>> logicFunc, String funcKey, SumType sumType, Function<Float, String> averageFormatter) {
-        Fragment fragment = new ReportDetailCommonFragment();
+        Fragment fragment = new ReportDetailPageDayFragment();
         Bundle bundle = new Bundle();
         bundle.putInt(THEME_COLOR_KEY, themeColor);
         bundle.putString(SYNC_FUNC_KEY, funcKey);
@@ -138,7 +135,11 @@ public class ReportDetailCommonFragment extends BackPressQuitFragment {
         Pair<SumType, Function<FuncParam, Pair<Long, List<BarEntry>>>> pair = FUNC_CACHE.get(funcKey);
         assert pair != null;
         sumType = pair.getA();
-        viewModel = new ViewModelProvider(this).get(MyViewModel.class);
+        if (getParentFragment() != null) {
+            viewModel = new ViewModelProvider(this.getParentFragment()).get(MyViewModel.class);
+        } else {
+            viewModel = new ViewModelProvider(this).get(MyViewModel.class);
+        }
         avgFormatter = FUNC_AVG_FORMATTER.get(funcKey);
     }
 
@@ -169,7 +170,15 @@ public class ReportDetailCommonFragment extends BackPressQuitFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         //执行第一次进入到这个Fragment的时候初始化函数
-        doLogicFunc(getFuncParam(LocalDate.now(), sumType));
+        View dateSelectorContainer = view.findViewById(R.id.dateSelectorContainer);
+        if (viewModel.selectedDate != null) {
+            setDateSelectorContainerText(dateSelectorContainer, viewModel.selectedDate);
+            doLogicFunc(getFuncParam(viewModel.selectedDate, sumType));
+        } else {
+            LocalDate now = LocalDate.now();
+            setDateSelectorContainerText(dateSelectorContainer, now);
+            doLogicFunc(getFuncParam(now, sumType));
+        }
         viewModel.funcResult.observe(getViewLifecycleOwner(), pair -> {
             /*
             entry中的数据如下：
@@ -208,7 +217,7 @@ public class ReportDetailCommonFragment extends BackPressQuitFragment {
         barDataSet.setColors(ContextCompat.getColor(requireContext(), themeColor));
         float barWidth = 0.2f;
         if (sumType == SumType.YEAR) {
-            barWidth = 0.1f;//12个月
+            barWidth = 0.15f;//12个月
         }
         BarData barData = new BarData(barDataSet);
         barData.setBarWidth(barWidth);
@@ -232,13 +241,12 @@ public class ReportDetailCommonFragment extends BackPressQuitFragment {
         xAxis.setDrawAxisLine(false);
         xAxis.setDrawGridLines(false);
         xAxis.setGranularity(1f);
-        Log.v("myTag",entries.toString());
 
         barChart.getAxisLeft().setEnabled(false);
         YAxis yAxis = barChart.getAxisRight();
         yAxis.setDrawAxisLine(false);
         yAxis.setDrawGridLines(false);
-        LimitLine limitLine=new LimitLine((float)entries.stream().mapToDouble(BarEntry::getY).average().orElse(0),"");
+        LimitLine limitLine = new LimitLine((float) entries.stream().mapToDouble(BarEntry::getY).average().orElse(0), "");
         limitLine.setLineWidth(3f);
         limitLine.setLineColor(themeColor);
         yAxis.addLimitLine(limitLine);
@@ -282,7 +290,8 @@ public class ReportDetailCommonFragment extends BackPressQuitFragment {
         //这里使用了viewModel，保证UI的更新安全
         FUNC_CACHE.computeIfPresent(funcKey, (k, v) -> {
             Function<FuncParam, Pair<Long, List<BarEntry>>> function = v.getB();
-            CompletableFuture.supplyAsync(() -> function.apply(funcParam), THREAD_POOL).thenAcceptAsync(barEntryResult -> viewModel.funcResult.setValue(barEntryResult), ContextCompat.getMainExecutor(requireContext()));
+            CompletableFuture.supplyAsync(() -> function.apply(funcParam), THREAD_POOL)
+                    .thenAcceptAsync(barEntryResult -> viewModel.funcResult.setValue(barEntryResult), ContextCompat.getMainExecutor(requireContext()));
             return null;
         });
     }
@@ -298,10 +307,26 @@ public class ReportDetailCommonFragment extends BackPressQuitFragment {
             DatePickerDialog dialog = new DatePickerDialog(requireContext(), (datePicker, year, month, day) -> {
                 //用户选好之后就后台执行统计逻辑
                 LocalDate selectedDate = LocalDate.of(year, month + 1, day);
+                setDateSelectorContainerText(view, selectedDate);
+                if (selectedDate.equals(localDate)) {
+                    return;
+                }
                 doLogicFunc(getFuncParam(selectedDate, sumType));
             }, localDate.getYear(), localDate.getMonthValue() - 1, localDate.getDayOfMonth());
             dialog.show();
         });
+    }
+
+    @SuppressLint("DefaultLocale")
+    private void setDateSelectorContainerText(View dateSelectorContainer, LocalDate date) {
+        TextView dateSelector = dateSelectorContainer.findViewById(R.id.dateSelector);
+        LocalDate now = LocalDate.now();
+        if (date.equals(now)) {
+            dateSelector.setText("今天");
+        } else if (date.getYear() == now.getYear()) {
+            dateSelector.setText(String.format("%d月%d日", date.getMonthValue(), date.getDayOfMonth()));
+        } else
+            dateSelector.setText(String.format("%d年%d月%d日", date.getYear(), date.getMonthValue(), date.getDayOfMonth()));
     }
 
     private FuncParam getFuncParam(LocalDate date, SumType sumType) {
@@ -385,7 +410,7 @@ public class ReportDetailCommonFragment extends BackPressQuitFragment {
         } else if (sumType == SumType.YEAR) {
             //需要计算第几月，注意逆序
             //相比于offset，增加了position个月
-            LocalDate startMonth = LocalDate.ofEpochDay(offset).plusMonths(position);
+            LocalDate startMonth = LocalDate.ofEpochDay(offset).plusMonths(index);
             //获取这个月的结束，如果这个月的结束大于当前时间，说明这个月没有过完，取当前时间
             long monthEnd = startMonth.with(TemporalAdjusters.lastDayOfMonth()).toEpochDay();
             long monthNow = LocalDate.now().toEpochDay();
@@ -402,6 +427,7 @@ public class ReportDetailCommonFragment extends BackPressQuitFragment {
 
     public static class MyViewModel extends ViewModel {
         public final MutableLiveData<Pair<Long, List<BarEntry>>> funcResult = new MutableLiveData<>();
+        public LocalDate selectedDate = null;
     }
 
     public static class FuncParam {
