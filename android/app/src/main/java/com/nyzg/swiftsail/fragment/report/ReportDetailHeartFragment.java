@@ -2,13 +2,12 @@ package com.nyzg.swiftsail.fragment.report;
 
 import androidx.fragment.app.Fragment;
 
+import com.nyzg.swiftsail.GlobalApplication;
 import com.nyzg.swiftsail.R;
+import com.nyzg.swiftsail.bean.SQLiteDB;
+import com.nyzg.swiftsail.dao.RecordTableBase;
 import com.nyzg.swiftsail.fragment.report.detail.ReportDetailCommDayFragment;
-import com.nyzg.swiftsail.fragment.report.detail.ReportDetailPageDayFragment;
-import com.nyzg.swiftsail.obj.Pair;
-import com.nyzg.swiftsail.obj.SumType;
 
-import java.util.ArrayList;
 import java.util.function.Function;
 
 public class ReportDetailHeartFragment extends ReportDetailBaseFragment {
@@ -17,64 +16,41 @@ public class ReportDetailHeartFragment extends ReportDetailBaseFragment {
     }
 
     private final static Function<Float, String> AVG_FORMATTER = aFloat -> ((int) (float) aFloat) + " bpm";
+    //取静息心率
+    private final static Function<Double, Float> POST_PROCESSOR = d -> (float) ((d / 1000000) % 1000);
+
+    @Override
+    protected Fragment getFirstPage() {
+        return ReportDetailCommDayFragment.getInstance(R.layout.fragment_report_detail_day_common);
+    }
+
+    @Override
+    protected Function<Float, String> getAvgFormatter() {
+        return AVG_FORMATTER;
+    }
+
+    @Override
+    protected String getPageType() {
+        return "Heart";
+    }
+
+    @Override
+    protected int getThemeColor() {
+        return R.color.heavyBlue;
+    }
+
+    @Override
+    protected RecordTableBase getRecordTable() {
+        return SQLiteDB.getDatabase(GlobalApplication.getAppContext()).recordHeartRateTable();
+    }
+
+    @Override
+    protected Function<Double, Float> getDataFormatter() {
+        return POST_PROCESSOR;
+    }
 
     @Override
     protected String getTitleText() {
         return "心率";
-    }
-
-    @Override
-    protected Function<Integer, Fragment> getFragmentSuppler() {
-        return position -> {
-            switch (position) {
-                case 0:
-                    return ReportDetailCommDayFragment.getInstance(R.layout.fragment_report_detail_day_common);
-                case 1://week
-                    return ReportDetailPageDayFragment.getInstance(
-                            R.color.heavyBlue,
-                            funcParam -> {
-                                return new Pair<>(0L, new ArrayList<>(0));
-                            },
-                            "ReportDetailHeartWeek",
-                            SumType.WEEK,
-                            AVG_FORMATTER
-                    );
-                case 2://month
-                    return ReportDetailPageDayFragment.getInstance(
-                            R.color.heavyBlue,
-                            funcParam -> {
-                                return new Pair<>(0L, new ArrayList<>(0));
-                            },
-                            "ReportDetailHeartMonth",
-                            SumType.MONTH,
-                            AVG_FORMATTER
-                    );
-                case 3://year
-                    return ReportDetailPageDayFragment.getInstance(
-                            R.color.heavyBlue,
-                            funcParam -> {
-                                return new Pair<>(0L, new ArrayList<>(0));
-                            },
-                            "ReportDetailHeartYear",
-                            SumType.YEAR,
-                            AVG_FORMATTER
-                    );
-                default://total
-                    return ReportDetailPageDayFragment.getInstance(
-                            R.color.heavyBlue,
-                            funcParam -> {
-                                return new Pair<>(0L, new ArrayList<>(0));
-                            },
-                            "ReportDetailHeartTotal",
-                            SumType.TOTAL,
-                            AVG_FORMATTER
-                    );
-            }
-        };
-    }
-
-    @Override
-    protected int getFragmentSize() {
-        return 5;
     }
 }

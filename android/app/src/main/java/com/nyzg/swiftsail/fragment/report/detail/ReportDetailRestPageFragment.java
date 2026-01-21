@@ -31,6 +31,7 @@ import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.nyzg.swiftsail.R;
+import com.nyzg.swiftsail.bean.DateUtils;
 import com.nyzg.swiftsail.obj.Pair;
 import com.nyzg.swiftsail.obj.SumType;
 import com.nyzg.swiftsail.view.RoundedBarChart;
@@ -62,7 +63,7 @@ import java.util.function.Function;
  * 这个类对应的fragment被销毁后，会自动清理哈希表，避免内存泄漏
  * 这个逻辑在类里面是同步调用的，如果你需要进行异步操作，请注意
  */
-public class ReportDetailPageDayFragment extends Fragment {
+public class ReportDetailRestPageFragment extends Fragment {
     /*
     我的代码保证下面：
     1. 每一个逻辑函数的key都是唯一的，所以插入和删除hash map的时候绝对不会发生冲突（逻辑上）
@@ -108,14 +109,14 @@ public class ReportDetailPageDayFragment extends Fragment {
      * 逻辑函数的返回值时有要求，必须按照时间顺序从左到右（从远到近）排列
      *
      * @param themeColor       柱状图的颜色
-     * @param logicFunc        逻辑函数，主要是从数据库中进行查找和统计和操作
+     * @param logicFunc        逻辑函数，主要是从数据库中进行查找和统计和操作这个函数内部异步执行
      * @param funcKey          逻辑函数在hashmap中的key
      * @param sumType          统计类型，比如按周统计、按月统计，按年统计，按所有数据统计
      * @param averageFormatter 对于每个BarEntry中的数据，怎么转化为字符串，比如9.20是9小时12分钟
      * @return 返回这个类的一个新的实例
      */
     public static Fragment getInstance(int themeColor, Function<FuncParam, Pair<Long, List<BarEntry>>> logicFunc, String funcKey, SumType sumType, Function<Float, String> averageFormatter) {
-        Fragment fragment = new ReportDetailPageDayFragment();
+        Fragment fragment = new ReportDetailRestPageFragment();
         Bundle bundle = new Bundle();
         bundle.putInt(THEME_COLOR_KEY, themeColor);
         bundle.putString(SYNC_FUNC_KEY, funcKey);
@@ -332,21 +333,26 @@ public class ReportDetailPageDayFragment extends Fragment {
     private FuncParam getFuncParam(LocalDate date, SumType sumType) {
         FuncParam funcParam = new FuncParam();
         //全部包含最后一天
+        LocalDate nowDate = LocalDate.now();
+        long now = nowDate.toEpochDay();
         if (sumType == SumType.WEEK) {//确定这一天的周开始和周结尾
             LocalDate startWeek = date.with(DayOfWeek.MONDAY);
             LocalDate endWeek = date.with(DayOfWeek.SUNDAY);
-            funcParam.fromDay = startWeek.toEpochDay();
-            funcParam.endDay = endWeek.toEpochDay();
+            funcParam.fromEpoch = startWeek.toEpochDay();
+            funcParam.endEpoch = Math.min(endWeek.toEpochDay(), now);
         } else if (sumType == SumType.MONTH) {//确定这一天的月开始和月结束
             LocalDate startOfMonth = date.withDayOfMonth(1);
             LocalDate endOfMonth = date.with(TemporalAdjusters.lastDayOfMonth());
-            funcParam.fromDay = startOfMonth.toEpochDay();
-            funcParam.endDay = endOfMonth.toEpochDay();
+            funcParam.fromEpoch = DateUtils.getEpochWeek(startOfMonth.toEpochDay());
+            funcParam.endEpoch = DateUtils.getEpochWeek(Math.min(endOfMonth.toEpochDay(), now));
         } else if (sumType == SumType.YEAR) {//确定这一天的年开始和年结束
             LocalDate startOfYear = date.withDayOfYear(1);
             LocalDate endOfYear = date.with(TemporalAdjusters.lastDayOfYear());
-            funcParam.fromDay = startOfYear.toEpochDay();
-            funcParam.endDay = endOfYear.toEpochDay();
+            if (endOfYear.isAfter(nowDate)) {
+                endOfYear = nowDate;
+            }
+            funcParam.fromEpoch = DateUtils.getEpochMonth(startOfYear);
+            funcParam.endEpoch = DateUtils.getEpochMonth(endOfYear);
         }
         funcParam.sumType = sumType;
         return funcParam;
@@ -431,8 +437,8 @@ public class ReportDetailPageDayFragment extends Fragment {
     }
 
     public static class FuncParam {
-        public long fromDay;//起始的日期，epoch day，包括在内
-        public long endDay;//结束的日期，epoch day，包括在内
+        public long fromEpoch;//起始的日期，epoch day，包括在内
+        public long endEpoch;//结束的日期，epoch day，包括在内
         public SumType sumType;//求平均的方式，天、周、月、年
     }
 }

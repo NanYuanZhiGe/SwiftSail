@@ -12,12 +12,21 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.github.mikephil.charting.data.BarEntry;
 import com.google.android.material.tabs.TabLayout;
 import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.adapter.ReportDetailAdapter;
 import com.nyzg.swiftsail.bean.UnsafeButFixProb;
+import com.nyzg.swiftsail.dao.RecordTableBase;
+import com.nyzg.swiftsail.dbobj.User;
 import com.nyzg.swiftsail.fragment.BackPressQuitFragment;
+import com.nyzg.swiftsail.fragment.report.detail.ReportDetailRestPageFragment;
+import com.nyzg.swiftsail.obj.Pair;
+import com.nyzg.swiftsail.obj.SumType;
+import com.nyzg.swiftsail.repository.LoginRepository;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 
 abstract public class ReportDetailBaseFragment extends BackPressQuitFragment {
@@ -86,9 +95,129 @@ abstract public class ReportDetailBaseFragment extends BackPressQuitFragment {
         });
     }
 
+    protected long getCurrentUserId() {
+        User user = LoginRepository.getInstance().currentUser.getValue();
+        if (user == null) {
+            return 0L;
+        }
+        return user.id;
+    }
+
+    protected Function<Integer, Fragment> getFragmentSuppler() {
+        RecordTableBase recordTableBase = getRecordTable();
+        return position -> {
+            switch (position) {
+                case 0:
+                    return getFirstPage();
+                case 1://week，week需要单独处理，因为week中的数据是每天的具体数据
+                    return ReportDetailRestPageFragment.getInstance(
+                            getThemeColor(),
+                            funcParam -> {
+                                long startDay = funcParam.fromEpoch;
+                                long endDay = funcParam.endEpoch;
+                                List<Long> queryList = recordTableBase.getDayRangeExposeValue(
+                                        getCurrentUserId(),
+                                        startDay,
+                                        endDay
+                                );
+                                List<BarEntry> result = new ArrayList<>(queryList.size());
+                                for (int i = 0; i < queryList.size(); ++i) {
+                                    Long temp = queryList.get(i);
+                                    if (temp == null) {
+                                        result.add(new BarEntry(i, .0f));
+                                        continue;
+                                    }
+                                    result.add(new BarEntry(i, temp / 1000f / 3600f));
+                                }
+                                return new Pair<>(startDay, result);
+                            },
+                            "ReportDetail" + getPageType() + "Week",
+                            SumType.WEEK,
+                            getAvgFormatter()
+                    );
+                case 2://month
+                    return ReportDetailRestPageFragment.getInstance(
+                            getThemeColor(),
+                            funcParam -> {
+                                long startWeek = funcParam.fromEpoch;
+                                long endWeek = funcParam.endEpoch;
+                                Pair<Long, List<Double>> pair = recordTableBase.getWeekRangeAndOffset(
+                                        getCurrentUserId(),
+                                        startWeek,
+                                        endWeek
+                                );
+                                return handleQueryData(pair);
+                            },
+                            "ReportDetail" + getPageType() + "Month",
+                            SumType.MONTH,
+                            getAvgFormatter()
+                    );
+                case 3://year
+                    return ReportDetailRestPageFragment.getInstance(
+                            getThemeColor(),
+                            funcParam -> {
+                                long startMonth = funcParam.fromEpoch;
+                                long endMonth = funcParam.endEpoch;
+                                Pair<Long, List<Double>> pair = recordTableBase.getMonthRangeAndOffset(
+                                        getCurrentUserId(),
+                                        startMonth,
+                                        endMonth
+                                );
+                                return handleQueryData(pair);
+                            },
+                            "ReportDetail" + getPageType() + "Year",
+                            SumType.YEAR,
+                            getAvgFormatter()
+                    );
+                default://total
+                    return ReportDetailRestPageFragment.getInstance(
+                            getThemeColor(),
+                            funcParam -> {
+                                Pair<Long, List<Double>> pair = recordTableBase.getYearRangeAndOffset(
+                                        getCurrentUserId()
+                                );
+                                return handleQueryData(pair);
+                            },
+                            "ReportDetail" + getPageType() + "Total",
+                            SumType.TOTAL,
+                            getAvgFormatter()
+                    );
+            }
+        };
+    }
+
+    protected Pair<Long, List<BarEntry>> handleQueryData(Pair<Long, List<Double>> pair) {
+        List<BarEntry> result = new ArrayList<>(pair.getB().size());
+        for (int i = 0; i < pair.getB().size(); ++i) {
+            Double temp = pair.getB().get(i);
+            if (temp == null) {
+                result.add(new BarEntry(i, .0f));
+                continue;
+            }
+            result.add(new BarEntry(i, getDataFormatter().apply(temp)));
+        }
+        if (pair.getA() == null) {//没有数据
+            return new Pair<>(0L, result);
+        }
+        return new Pair<>(pair.getA(), result);
+    }
+
+    protected int getFragmentSize() {
+        return 5;
+    }
+
+
+    protected abstract Fragment getFirstPage();
+
+    protected abstract Function<Float, String> getAvgFormatter();
+
+    protected abstract String getPageType();
+
+    protected abstract int getThemeColor();
+
+    protected abstract RecordTableBase getRecordTable();
+
+    protected abstract Function<Double, Float> getDataFormatter();
+
     protected abstract String getTitleText();
-
-    protected abstract Function<Integer, Fragment> getFragmentSuppler();
-
-    protected abstract int getFragmentSize();
 }

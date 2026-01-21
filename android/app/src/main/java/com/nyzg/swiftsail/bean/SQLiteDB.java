@@ -41,7 +41,7 @@ import com.nyzg.swiftsail.dbobj.Watch;
                 RecordSleep.class,
                 RecordStep.class
         },
-        version = 8,
+        version = 9,
         exportSchema = false)
 public abstract class SQLiteDB extends RoomDatabase {
     private volatile static SQLiteDB self;

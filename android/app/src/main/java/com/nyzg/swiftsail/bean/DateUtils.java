@@ -6,6 +6,7 @@ public class DateUtils {
     public static long getEpochWeek(long epochDay) {
         return 1L + (epochDay - 4L) / 7L;
     }
+
     public static long getEpochMonth(LocalDate date){
         return (date.getYear() - 1970) * 12L + (date.getMonthValue() - 1);
     }

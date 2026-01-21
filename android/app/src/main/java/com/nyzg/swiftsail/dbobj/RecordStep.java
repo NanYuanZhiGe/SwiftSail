@@ -8,7 +8,9 @@ import androidx.room.PrimaryKey;
         tableName = "recordStepTable",
         indices = {
                 @Index(value = {"userId", "epochDay", "exposeValue"}),
-                @Index(value = {"userId", "epochYear", "epochMonth", "epochWeek", "exposeValue"}),
+                @Index(value = {"userId", "epochWeek", "exposeValue"}),
+                @Index(value = {"userId", "epochMonth", "exposeValue"}),
+                @Index(value = {"userId", "epochYear", "exposeValue"}),
                 @Index(value = {"userId", "recordId"})
         }
 )

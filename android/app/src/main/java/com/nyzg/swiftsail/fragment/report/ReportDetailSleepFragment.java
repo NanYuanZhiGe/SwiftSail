@@ -1,15 +1,17 @@
 package com.nyzg.swiftsail.fragment.report;
 
 import android.annotation.SuppressLint;
+
 import androidx.fragment.app.Fragment;
 
 import com.github.mikephil.charting.data.BarEntry;
+import com.nyzg.swiftsail.GlobalApplication;
 import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.bean.DateUtils;
-import com.nyzg.swiftsail.fragment.report.detail.ReportDetailPageDayFragment;
+import com.nyzg.swiftsail.bean.SQLiteDB;
+import com.nyzg.swiftsail.dao.RecordTableBase;
 import com.nyzg.swiftsail.fragment.report.detail.ReportDetailSleepDayFragment;
 import com.nyzg.swiftsail.obj.Pair;
-import com.nyzg.swiftsail.obj.SumType;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -26,68 +28,47 @@ public class ReportDetailSleepFragment extends ReportDetailBaseFragment {
         return String.format("%d小时%d分钟", hour, minute);
     };
 
+    final private static Function<Double, Float> POST_PROCESSOR = d -> (float) (d / 1000.0 / 3600.0);
+
     public static Fragment getInstance() {
         return new ReportDetailSleepFragment();
     }
+
+    @Override
+    protected Fragment getFirstPage() {
+        return ReportDetailSleepDayFragment.getInstance(R.layout.fragment_report_detail_sleep_day);
+    }
+
+    @Override
+    protected Function<Float, String> getAvgFormatter() {
+        return AVG_FORMATTER;
+    }
+
+    @Override
+    protected String getPageType() {
+        return "Sleep";
+    }
+
+    @Override
+    protected int getThemeColor() {
+        return R.color.heavyPurple;
+    }
+
+    @Override
+    protected RecordTableBase getRecordTable() {
+        return SQLiteDB.getDatabase(GlobalApplication.getAppContext()).recordSleepTable();
+    }
+
+    @Override
+    protected Function<Double, Float> getDataFormatter() {
+        return POST_PROCESSOR;
+    }
+
     @Override
     protected String getTitleText() {
         return "睡觉";
     }
 
-    @Override
-    protected Function<Integer, Fragment> getFragmentSuppler() {
-        return position -> {
-            switch (position) {
-                case 0:
-                    return ReportDetailSleepDayFragment.getInstance(R.layout.fragment_report_detail_sleep_day);
-                case 1://week
-                    return ReportDetailPageDayFragment.getInstance(
-                            R.color.darkPurple,
-                            funcParam -> {
-                                return getTestDayData();
-                            },
-                            "ReportDetailSleepWeek",
-                            SumType.WEEK,
-                            AVG_FORMATTER
-                    );
-                case 2://month
-                    return ReportDetailPageDayFragment.getInstance(
-                            R.color.darkPurple,
-                            funcParam -> {
-                                return getTestWeekData();
-                            },
-                            "ReportDetailSleepMonth",
-                            SumType.MONTH,
-                            AVG_FORMATTER
-                    );
-                case 3://year
-                    return ReportDetailPageDayFragment.getInstance(
-                            R.color.darkPurple,
-                            funcParam -> {
-                                return getTestMonthData();
-                            },
-                            "ReportDetailSleepYear",
-                            SumType.YEAR,
-                            AVG_FORMATTER
-                    );
-                default://total
-                    return ReportDetailPageDayFragment.getInstance(
-                            R.color.darkPurple,
-                            funcParam -> {
-                                return getTestYearData();
-                            },
-                            "ReportDetailSleepTotal",
-                            SumType.TOTAL,
-                            AVG_FORMATTER
-                    );
-            }
-        };
-    }
-
-    @Override
-    protected int getFragmentSize() {
-        return 5;
-    }
 
     /**
      * 模拟从2025年2月1日到2025年2月28日的数据
@@ -126,7 +107,7 @@ public class ReportDetailSleepFragment extends ReportDetailBaseFragment {
             }
             count += 1;
             if (i == endDay) {//最后一天了，不论如何，都要添加到BarEntry中
-                entries.add(new BarEntry(entryCount,(sum / 1000f / 3600f / (float) count)));
+                entries.add(new BarEntry(entryCount, (sum / 1000f / 3600f / (float) count)));
             }
         }
         return new Pair<>(startDay, entries);
