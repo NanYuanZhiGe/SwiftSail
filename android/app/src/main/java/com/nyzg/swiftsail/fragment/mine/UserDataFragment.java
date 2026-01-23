@@ -12,16 +12,16 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.nyzg.swiftsail.R;
-import com.nyzg.swiftsail.fragment.BackPressQuitFragment;
+import com.nyzg.swiftsail.fragment.BackPressPopFragment;
 import com.nyzg.swiftsail.repository.LoginRepository;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-public class MainUserDataFragment extends BackPressQuitFragment {
+public class UserDataFragment extends BackPressPopFragment {
 
     public static Fragment getInstance() {
-        return new MainUserDataFragment();
+        return new UserDataFragment();
     }
 
     private final static DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy年MM月dd日");

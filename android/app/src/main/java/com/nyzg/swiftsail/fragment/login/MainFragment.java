@@ -1,7 +1,6 @@
 package com.nyzg.swiftsail.fragment.login;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,7 +32,7 @@ public class MainFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         View viewpager = view.findViewById(R.id.mainViewPager);
-        viewpager.post(() -> UnsafeButFixProb.innerFragmentHeight=viewpager.getHeight());
+        viewpager.post(() -> UnsafeButFixProb.innerFragmentHeight = viewpager.getHeight());
     }
 
     private void initNavManager(View father) {

@@ -36,7 +36,7 @@ import com.nyzg.swiftsail.dao.WatchTable;
 import com.nyzg.swiftsail.dbobj.User;
 import com.nyzg.swiftsail.dbobj.Watch;
 import com.nyzg.swiftsail.encrypt.Uuid;
-import com.nyzg.swiftsail.fragment.BackPressQuitFragment;
+import com.nyzg.swiftsail.fragment.InnerFragment;
 import com.nyzg.swiftsail.netobj.report.WatchAddReq;
 import com.nyzg.swiftsail.obj.SucceedOrNot;
 import com.nyzg.swiftsail.obj.Tuple;
@@ -50,7 +50,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class ReportAddDeviceFragment extends BackPressQuitFragment {
+public class ReportAddDeviceFragment extends InnerFragment {
 
     public static Fragment getInstance() {
         return new ReportAddDeviceFragment();
@@ -100,7 +100,7 @@ public class ReportAddDeviceFragment extends BackPressQuitFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View father = inflater.inflate(R.layout.fragment_report_add_device, container, false);
+        View father = inflater.inflate(R.layout.fragment_report_device_add, container, false);
         inputDeviceName = father.findViewById(R.id.inputDeviceName);
         inputDeviceType = father.findViewById(R.id.inputDeviceType);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
@@ -261,6 +261,7 @@ public class ReportAddDeviceFragment extends BackPressQuitFragment {
         watch.type = deviceType;
         watch.name = deviceName;
         watch.authorizeHeader = EncryptThreadSafe.transferStringToBase64EncodedString(clientId + ":" + clientSecret);
+        watch.accessible=true;
         return watch;
     }
 

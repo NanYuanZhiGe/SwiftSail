@@ -19,4 +19,5 @@ public class Watch {
     public String clientId;//手表的client_id
     public String type;//手表类型，比如fitbit
     public String authorizeHeader;//授权的头部信息，base64编码，client_id:client_secret
+    public boolean accessible;
 }

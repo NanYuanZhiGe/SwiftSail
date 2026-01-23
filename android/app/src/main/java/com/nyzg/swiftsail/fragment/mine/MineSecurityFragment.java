@@ -32,7 +32,7 @@ import com.nyzg.swiftsail.bean.JsonSerializer;
 import com.nyzg.swiftsail.dbobj.User;
 import com.nyzg.swiftsail.encrypt.Biometric;
 import com.nyzg.swiftsail.encrypt.Sha256;
-import com.nyzg.swiftsail.fragment.BackPressQuitFragment;
+import com.nyzg.swiftsail.fragment.BackPressPopFragment;
 import com.nyzg.swiftsail.fragment.login.KeyLoginFragment;
 import com.nyzg.swiftsail.netobj.login.BiometricAddReq;
 import com.nyzg.swiftsail.netobj.login.BiometricAddResp;
@@ -47,7 +47,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class MineSecurityFragment extends BackPressQuitFragment {
+public class MineSecurityFragment extends BackPressPopFragment {
     public static Fragment getInstance() {
         return new MineSecurityFragment();
     }

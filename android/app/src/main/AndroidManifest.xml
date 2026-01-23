@@ -30,6 +30,7 @@
         android:theme="@style/Theme.SwiftSail.Fullscreen"
         tools:targetApi="31">
         <activity
+            android:screenOrientation="portrait"
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
@@ -38,7 +39,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".RecordActivity" />
+        <activity
+            android:screenOrientation="portrait"
+            android:name=".RecordActivity" />
 
         <service
             android:name=".service.RecordRecordService"

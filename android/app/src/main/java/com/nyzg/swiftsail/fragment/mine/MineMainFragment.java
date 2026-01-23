@@ -58,7 +58,7 @@ public class MineMainFragment extends Fragment {
         requireActivity()
                 .getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.mineFragment, MainUserDataFragment.getInstance())
+                .replace(R.id.mineFragment, UserDataFragment.getInstance())
                 .addToBackStack(null)
                 .commit();
     }

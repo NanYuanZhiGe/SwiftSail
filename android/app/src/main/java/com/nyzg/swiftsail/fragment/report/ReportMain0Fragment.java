@@ -12,9 +12,9 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.nyzg.swiftsail.MainActivity;
 import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.fragment.report.pull.ReportAddDeviceFragment;
+import com.nyzg.swiftsail.fragment.report.pull.ReportMangeDeviceFragment;
 import com.nyzg.swiftsail.repository.ReportRepository;
 import com.nyzg.swiftsail.view.DateSelector;
 
@@ -95,14 +95,19 @@ public class ReportMain0Fragment extends Fragment {
     }
 
     private void onAddDeviceClicked(View v) {
-        MainActivity.addFragmentToStackTop(
-                requireActivity().getSupportFragmentManager(),
-                ReportAddDeviceFragment.getInstance()
-        );
+        requireActivity().getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.reportFragment, ReportAddDeviceFragment.getInstance())
+                .addToBackStack(null)
+                .commit();
     }
 
     private void onManageDeviceClicked(View v) {
-
+        requireActivity().getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.reportFragment, ReportMangeDeviceFragment.getInstance())
+                .addToBackStack(null)
+                .commit();
     }
 
     private void onFoodClicked(View v) {

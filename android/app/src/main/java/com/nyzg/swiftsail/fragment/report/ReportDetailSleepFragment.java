@@ -5,11 +5,9 @@ import android.annotation.SuppressLint;
 import androidx.fragment.app.Fragment;
 
 import com.github.mikephil.charting.data.BarEntry;
-import com.nyzg.swiftsail.GlobalApplication;
 import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.bean.DateUtils;
-import com.nyzg.swiftsail.bean.SQLiteDB;
-import com.nyzg.swiftsail.dao.RecordTableBase;
+import com.nyzg.swiftsail.bean.RecordType;
 import com.nyzg.swiftsail.fragment.report.detail.ReportDetailSleepDayFragment;
 import com.nyzg.swiftsail.obj.Pair;
 
@@ -46,17 +44,12 @@ public class ReportDetailSleepFragment extends ReportDetailBaseFragment {
 
     @Override
     protected String getPageType() {
-        return "Sleep";
+        return RecordType.SLEEP;
     }
 
     @Override
     protected int getThemeColor() {
         return R.color.heavyPurple;
-    }
-
-    @Override
-    protected RecordTableBase getRecordTable() {
-        return SQLiteDB.getDatabase(GlobalApplication.getAppContext()).recordSleepTable();
     }
 
     @Override

@@ -22,6 +22,7 @@ import com.nyzg.swiftsail.bean.GlobalToast;
 import com.nyzg.swiftsail.bean.JsonSerializer;
 import com.nyzg.swiftsail.dbobj.User;
 import com.nyzg.swiftsail.encrypt.Sha256;
+import com.nyzg.swiftsail.fragment.BackPressPopFragment;
 import com.nyzg.swiftsail.listener.LoginWaitingListener;
 import com.nyzg.swiftsail.netobj.login.PasswordVerifyReq;
 import com.nyzg.swiftsail.repository.LoginRepository;
@@ -32,7 +33,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 
-public class PasswordLoginFragment extends Fragment {
+public class PasswordLoginFragment extends BackPressPopFragment {
     User user;
     private volatile boolean quitForbidden = false;
 

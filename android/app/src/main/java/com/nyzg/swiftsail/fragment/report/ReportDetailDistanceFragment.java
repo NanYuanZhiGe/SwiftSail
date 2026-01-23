@@ -4,10 +4,8 @@ import android.annotation.SuppressLint;
 
 import androidx.fragment.app.Fragment;
 
-import com.nyzg.swiftsail.GlobalApplication;
 import com.nyzg.swiftsail.R;
-import com.nyzg.swiftsail.bean.SQLiteDB;
-import com.nyzg.swiftsail.dao.RecordTableBase;
+import com.nyzg.swiftsail.bean.RecordType;
 import com.nyzg.swiftsail.fragment.report.detail.ReportDetailCommDayFragment;
 
 import java.util.function.Function;
@@ -18,7 +16,7 @@ public class ReportDetailDistanceFragment extends ReportDetailBaseFragment {
     }
 
     @SuppressLint("DefaultLocale")
-    private final static Function<Float, String> AVG_FORMATTER = aFloat -> String.format("%.2f公里", aFloat);
+    private final static Function<Float, String> AVG_FORMATTER = aFloat -> String.format("%.2f公里", aFloat/1000f);
     private final static Function<Double, Float> POST_PROCESSOR = d -> (float) (double) d;
 
     @Override
@@ -33,17 +31,12 @@ public class ReportDetailDistanceFragment extends ReportDetailBaseFragment {
 
     @Override
     protected String getPageType() {
-        return "Distance";
+        return RecordType.DISTANCE;
     }
 
     @Override
     protected int getThemeColor() {
         return R.color.heavyGreen;
-    }
-
-    @Override
-    protected RecordTableBase getRecordTable() {
-        return SQLiteDB.getDatabase(GlobalApplication.getAppContext()).recordDistanceTable();
     }
 
     @Override

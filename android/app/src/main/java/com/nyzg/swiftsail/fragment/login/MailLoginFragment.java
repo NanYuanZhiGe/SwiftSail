@@ -21,6 +21,7 @@ import com.nyzg.swiftsail.bean.GlobalInstance;
 import com.nyzg.swiftsail.bean.GlobalToast;
 import com.nyzg.swiftsail.bean.JsonSerializer;
 import com.nyzg.swiftsail.dbobj.User;
+import com.nyzg.swiftsail.fragment.BackPressPopFragment;
 import com.nyzg.swiftsail.listener.LoginWaitingListener;
 import com.nyzg.swiftsail.listener.LoginCountingListener;
 import com.nyzg.swiftsail.netobj.login.MailCodeVerifyReq;
@@ -34,7 +35,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 
 
-public class MailLoginFragment extends Fragment {
+public class MailLoginFragment extends BackPressPopFragment {
     private String email;
     private static final String EMAIL_KEY = "user_email";
     private volatile boolean quitForbidden = false;

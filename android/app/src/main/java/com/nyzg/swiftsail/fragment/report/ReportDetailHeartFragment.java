@@ -2,10 +2,8 @@ package com.nyzg.swiftsail.fragment.report;
 
 import androidx.fragment.app.Fragment;
 
-import com.nyzg.swiftsail.GlobalApplication;
 import com.nyzg.swiftsail.R;
-import com.nyzg.swiftsail.bean.SQLiteDB;
-import com.nyzg.swiftsail.dao.RecordTableBase;
+import com.nyzg.swiftsail.bean.RecordType;
 import com.nyzg.swiftsail.fragment.report.detail.ReportDetailCommDayFragment;
 
 import java.util.function.Function;
@@ -31,19 +29,13 @@ public class ReportDetailHeartFragment extends ReportDetailBaseFragment {
 
     @Override
     protected String getPageType() {
-        return "Heart";
+        return RecordType.HEART;
     }
 
     @Override
     protected int getThemeColor() {
         return R.color.heavyBlue;
     }
-
-    @Override
-    protected RecordTableBase getRecordTable() {
-        return SQLiteDB.getDatabase(GlobalApplication.getAppContext()).recordHeartRateTable();
-    }
-
     @Override
     protected Function<Double, Float> getDataFormatter() {
         return POST_PROCESSOR;

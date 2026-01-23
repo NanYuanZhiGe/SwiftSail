@@ -19,9 +19,10 @@ import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.bean.GlobalToast;
 import com.nyzg.swiftsail.bean.MatchUtils;
 import com.nyzg.swiftsail.dbobj.User;
+import com.nyzg.swiftsail.fragment.BackPressPopFragment;
 import com.nyzg.swiftsail.repository.LoginRepository;
 
-public class UserNotInListFragment extends Fragment {
+public class UserNotInListFragment extends BackPressPopFragment {
     static public Fragment newInstance() {
         return new UserNotInListFragment();
     }

@@ -190,7 +190,7 @@ public class ReportDetailRestPageFragment extends Fragment {
              */
             List<BarEntry> entries = pair.getB();
             long offset = pair.getA();
-            notifyTextViewChange((float) entries.stream().mapToDouble(BarEntry::getY).average().orElse(0L));
+            notifyTextViewChange((float) entries.stream().mapToDouble(BarEntry::getY).average().orElse(0));
             notifyRecyclerViewDatasetChange(offset, entries);
             notifyBarChartDatasetChange(offset, entries);
         });

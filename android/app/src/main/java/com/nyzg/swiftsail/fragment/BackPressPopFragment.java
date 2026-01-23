@@ -1,13 +1,12 @@
 package com.nyzg.swiftsail.fragment;
 
 import android.os.Bundle;
-import android.util.Log;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-abstract public class BackPressQuitFragment extends Fragment {
+abstract public class BackPressPopFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -18,6 +17,6 @@ abstract public class BackPressQuitFragment extends Fragment {
                 requireActivity().getSupportFragmentManager().popBackStack();
             }
         };
-        requireActivity().getOnBackPressedDispatcher().addCallback(this, callback);
+        requireActivity().getOnBackPressedDispatcher().addCallback(requireActivity(), callback);
     }
 }

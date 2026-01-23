@@ -14,12 +14,14 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.github.mikephil.charting.data.BarEntry;
 import com.google.android.material.tabs.TabLayout;
+import com.nyzg.swiftsail.GlobalApplication;
 import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.adapter.ReportDetailAdapter;
+import com.nyzg.swiftsail.bean.SQLiteDB;
 import com.nyzg.swiftsail.bean.UnsafeButFixProb;
-import com.nyzg.swiftsail.dao.RecordTableBase;
+import com.nyzg.swiftsail.dao.RecordTable;
 import com.nyzg.swiftsail.dbobj.User;
-import com.nyzg.swiftsail.fragment.BackPressQuitFragment;
+import com.nyzg.swiftsail.fragment.BackPressPopFragment;
 import com.nyzg.swiftsail.fragment.report.detail.ReportDetailRestPageFragment;
 import com.nyzg.swiftsail.obj.Pair;
 import com.nyzg.swiftsail.obj.SumType;
@@ -29,7 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-abstract public class ReportDetailBaseFragment extends BackPressQuitFragment {
+abstract public class ReportDetailBaseFragment extends BackPressPopFragment {
 
     @Override
     final public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -104,19 +106,20 @@ abstract public class ReportDetailBaseFragment extends BackPressQuitFragment {
     }
 
     protected Function<Integer, Fragment> getFragmentSuppler() {
-        RecordTableBase recordTableBase = getRecordTable();
+        RecordTable recordTable = SQLiteDB.getDatabase(GlobalApplication.getAppContext()).recordTable();
         return position -> {
             switch (position) {
                 case 0:
                     return getFirstPage();
-                case 1://week，week需要单独处理，因为week中的数据是每天的具体数据
+                case 1://week,week的逻辑需要单独处理，因为它是获取每天的数据，没有average
                     return ReportDetailRestPageFragment.getInstance(
                             getThemeColor(),
                             funcParam -> {
                                 long startDay = funcParam.fromEpoch;
                                 long endDay = funcParam.endEpoch;
-                                List<Long> queryList = recordTableBase.getDayRangeExposeValue(
+                                List<Long> queryList = recordTable.getDayRangeExposeValue(
                                         getCurrentUserId(),
+                                        getPageType(),
                                         startDay,
                                         endDay
                                 );
@@ -127,7 +130,7 @@ abstract public class ReportDetailBaseFragment extends BackPressQuitFragment {
                                         result.add(new BarEntry(i, .0f));
                                         continue;
                                     }
-                                    result.add(new BarEntry(i, temp / 1000f / 3600f));
+                                    result.add(new BarEntry(i, getDataFormatter().apply(Double.valueOf(temp))));
                                 }
                                 return new Pair<>(startDay, result);
                             },
@@ -141,8 +144,9 @@ abstract public class ReportDetailBaseFragment extends BackPressQuitFragment {
                             funcParam -> {
                                 long startWeek = funcParam.fromEpoch;
                                 long endWeek = funcParam.endEpoch;
-                                Pair<Long, List<Double>> pair = recordTableBase.getWeekRangeAndOffset(
+                                Pair<Long, List<Double>> pair = recordTable.getWeekRangeAndOffset(
                                         getCurrentUserId(),
+                                        getPageType(),
                                         startWeek,
                                         endWeek
                                 );
@@ -158,8 +162,9 @@ abstract public class ReportDetailBaseFragment extends BackPressQuitFragment {
                             funcParam -> {
                                 long startMonth = funcParam.fromEpoch;
                                 long endMonth = funcParam.endEpoch;
-                                Pair<Long, List<Double>> pair = recordTableBase.getMonthRangeAndOffset(
+                                Pair<Long, List<Double>> pair = recordTable.getMonthRangeAndOffset(
                                         getCurrentUserId(),
+                                        getPageType(),
                                         startMonth,
                                         endMonth
                                 );
@@ -173,8 +178,9 @@ abstract public class ReportDetailBaseFragment extends BackPressQuitFragment {
                     return ReportDetailRestPageFragment.getInstance(
                             getThemeColor(),
                             funcParam -> {
-                                Pair<Long, List<Double>> pair = recordTableBase.getYearRangeAndOffset(
-                                        getCurrentUserId()
+                                Pair<Long, List<Double>> pair = recordTable.getYearRangeAndOffset(
+                                        getCurrentUserId(),
+                                        getPageType()
                                 );
                                 return handleQueryData(pair);
                             },
@@ -206,7 +212,6 @@ abstract public class ReportDetailBaseFragment extends BackPressQuitFragment {
         return 5;
     }
 
-
     protected abstract Fragment getFirstPage();
 
     protected abstract Function<Float, String> getAvgFormatter();
@@ -214,8 +219,6 @@ abstract public class ReportDetailBaseFragment extends BackPressQuitFragment {
     protected abstract String getPageType();
 
     protected abstract int getThemeColor();
-
-    protected abstract RecordTableBase getRecordTable();
 
     protected abstract Function<Double, Float> getDataFormatter();
 

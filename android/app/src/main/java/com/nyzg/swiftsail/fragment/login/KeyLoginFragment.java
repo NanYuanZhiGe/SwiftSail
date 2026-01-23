@@ -25,6 +25,7 @@ import com.nyzg.swiftsail.bean.GlobalToast;
 import com.nyzg.swiftsail.bean.JsonSerializer;
 import com.nyzg.swiftsail.dbobj.User;
 import com.nyzg.swiftsail.encrypt.Biometric;
+import com.nyzg.swiftsail.fragment.BackPressPopFragment;
 import com.nyzg.swiftsail.netobj.login.BiometricUser;
 import com.nyzg.swiftsail.netobj.login.KeyVerifyReq;
 import com.nyzg.swiftsail.repository.LoginRepository;
@@ -40,7 +41,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class KeyLoginFragment extends Fragment {
+public class KeyLoginFragment extends BackPressPopFragment {
     String email;
     private volatile boolean quitForbidden = false;
     private BiometricPrompt prompt;
