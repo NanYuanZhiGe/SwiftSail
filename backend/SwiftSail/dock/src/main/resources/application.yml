@@ -1,5 +1,0 @@
-server:
-  port: 8080
-  ssl:
-    certificate: "/etc/letsencrypt/archive/nyzghencute.top/cert1.pem"
-    certificate-private-key: "/etc/letsencrypt/archive/nyzghencute.top/privkey1.pem"
