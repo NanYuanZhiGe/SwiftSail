@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nyzg.user.mapper.TrustDeviceTableMapper">
+
+    <select id="isUserDeviceInTable">
+        SELECT COUNT(*)
+        FROM `trustDeviceTable`
+        WHERE `email` = #{email}
+          AND `deviceId` = #{deviceId};
+    </select>
+    <insert id="insertDeviceInTable" parameterType="com.nyzg.user.dbobj.TrustDevice">
+        INSERT IGNORE INTO `trustDeviceTable`
+        VALUES (null, #{email}, #{deviceName}, #{deviceId});
+    </insert>
+</mapper>

@@ -14,6 +14,7 @@
         <module>user</module>
         <module>dock</module>
         <module>common</module>
+        <module>gateway</module>
     </modules>
 
     <properties>
@@ -43,10 +44,11 @@
 
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-starter-bootstrap</artifactId>
-                <version>4.2.1</version>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>2022.0.0</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
-
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
@@ -70,11 +72,10 @@
                 <artifactId>mybatis-spring-boot-starter</artifactId>
                 <version>3.0.3</version>
             </dependency>
-
             <dependency>
-                <groupId>com.tencentcloudapi</groupId>
-                <artifactId>tencentcloud-sdk-java-sms</artifactId>
-                <version>3.1.1357</version>
+                <groupId>com.nyzg</groupId>
+                <artifactId>common</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

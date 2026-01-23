@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nyzg.dock.mapper.RecordTableMapper">
+    <insert id="insertRecordIntoTable">
+        INSERT INTO `recordTable`
+        VALUES (null,
+                #{userId},
+                #{recordId},
+                #{type},
+                #{exposeValue},
+                #{detailValue},
+                #{epochDay},
+                #{epochWeek},
+                #{epochMonth},
+                #{epochYear});
+    </insert>
+</mapper>

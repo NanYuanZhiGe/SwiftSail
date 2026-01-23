@@ -14,5 +14,4 @@ public class JWTConf {
     public JWTConf(@Value("${jwt.hs-key:hello-world}") String strHsKey) {
         this.hsKey = strHsKey.getBytes(StandardCharsets.UTF_8);
     }
-
 }

@@ -1,7 +1,7 @@
 package com.nyzg.user.service;
 
 import com.nyzg.user.conf.SmtpConf;
-import com.nyzg.user.netobj.HttpResp;
+import com.nyzg.common.netobj.HttpResp;
 import jakarta.annotation.Resource;
 import jakarta.mail.internet.MimeMessage;
 import org.redisson.api.RBucket;
@@ -13,7 +13,6 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.random.RandomGenerator;

@@ -1,0 +1,39 @@
+server:
+  port: 5050
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+      routes:
+        - id: swift-sail-user-service
+          uri: lb://swift-sail-user-service
+          predicates:
+            - Path=/api/user/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 100   # 每秒填充令牌数
+                redis-rate-limiter.burstCapacity: 200   # 令牌桶最大容量
+                key-resolver: "#{@remoteAddrKeyResolver}" # 使用 SpEL 引用 Bean
+        - id: swift-sail-dock-service
+          uri: lb://swift-sail-dock-service
+          predicates:
+            - Path=/api/dock/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 100   # 每秒填充令牌数
+                redis-rate-limiter.burstCapacity: 200   # 令牌桶最大容量
+                key-resolver: "#{@remoteAddrKeyResolver}" # 使用 SpEL 引用 Bean
+  data:
+    redis:
+      host: 106.52.80.239
+      port: 6379
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+      password: I_have_a_cute_sister_called_duchess

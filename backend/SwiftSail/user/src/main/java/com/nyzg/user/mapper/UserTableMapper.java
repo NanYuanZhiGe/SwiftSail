@@ -11,14 +11,11 @@ public interface UserTableMapper {
     int isEmailExists(String email);
     int isNickNameExists(String nickName);
 
-    int isHaveEmailAndSecretWord(@Param("email") String email, @Param("secretWord") byte[] secretWord);
-
-    int isHaveEmailAndSecretKey(String mail);
+    List<User> isHaveEmailAndSecretWord(@Param("email") String email, @Param("secretWord") byte[] secretWord);
 
     List<User> getUserByEmail(@Param("email")String email);
 
     Long getUserIdByEmail(@Param("email")String email);
 
-    List<User> getSecretPubKey(String mail);
     void insertUserIfNotExists(User user);
 }

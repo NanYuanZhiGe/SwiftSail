@@ -13,7 +13,7 @@
         WHERE nickName = #{nickName};
     </select>
     <select id="getUserByEmail">
-        SELECT id, nickName, email
+        SELECT id, nickName, email,createTime
         FROM userTable
         WHERE email = #{email};
     </select>
@@ -23,7 +23,7 @@
         WHERE email = #{email};
     </select>
     <select id="isHaveEmailAndSecretWord">
-        SELECT COUNT(*)
+        SELECT id,nickName,email,createTime
         FROM userTable
         WHERE email = #{email}
           AND secretWord = #{secretWord};

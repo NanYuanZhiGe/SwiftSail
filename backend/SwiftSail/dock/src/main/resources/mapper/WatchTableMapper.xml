@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nyzg.dock.mapper.WatchTableMapper">
+    <insert id="insertWatch" parameterType="com.nyzg.dock.dbobj.Watch">
+        INSERT IGNORE INTO `watchTable`(`name`,
+                                        `watchType`,
+                                        `authorizeHeader`,
+                                        `codeVerifier`,
+                                        `clientId`,
+                                        `userId`)
+        VALUES (#{name},
+                #{watchType},
+                #{authorizeHeader},
+                #{codeVerifier},
+                #{clientId},
+                #{userId})
+    </insert>
+
+    <update id="updateWatchToken">
+        UPDATE `watchTable`
+        SET `clientId`=#{clientId},
+            `accessToken`=#{accessToken},
+            `refreshToken`=#{refreshToken},
+            `watchUserId`=#{watchUserId},
+            `expireTime`=#{expireTime}
+        WHERE `clientId` = clientId;
+    </update>
+
+    <select id="selectWatchByClientId">
+        SELECT *
+        FROM `watchTable`
+        WHERE `clientId` = #{clientId};
+    </select>
+
+    <select id="checkExpireTime">
+        SELECT `expireTime`, `authorizeHeader`
+        FROM `watchTable`
+        WHERE `clientId` = #{clientId};
+    </select>
+    <update id="updateRefreshToken">
+        UPDATE `watchTable`
+        SET `accessToken`=#{accessToken},
+            `refreshToken`=#{refreshToken},
+            `expireTime`=#{expireTime}
+        WHERE `clientId` = #{clientId};
+    </update>
+    <update id="markWatchExpire">
+        UPDATE `watchTable`
+        SET `expireTime`=0
+        WHERE `clientId` = #{clientId};
+    </update>
+</mapper>
