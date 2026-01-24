@@ -44,7 +44,7 @@ public class PasswordLoginFragment extends BackPressPopFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.user = LoginRepository.getInstance().getOnLoginUser().getValue();
+        this.user = LoginRepository.getInstance().onLoginUser.getValue();
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {

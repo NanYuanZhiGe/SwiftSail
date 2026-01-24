@@ -1,5 +1,7 @@
 package com.nyzg.swiftsail.bean;
 
+import androidx.annotation.NonNull;
+
 import com.nyzg.swiftsail.repository.LoginRepository;
 
 import java.net.URL;
@@ -25,7 +27,7 @@ public class NetWorkBuilder {
                 .build();
     }
 
-    public static Response doChunkRequest(Request request) {
+    public static Response doChunkRequest(@NonNull Request request) {
         try {
             OkHttpClient client = GlobalInstance.OK_HTTP_NO_PROXY;
             return client.newCall(request).execute();

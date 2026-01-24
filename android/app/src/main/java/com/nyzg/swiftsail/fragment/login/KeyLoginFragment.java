@@ -56,8 +56,8 @@ public class KeyLoginFragment extends BackPressPopFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (LoginRepository.getInstance().getOnLoginUser().getValue() != null) {
-            this.email = LoginRepository.getInstance().getOnLoginUser().getValue().email;
+        if (LoginRepository.getInstance().onLoginUser.getValue() != null) {
+            this.email = LoginRepository.getInstance().onLoginUser.getValue().email;
         }
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override

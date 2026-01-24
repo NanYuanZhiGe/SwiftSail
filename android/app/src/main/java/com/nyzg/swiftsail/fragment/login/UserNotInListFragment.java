@@ -52,7 +52,7 @@ public class UserNotInListFragment extends BackPressPopFragment {
                     }
                     User user = new User();
                     user.email = str;
-                    LoginRepository.getInstance().getOnLoginUser().setValue(user);
+                    LoginRepository.getInstance().onLoginUser.setValue(user);
                     MainActivity.addFragmentToStackTop(
                             requireActivity().getSupportFragmentManager(),
                             LoginTypeSelectFragment.newInstance()

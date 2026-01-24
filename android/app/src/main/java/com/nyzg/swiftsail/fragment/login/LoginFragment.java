@@ -97,7 +97,7 @@ public class LoginFragment extends Fragment {
         showLoginPage(father, null);//先传一个空的，让它显示注册界面
         //观察userList，如果查询到了用户数据，就更新为登录界面
         LoginRepository.getInstance()
-                .getMutableAvailableUserList()
+                .availableUserList
                 .observe(
                         getViewLifecycleOwner(),
                         userList -> showLoginPage(father, userList)
@@ -366,7 +366,7 @@ public class LoginFragment extends Fragment {
             nickName.setText(user.nickName);
             email.setText(user.email);
             itemView.setOnClickListener(view -> {
-                LoginRepository.getInstance().getOnLoginUser().setValue(user);
+                LoginRepository.getInstance().onLoginUser.setValue(user);
                 MainActivity.addFragmentToStackTop(
                         requireActivity().getSupportFragmentManager(),
                         LoginTypeSelectFragment.newInstance()

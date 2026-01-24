@@ -1,5 +1,6 @@
 package com.nyzg.swiftsail.bean;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentManager;
 
 import com.nyzg.swiftsail.MainActivity;
@@ -52,7 +53,12 @@ public class NetWorkHandler {
      * @param clz             content的类型，用于Json的反序列化
      * @param <T>             content的类型
      */
-    public static <T> void handleNetRespAfterLogin(FragmentManager fragmentManager, Response response, Runnable onFail, Consumer<T> onSuccess, Class<T> clz) {
+    public static <T> void handleNetRespAfterLogin(
+            FragmentManager fragmentManager,
+            Response response,
+            @NonNull Runnable onFail,
+            @NonNull Consumer<T> onSuccess,
+            @NonNull Class<T> clz) {
         if (response == null) {
             GlobalToast.SERVER_NOT_RESPONSE.run();
             onFail.run();
@@ -94,13 +100,13 @@ public class NetWorkHandler {
         try {
             HttpResp httpResp = JsonSerializer.deSerialize(response.body() != null ? response.body().string() : null, HttpResp.class);
             if (httpResp == null || !httpResp.isSuccess()) {
-                GlobalToast.RESPONSE_NOT_SUCCESS.accept(httpResp == null ? statusCode+"" : httpResp.getMessage());
+                GlobalToast.RESPONSE_NOT_SUCCESS.accept(httpResp == null ? statusCode + "" : httpResp.getMessage());
                 onFail.run();
                 response.close();
                 return;
             }
             content = JsonSerializer.mapToObject(httpResp.getContent(), clz).orElse(null);
-            if (content == null&&clz!= Void.class) {
+            if (content == null && clz != Void.class) {
                 GlobalToast.CONTENT_UNACCEPTABLE.run();
                 onFail.run();
                 response.close();

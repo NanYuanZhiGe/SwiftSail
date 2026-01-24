@@ -106,7 +106,7 @@ public class MineMainFragment extends Fragment {
                         User unListUser = new User();
                         unListUser.id=-1L;
                         availableUserList.add(unListUser);
-                        LoginRepository.getInstance().getMutableAvailableUserList().postValue(availableUserList);
+                        LoginRepository.getInstance().availableUserList.postValue(availableUserList);
                         return null;
                     }).thenAcceptAsync(action -> {
                         view.setOnClickListener(this::onLogoutClicked);

@@ -7,6 +7,8 @@ import androidx.room.Query;
 
 import com.nyzg.swiftsail.dbobj.Watch;
 
+import java.util.List;
+
 @Dao
 public interface WatchTable {
 
@@ -15,4 +17,7 @@ public interface WatchTable {
 
     @Query("DELETE FROM `watchTable` WHERE `id`=:id;")
     void deleteWatch(long id);
+
+    @Query("SELECT * FROM `watchTable` WHERE `userId`=:userId;")
+    List<Watch> selectWatchByUserId(long userId);
 }

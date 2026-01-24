@@ -25,7 +25,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class LoginRepository {
+public class LoginRepository{
     private volatile static LoginRepository INSTANCE = null;
 
     public static LoginRepository getInstance() {
@@ -42,15 +42,11 @@ public class LoginRepository {
     }
 
     public final MutableLiveData<User> currentUser = new MutableLiveData<>();
-    private final MutableLiveData<User> onLoginUser = new MutableLiveData<>();
-    private final MutableLiveData<List<User>> mutableAvailableUserList = new MutableLiveData<>();
+    public final MutableLiveData<User> onLoginUser = new MutableLiveData<>();
+    public final MutableLiveData<List<User>> availableUserList = new MutableLiveData<>();
     private volatile boolean onLastLogin = false;
 
     private LoginRepository() {
-    }
-
-    public MutableLiveData<User> getOnLoginUser() {
-        return onLoginUser;
     }
 
     public void setCurrentUser(User user) {
@@ -59,10 +55,6 @@ public class LoginRepository {
 
     public MutableLiveData<User> getCurrentUser() {
         return currentUser;
-    }
-
-    public MutableLiveData<List<User>> getMutableAvailableUserList() {
-        return mutableAvailableUserList;
     }
 
     /**
@@ -123,7 +115,7 @@ public class LoginRepository {
                 User unListUser = new User();
                 unListUser.id = -1L;
                 availableUserList.add(unListUser);
-                LoginRepository.INSTANCE.getMutableAvailableUserList().postValue(availableUserList);
+                LoginRepository.INSTANCE.availableUserList.postValue(availableUserList);
                 return SucceedOrNot.FAIL;
             }
             //如果成功，保存当前的登录账户，更新当前的user就行了

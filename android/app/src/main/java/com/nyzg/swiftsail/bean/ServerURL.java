@@ -22,11 +22,15 @@ public class ServerURL {
     //dock
     final public static URL URL_SYNC_BACKUP_RECORD;
     final public static URL URL_IS_WATCH_ADDED;
+    final public static URL URL_SYNC_STOP;
+    final public static URL URL_CHECK_SYNC_STATUS;
 
     static {
         try {
             URL_SYNC_BACKUP_RECORD = new URL(BASE_HOST + URL_DOCK_PREFIX + "/sync/record/backup");
             URL_IS_WATCH_ADDED = new URL(BASE_HOST + URL_DOCK_PREFIX + "/is/watch/added");
+            URL_SYNC_STOP = new URL(BASE_HOST + URL_DOCK_PREFIX + "/sync/stop");
+            URL_CHECK_SYNC_STATUS = new URL(BASE_HOST + URL_DOCK_PREFIX + "/check/sync/status");
         } catch (MalformedURLException e) {//正常情况下是不会发生的
             throw new RuntimeException(e);
         }

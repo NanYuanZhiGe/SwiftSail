@@ -65,7 +65,6 @@ public class ReportRepository {
     private final LruParsedReportCache parsedReportCache = new LruParsedReportCache(32);
     private final ReadWriteLock parsedReportCacheLock = new ReentrantReadWriteLock();
 
-
     /**
      * 有缓存优化，
      * 通过线程池的设计，保证用户在快速的切换的时候不会过度堆积任务，而且能够保证响应速度
@@ -120,15 +119,15 @@ public class ReportRepository {
         }
         long userId = user.id;
         try {
-            Long caloric = sqLiteDB.recordTable().getExposeValue(userId, RecordType.CALORIC,day);
+            Long caloric = sqLiteDB.recordTable().getExposeValue(userId, RecordType.CALORIC, day);
             if (caloric != null) {
                 result.caloric = caloric + "卡";
             }
-            Long distance = sqLiteDB.recordTable().getExposeValue(userId, RecordType.DISTANCE,day);
+            Long distance = sqLiteDB.recordTable().getExposeValue(userId, RecordType.DISTANCE, day);
             if (distance != null) {
                 result.stepDistance = distance + "公里";
             }
-            Long heartRate = sqLiteDB.recordTable().getExposeValue(userId,RecordType.HEART ,day);
+            Long heartRate = sqLiteDB.recordTable().getExposeValue(userId, RecordType.HEART, day);
             if (heartRate != null && heartRate >= 1000000000L) {
                 //第三位为低心率，中三位为高心率，高三位为静息心率
                 int lowRate = (int) (heartRate % 1000);
@@ -137,11 +136,11 @@ public class ReportRepository {
                 result.heartRange = String.format("%d-%d bpm", lowRate, high);
                 result.restHeartBeat = String.format("%d bpm", rest);
             }
-            Long nutrition = sqLiteDB.recordTable().getExposeValue(userId,RecordType.FOOD ,day);
+            Long nutrition = sqLiteDB.recordTable().getExposeValue(userId, RecordType.FOOD, day);
             if (nutrition != null) {
                 result.nutrition = nutrition + "卡";
             }
-            Long sleep = sqLiteDB.recordTable().getExposeValue(userId, RecordType.SLEEP,day);
+            Long sleep = sqLiteDB.recordTable().getExposeValue(userId, RecordType.SLEEP, day);
             if (sleep != null) {//sleep是毫秒
                 float time = sleep / 1000f / 3600f;
                 int hour = (int) time;
@@ -150,7 +149,7 @@ public class ReportRepository {
                 result.sleepTime = String.format("%d小时%d分钟", hour, minute);
                 result.sleepScore = score + "";
             }
-            Long step = sqLiteDB.recordTable().getExposeValue(userId, RecordType.STEP,day);
+            Long step = sqLiteDB.recordTable().getExposeValue(userId, RecordType.STEP, day);
             if (step != null) {
                 result.stepCount = step + "";
             }

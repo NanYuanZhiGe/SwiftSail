@@ -17,10 +17,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.nyzg.swiftsail.GlobalApplication;
 import com.nyzg.swiftsail.R;
+import com.nyzg.swiftsail.bean.GlobalToast;
+import com.nyzg.swiftsail.bean.NetWorkBuilder;
+import com.nyzg.swiftsail.bean.NetWorkHandler;
 import com.nyzg.swiftsail.bean.SQLiteDB;
+import com.nyzg.swiftsail.bean.ServerURL;
 import com.nyzg.swiftsail.dao.WatchTable;
+import com.nyzg.swiftsail.dbobj.User;
 import com.nyzg.swiftsail.dbobj.Watch;
 import com.nyzg.swiftsail.fragment.InnerFragment;
+import com.nyzg.swiftsail.netobj.report.WatchDeleteReq;
+import com.nyzg.swiftsail.repository.LoginRepository;
 import com.nyzg.swiftsail.repository.WatchRepository;
 
 import java.util.ArrayList;
@@ -54,6 +61,7 @@ public class ReportMangeDeviceFragment extends InnerFragment implements ReplaceL
             }
             myAdapter.notifyDataSetChanged();
         });
+        WatchRepository.getInstance().getWatchListAsync();
         return father;
     }
 
@@ -87,8 +95,6 @@ public class ReportMangeDeviceFragment extends InnerFragment implements ReplaceL
         public void setWatchList(List<Watch> watchList) {
             this.watchList = new ArrayList<>(watchList.size());
             this.watchList.addAll(watchList);
-            this.watchList.add(new Watch());
-            this.watchList.add(new Watch());
         }
 
         @NonNull
@@ -114,12 +120,13 @@ public class ReportMangeDeviceFragment extends InnerFragment implements ReplaceL
                 holder.status.setText("授权过期");
                 holder.status.setTextColor(ContextCompat.getColor(GlobalApplication.getAppContext(), R.color.lightRed));
             }
-            holder.id = watch.id;
+            holder.primaryKey = watch.id;
+            holder.clientId = watch.clientId;
         }
 
         @Override
         public int getItemCount() {
-            Log.v("myTag",watchList.size()+"");
+            Log.v("myTag", watchList.size() + "");
             return watchList.size();
         }
     }
@@ -128,7 +135,8 @@ public class ReportMangeDeviceFragment extends InnerFragment implements ReplaceL
         final private TextView firstCharacter;
         final private TextView name;
         final private TextView status;
-        private long id = -1L;
+        private long primaryKey = -1L;
+        private String clientId = "";
         private final ReplaceListener replaceListener;
 
         public MyViewHolder(
@@ -150,12 +158,29 @@ public class ReportMangeDeviceFragment extends InnerFragment implements ReplaceL
         }
 
         private void onDeleteClicked(View v) {
+            User user = LoginRepository.getInstance().currentUser.getValue();
+            if (user == null) {
+                return;
+            }
             //本地删除这个设备，不再显示
             //下一次添加服务端会自动处理冲突
             CompletableFuture.supplyAsync(() -> {
-                WatchTable watchTable = SQLiteDB.getDatabase(GlobalApplication.getAppContext()).watchTable();
-                watchTable.deleteWatch(id);
-                WatchRepository.getInstance().deleteWatchThreadSafe(id);
+                //向服务端提交删除请求
+                NetWorkHandler.handleNetRespAfterLogin(
+                        null,
+                        NetWorkBuilder.doChunkRequest(NetWorkBuilder.buildJsonRequestJwt(
+                                ServerURL.URL_SYNC_STOP, ServerURL.POST, new WatchDeleteReq(user.id, clientId)
+                        )),
+                        () -> {
+                        },
+                        ignore -> {
+                            GlobalToast.COMMON_TOAST.accept("成功删除设备");
+                            WatchTable watchTable = SQLiteDB.getDatabase(GlobalApplication.getAppContext()).watchTable();
+                            watchTable.deleteWatch(primaryKey);
+                            WatchRepository.getInstance().deleteWatchThreadSafe(primaryKey);
+                        },
+                        Void.class
+                );
                 return null;
             });
         }

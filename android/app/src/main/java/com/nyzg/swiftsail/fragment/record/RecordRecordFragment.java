@@ -185,10 +185,10 @@ public class RecordRecordFragment extends Fragment {
         }
         //通过data layer来更新UI
         RecordRecordRepository repository = RecordRecordRepository.INSTANCE;
-        repository.getMutableMinuteSecond().observe(getViewLifecycleOwner(), time -> ((TextView) father.findViewById(R.id.duration)).setText(time));
-        repository.getMutableDistanceKilo().observe(getViewLifecycleOwner(), distance -> ((TextView) father.findViewById(R.id.distanceKilo)).setText(distance));
-        repository.getMutableSpeedMeterSecond().observe(getViewLifecycleOwner(), speed -> ((TextView) father.findViewById(R.id.speed)).setText(speed));
-        repository.getMutableLocation().observe(getViewLifecycleOwner(), location -> {
+        repository.getMinuteSecond().observe(getViewLifecycleOwner(), time -> ((TextView) father.findViewById(R.id.duration)).setText(time));
+        repository.getDistanceKilo().observe(getViewLifecycleOwner(), distance -> ((TextView) father.findViewById(R.id.distanceKilo)).setText(distance));
+        repository.getSpeedMeterSecond().observe(getViewLifecycleOwner(), speed -> ((TextView) father.findViewById(R.id.speed)).setText(speed));
+        repository.getLocation().observe(getViewLifecycleOwner(), location -> {
             if (mapLibreMap == null) {
                 return;
             }

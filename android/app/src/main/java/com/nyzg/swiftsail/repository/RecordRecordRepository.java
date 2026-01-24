@@ -10,14 +10,14 @@ import com.nyzg.swiftsail.dbobj.RecordBackUp;
  * 这个repo专门提供给RecordRecordFragment和RecordRecordService来使用
  * 用于更新当前的运动的记录
  */
-public class RecordRecordRepository {
+public class RecordRecordRepository{
     public static RecordRecordRepository INSTANCE = new RecordRecordRepository();
-    private final MutableLiveData<String> mutableMinuteSecond = new MutableLiveData<>();
-    final private MutableLiveData<String> mutableDistanceKilo = new MutableLiveData<>();
-    final private MutableLiveData<String> mutableSpeedMeterSecond = new MutableLiveData<>();
-    final private MutableLiveData<Location> mutableLocation = new MutableLiveData<>();
-    final private MutableLiveData<Long> sportStartTime=new MutableLiveData<>(System.currentTimeMillis());
-    private final MutableLiveData<RecordBackUp> recordBackUp=new MutableLiveData<>();
+    private final MutableLiveData<String> minuteSecond = new MutableLiveData<>();
+    final private MutableLiveData<String> distanceKilo = new MutableLiveData<>();
+    final private MutableLiveData<String> speedMeterSecond = new MutableLiveData<>();
+    final private MutableLiveData<Location> location = new MutableLiveData<>();
+    final private MutableLiveData<Long> sportStartTime = new MutableLiveData<>(System.currentTimeMillis());
+    private final MutableLiveData<RecordBackUp> recordBackUp = new MutableLiveData<>();
 
     private RecordRecordRepository() {
     }
@@ -30,41 +30,41 @@ public class RecordRecordRepository {
         return recordBackUp;
     }
 
-    public MutableLiveData<String> getMutableMinuteSecond() {
-        return mutableMinuteSecond;
+    public MutableLiveData<String> getMinuteSecond() {
+        return minuteSecond;
     }
 
-    public MutableLiveData<String> getMutableDistanceKilo() {
-        return mutableDistanceKilo;
+    public MutableLiveData<String> getDistanceKilo() {
+        return distanceKilo;
     }
 
-    public MutableLiveData<String> getMutableSpeedMeterSecond() {
-        return mutableSpeedMeterSecond;
+    public MutableLiveData<String> getSpeedMeterSecond() {
+        return speedMeterSecond;
     }
 
-    public MutableLiveData<Location> getMutableLocation() {
-        return mutableLocation;
+    public MutableLiveData<Location> getLocation() {
+        return location;
     }
 
     public void setMinuteSecond(String s) {
-        this.mutableMinuteSecond.setValue(s);
+        this.minuteSecond.setValue(s);
     }
 
     public void setDistanceKilo(String s) {
-        this.mutableDistanceKilo.setValue(s);
+        this.distanceKilo.setValue(s);
     }
 
     public void setSpeedMeterSecond(String s) {
-        this.mutableSpeedMeterSecond.setValue(s);
+        this.speedMeterSecond.setValue(s);
     }
 
     public void setLocation(Location l) {
-        this.mutableLocation.setValue(l);
+        this.location.setValue(l);
     }
 
     public void initValue() {
-        this.mutableDistanceKilo.setValue("0");
-        this.mutableMinuteSecond.setValue("00:00");
-        this.mutableSpeedMeterSecond.setValue("--");
+        this.distanceKilo.setValue("0");
+        this.minuteSecond.setValue("00:00");
+        this.speedMeterSecond.setValue("--");
     }
 }

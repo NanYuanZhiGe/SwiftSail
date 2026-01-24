@@ -12,12 +12,15 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <!-- 防止设备休眠，因为需要持续追踪用户的状态-->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <!-- 指纹登录权限需要-->
-    <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
     <!-- 如果需要使用http作为测试-->
     <!--android:usesCleartextTraffic="true"-->
+    <!-- 安卓34要求必须有这个权限，不然会报一个很奇怪的错，说你的foreground service没有在合适的时间内调用startForeground-->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
     <application
         android:name=".GlobalApplication"
         android:allowBackup="true"
@@ -30,9 +33,9 @@
         android:theme="@style/Theme.SwiftSail.Fullscreen"
         tools:targetApi="31">
         <activity
-            android:screenOrientation="portrait"
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -40,13 +43,17 @@
         </activity>
 
         <activity
-            android:screenOrientation="portrait"
-            android:name=".RecordActivity" />
+            android:name=".RecordActivity"
+            android:screenOrientation="portrait" />
 
         <service
             android:name=".service.RecordRecordService"
             android:exported="false"
             android:foregroundServiceType="location" />
+        <service
+            android:name=".service.ReportSyncService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
     </application>
 
 </manifest>

@@ -1,13 +1,19 @@
 package com.nyzg.swiftsail;
 
+import static androidx.core.content.ContextCompat.getSystemService;
+
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
@@ -16,6 +22,7 @@ import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import com.nyzg.swiftsail.bean.ChannelId;
 import com.nyzg.swiftsail.bean.GlobalInstance;
 import com.nyzg.swiftsail.fragment.login.LoginFragment;
 import com.nyzg.swiftsail.fragment.login.MainFragment;
@@ -23,6 +30,7 @@ import com.nyzg.swiftsail.fragment.main.WaitingFragment;
 import com.nyzg.swiftsail.obj.SucceedOrNot;
 import com.nyzg.swiftsail.repository.LoginRepository;
 import com.nyzg.swiftsail.repository.RecordRepository;
+import com.nyzg.swiftsail.repository.SyncRepository;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -43,6 +51,35 @@ public class MainActivity extends AppCompatActivity {
         fullScreen();
         checkAndDoLogin();
         doubleClickToQuitApp();
+        createHeadsUpNotificationChannel();
+        observeNotificationRequest();
+    }
+
+
+    private void createHeadsUpNotificationChannel() {
+        NotificationChannel channel = new NotificationChannel(
+                ChannelId.HEAD_UP_CHANNEL_ID,
+                "操作提示",
+                NotificationManager.IMPORTANCE_HIGH
+        );
+        channel.setDescription("用于短暂提示用户操作状态");
+        getSystemService(NotificationManager.class).createNotificationChannel(channel);
+    }
+
+    private void observeNotificationRequest() {
+        SyncRepository.getInstance().notificationPair.observeForever(pair -> {
+            String msg = pair.getA();
+            if (msg == null || msg.isEmpty()) {
+                return;
+            }
+            Notification notification = new NotificationCompat.Builder(this, ChannelId.HEAD_UP_CHANNEL_ID)
+                    .setSmallIcon(R.drawable.ic_launcher_foreground)
+                    .setContentTitle("您已经在同步数据了")
+                    .setTimeoutAfter(3000)
+                    .setAutoCancel(true)
+                    .build();
+            getSystemService(NotificationManager.class).notify(ChannelId.NOTIFICATION_ID.getAndIncrement(), notification);
+        });
     }
 
 

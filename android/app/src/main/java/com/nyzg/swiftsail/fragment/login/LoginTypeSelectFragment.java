@@ -31,7 +31,7 @@ public class LoginTypeSelectFragment extends BackPressPopFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        user = LoginRepository.getInstance().getOnLoginUser().getValue();
+        user = LoginRepository.getInstance().onLoginUser.getValue();
     }
 
     @Nullable

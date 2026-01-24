@@ -40,7 +40,7 @@ public class RecordRepository {
     private volatile static RecordRepository INSTANCE=null;
 
     //这个成员核心，它主要是用于RecordFragment的UI显示
-    private final MutableLiveData<RecordData> mutableRecordData = new MutableLiveData<>();
+    private final MutableLiveData<RecordData> recordData = new MutableLiveData<>();
     private final ReadWriteLock recordLock = new ReentrantReadWriteLock();
     private final AtomicBoolean OBSERVE_USER_LOCK = new AtomicBoolean(false);
 
@@ -216,17 +216,17 @@ public class RecordRepository {
     //update是加上基础制
     private void updateChartData(boolean useFeet, int startHour, int endHour, float meters, int durationSecond) {
         RecordData recordData;
-        if (mutableRecordData.getValue() == null) {
+        if (this.recordData.getValue() == null) {
             recordData = new RecordData();
         } else {
-            recordData = new RecordData(mutableRecordData.getValue());
+            recordData = new RecordData(this.recordData.getValue());
         }
         if (useFeet) {
             recordData.updateFeetData(startHour, endHour, meters, durationSecond);
         } else {
             recordData.updateWheelData(startHour, endHour, meters, durationSecond);
         }
-        mutableRecordData.postValue(recordData);
+        this.recordData.postValue(recordData);
     }
 
     //set是拿新值来替代旧值
@@ -238,10 +238,10 @@ public class RecordRepository {
         } else {
             recordData.setWheelData(startHour, endHour, meters, durationSecond);
         }
-        mutableRecordData.postValue(recordData);
+        this.recordData.postValue(recordData);
     }
 
     public LiveData<RecordData> getLiveRecordData() {
-        return mutableRecordData;
+        return recordData;
     }
 }
