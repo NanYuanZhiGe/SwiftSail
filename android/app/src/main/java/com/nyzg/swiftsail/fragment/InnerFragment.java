@@ -13,9 +13,12 @@ public class InnerFragment extends BackPressPopFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        ViewGroup.LayoutParams params = view.getLayoutParams();
-        int screenHeight = getResources().getDisplayMetrics().heightPixels;
-        params.height = Math.min(Math.max(UnsafeButFixProb.innerFragmentHeight, 0), screenHeight);
-        view.setLayoutParams(params);
+        UnsafeButFixProb.innerFragmentHeight.observe(getViewLifecycleOwner(),
+                h -> {
+                    ViewGroup.LayoutParams params = view.getLayoutParams();
+                    int screenHeight = getResources().getDisplayMetrics().heightPixels;
+                    params.height = Math.min(Math.max(h, 0), screenHeight);
+                    view.setLayoutParams(params);
+                });
     }
 }

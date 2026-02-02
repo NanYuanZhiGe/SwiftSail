@@ -40,6 +40,7 @@ import com.nyzg.swiftsail.bean.ServerURL;
 import com.nyzg.swiftsail.dbobj.User;
 import com.nyzg.swiftsail.dbobj.Watch;
 import com.nyzg.swiftsail.encrypt.Uuid;
+import com.nyzg.swiftsail.fragment.BackPressPopFragment;
 import com.nyzg.swiftsail.fragment.InnerFragment;
 import com.nyzg.swiftsail.netobj.report.WatchAddReq;
 import com.nyzg.swiftsail.obj.SucceedOrNot;
@@ -304,8 +305,11 @@ public class ReportAddDeviceFragment extends InnerFragment {
         watchViewModel.getWatch().setValue(watch);
         Tuple<String, String, String> codeChallenge = EncryptThreadSafe.getBase64UrlSha256RandomString();
         watchViewModel.getCodeVerifier().setValue(codeChallenge.getA());
-        String state = Uuid.getUuidString36();
-        watchViewModel.getState().setValue(state);
+        String state = watchViewModel.getState().getValue();
+        if (state == null) {
+            doNotification("信息不完整！无法生成请求的state");
+            return;
+        }
         String parseUrl = "https://www.fitbit.com/oauth2/authorize?client_id=" + watch.clientId + "&response_type=code" +
                 "&code_challenge=" + codeChallenge.getC() + "&code_challenge_method=S256" +
                 "&scope=activity%20heartrate%20location%20nutrition%20oxygen_saturation%20profile" +
@@ -317,6 +321,7 @@ public class ReportAddDeviceFragment extends InnerFragment {
         grantedBtn.setVisibility(View.VISIBLE);
     }
 
+    @SuppressLint("DefaultLocale")//抑制format %d的警告
     private Watch getWatch() {
         //校验用户的输入
         User currentUser = LoginRepository.getInstance().getCurrentUser().getValue();
@@ -328,18 +333,18 @@ public class ReportAddDeviceFragment extends InnerFragment {
             return null;
         }
         //获取数据
-        String deviceName = inputDeviceName.getText()==null?null:inputDeviceName.getText().toString().trim();
-        if (deviceName==null||deviceName.isEmpty()) {
+        String deviceName = inputDeviceName.getText() == null ? null : inputDeviceName.getText().toString().trim();
+        if (deviceName == null || deviceName.isEmpty()) {
             doNotification("设备名字不能为空");
             return null;
         }
-        String clientId = inputClientId.getText()==null?null:inputClientId.getText().toString().trim();
-        if (clientId==null||clientId.isEmpty()) {
+        String clientId = inputClientId.getText() == null ? null : inputClientId.getText().toString().trim();
+        if (clientId == null || clientId.isEmpty()) {
             doNotification("client_id不能为空");
             return null;
         }
-        String clientSecret = inputClientSecret.getText()==null?null:inputClientSecret.getText().toString().trim();
-        if (clientSecret==null||clientSecret.isEmpty()) {
+        String clientSecret = inputClientSecret.getText() == null ? null : inputClientSecret.getText().toString().trim();
+        if (clientSecret == null || clientSecret.isEmpty()) {
             doNotification("client_secret不能为空");
             return null;
         }
@@ -352,6 +357,9 @@ public class ReportAddDeviceFragment extends InnerFragment {
         watch.name = deviceName;
         watch.authorizeHeader = EncryptThreadSafe.transferStringToBase64EncodedString(clientId + ":" + clientSecret);
         watch.accessible = true;
+        watchViewModel.state.setValue(EncryptThreadSafe.getBase64UrlSha256WithCertainString(
+                String.format("%d:%s:%s:%s", watch.userId, watch.clientId, watch.type, watch)
+        ));
         return watch;
     }
 

@@ -8,6 +8,8 @@
     <dimen name="submitBtnPaddingHor">20dp</dimen>
     <dimen name="submitBtnPaddingVer">12dp</dimen>
 
+    <dimen name="paddingInput">12dp</dimen>
+
     <!-- record record-->
     <dimen name="recordRecordTextSize">20sp</dimen>
     <dimen name="rRBackWardOut">55dp</dimen>

@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/top_blue">
-<androidx.drawerlayout.widget.DrawerLayout
-    android:id="@+id/drawerLayout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
         <LinearLayout
             android:id="@+id/backward"
             android:layout_width="55dp"
@@ -44,16 +43,17 @@
             app:layout_constraintBottom_toBottomOf="@id/backward"
             app:layout_constraintStart_toEndOf="@id/backward"
             app:layout_constraintTop_toTopOf="@id/backward" />
+
         <ImageView
             android:id="@+id/notification"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:src="@drawable/notifications"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/backward"
-            app:layout_constraintBottom_toBottomOf="@id/backward"
             android:layout_marginEnd="18dp"
-            />
+            android:src="@drawable/notifications"
+            app:layout_constraintBottom_toBottomOf="@id/backward"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/backward" />
+
         <TextView
             android:id="@+id/companion"
             android:layout_width="wrap_content"
@@ -104,6 +104,7 @@
                     android:layout_marginTop="8dp"
                     android:background="@drawable/report_add_device_input_bk"
                     android:inputType="text"
+                    android:paddingStart="@dimen/paddingInput"
                     android:text="我的设备"
                     android:textColor="@color/liteWhite"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -126,6 +127,7 @@
                     android:layout_height="@dimen/reInputHeight"
                     android:layout_marginTop="8dp"
                     android:background="@drawable/report_add_device_input_bk"
+                    android:paddingStart="@dimen/paddingInput"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/textSelectDeviceType" />
@@ -147,6 +149,7 @@
                     android:layout_marginTop="8dp"
                     android:background="@drawable/report_add_device_input_bk"
                     android:inputType="text"
+                    android:paddingStart="@dimen/paddingInput"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/textClientId" />
@@ -167,6 +170,7 @@
                     android:layout_height="@dimen/reInputHeight"
                     android:layout_marginTop="8dp"
                     android:background="@drawable/report_add_device_input_bk"
+                    android:paddingStart="@dimen/paddingInput"
                     app:layout_constraintStart_toStartOf="@id/inputDeviceName"
                     app:layout_constraintTop_toBottomOf="@id/textClientSecret" />
 
@@ -201,15 +205,15 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.core.widget.NestedScrollView>
     </androidx.constraintlayout.widget.ConstraintLayout>
+
     <androidx.recyclerview.widget.RecyclerView
-        android:paddingVertical="28dp"
         android:id="@+id/msgBox"
         android:layout_width="240dp"
+        android:layout_height="match_parent"
         android:layout_gravity="end"
-        android:paddingStart="12dp"
         android:background="@color/white"
-        android:layout_height="match_parent">
+        android:paddingVertical="28dp"
+        android:paddingStart="12dp">
 
     </androidx.recyclerview.widget.RecyclerView>
 </androidx.drawerlayout.widget.DrawerLayout>
-</androidx.constraintlayout.widget.ConstraintLayout>

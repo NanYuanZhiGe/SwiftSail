@@ -81,7 +81,7 @@ abstract public class ReportDetailBaseFragment extends BackPressPopFragment {
         ViewPager2 viewPager2 = view.findViewById(R.id.summaries);
         view.post(() -> {
             int screenHeight = getResources().getDisplayMetrics().heightPixels;
-            int needHeight = UnsafeButFixProb.innerFragmentHeight;
+            int needHeight = UnsafeButFixProb.getInnerHeight();
             if (needHeight < 0) {
                 needHeight = screenHeight;
             }
