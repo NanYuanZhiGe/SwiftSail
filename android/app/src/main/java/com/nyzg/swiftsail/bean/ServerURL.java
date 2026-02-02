@@ -24,6 +24,7 @@ public class ServerURL {
     final public static URL URL_IS_WATCH_ADDED;
     final public static URL URL_SYNC_STOP;
     final public static URL URL_CHECK_SYNC_STATUS;
+    final public static URL URL_ACQUIRE_SYNC_DATA;
 
     static {
         try {
@@ -31,6 +32,7 @@ public class ServerURL {
             URL_IS_WATCH_ADDED = new URL(BASE_HOST + URL_DOCK_PREFIX + "/is/watch/added");
             URL_SYNC_STOP = new URL(BASE_HOST + URL_DOCK_PREFIX + "/sync/stop");
             URL_CHECK_SYNC_STATUS = new URL(BASE_HOST + URL_DOCK_PREFIX + "/check/sync/status");
+            URL_ACQUIRE_SYNC_DATA=new URL(BASE_HOST + URL_DOCK_PREFIX + "/acquire/sync/data");
         } catch (MalformedURLException e) {//正常情况下是不会发生的
             throw new RuntimeException(e);
         }

@@ -20,4 +20,11 @@ public interface WatchTable {
 
     @Query("SELECT * FROM `watchTable` WHERE `userId`=:userId;")
     List<Watch> selectWatchByUserId(long userId);
+
+    @Query("SELECT * FROM `watchTable` WHERE `userId`=:userId AND `activate`=1 LIMIT 1;")
+    Watch selectWatchActivated(long userId);
+
+    @Query("SELECT `clientId` FROM `watchTable` WHERE `userId`=:userId AND `activate`=1 LIMIT 1;")
+    String getActivateWatchClientId(long userId);
+
 }

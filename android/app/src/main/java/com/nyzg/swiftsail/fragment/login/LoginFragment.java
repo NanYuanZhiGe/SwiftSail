@@ -216,7 +216,7 @@ public class LoginFragment extends Fragment {
                             //成功登录
                             LoginRepository.getInstance().login(user);
                             //返回主界面
-                            MainActivity.popUntilTheInitOne(requireActivity().getSupportFragmentManager());
+                            MainActivity.toMainPage(requireActivity().getSupportFragmentManager());
                         } catch (Exception e) {
                             GlobalToast.SERVER_RESP_UNACCEPTABLE.run();
                         }

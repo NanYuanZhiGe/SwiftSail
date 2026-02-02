@@ -1,21 +1,18 @@
 package com.nyzg.swiftsail;
 
-import static androidx.core.content.ContextCompat.getSystemService;
-
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
@@ -23,14 +20,11 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.nyzg.swiftsail.bean.ChannelId;
-import com.nyzg.swiftsail.bean.GlobalInstance;
-import com.nyzg.swiftsail.fragment.login.LoginFragment;
 import com.nyzg.swiftsail.fragment.login.MainFragment;
 import com.nyzg.swiftsail.fragment.main.WaitingFragment;
-import com.nyzg.swiftsail.obj.SucceedOrNot;
-import com.nyzg.swiftsail.repository.LoginRepository;
-import com.nyzg.swiftsail.repository.RecordRepository;
 import com.nyzg.swiftsail.repository.SyncRepository;
+
+import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -43,13 +37,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        //全屏显示，不要状态栏
+        fullScreen();
         //显示加载界面
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.mainFragment, WaitingFragment.getInstance())
                 .commit();
-        fullScreen();
-        checkAndDoLogin();
         doubleClickToQuitApp();
         createHeadsUpNotificationChannel();
         observeNotificationRequest();
@@ -62,6 +56,8 @@ public class MainActivity extends AppCompatActivity {
                 "操作提示",
                 NotificationManager.IMPORTANCE_HIGH
         );
+        channel.enableVibration(false);
+        channel.setSound(Settings.System.DEFAULT_NOTIFICATION_URI, null); // 使用系统默认声音
         channel.setDescription("用于短暂提示用户操作状态");
         getSystemService(NotificationManager.class).createNotificationChannel(channel);
     }
@@ -106,32 +102,6 @@ public class MainActivity extends AppCompatActivity {
         this.getOnBackPressedDispatcher().addCallback(this, callback);
     }
 
-    private void checkAndDoLogin() {
-        LoginRepository.getInstance()
-                .tryLastLoginAsync()
-                .thenAcceptAsync(result -> {
-                    if (result == SucceedOrNot.FAIL) {
-                        //使用上一次的登录账户登录失败，添加登录页面，
-                        MainActivity.this.getSupportFragmentManager()
-                                .beginTransaction()
-                                .replace(R.id.mainFragment, MainFragment.getInstance())
-                                .commit();
-                        MainActivity.this.getSupportFragmentManager()
-                                .beginTransaction()
-                                .replace(R.id.mainFragment, LoginFragment.newInstance())
-                                .addToBackStack(null)
-                                .commit();
-                    } else {
-                        //使用上一次的登录账户登录成功，直接进入主界面
-                        MainActivity.this.getSupportFragmentManager()
-                                .beginTransaction()
-                                .replace(R.id.mainFragment, MainFragment.getInstance())
-                                .commit();
-                    }
-                    //此时LoginRepository已经成功更新了currentUser
-                    RecordRepository.getInstance().updateUserOnChange();
-                }, ContextCompat.getMainExecutor(this));
-    }
 
     public static void addFragmentToStackTop(FragmentManager manager, Fragment fragment) {
         Fragment current = manager.findFragmentById(R.id.mainFragment);
@@ -145,14 +115,16 @@ public class MainActivity extends AppCompatActivity {
         transaction.commit();
     }
 
-    public static void popUntilTheInitOne(FragmentManager manager) {
-        if (manager.isStateSaved()) {
-            return;
+    public static void toMainPage(FragmentManager manager) {
+        List<Fragment> fragmentList=manager.getFragments();
+        FragmentTransaction transaction=manager.beginTransaction();
+        for (Fragment fragment:fragmentList){
+            transaction.remove(fragment);
         }
-        int count = manager.getBackStackEntryCount();
-        if (count > 0) {
-            manager.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-        }
+        transaction.commit();
+        manager.beginTransaction()
+                .replace(R.id.mainFragment, MainFragment.getInstance())
+                .commit();
     }
 
     private void fullScreen() {

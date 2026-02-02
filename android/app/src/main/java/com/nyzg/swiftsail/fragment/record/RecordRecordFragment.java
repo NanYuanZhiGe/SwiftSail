@@ -117,35 +117,44 @@ public class RecordRecordFragment extends Fragment {
         return fragment;
     }
 
+    private OnBackPressedCallback callback;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.type = getArguments() != null ? getArguments().getString(TYPE_KEY) : "";
-        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+        callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                if (!isUnSave) {
-                    setEnabled(false);
-                    requireActivity().getOnBackPressedDispatcher().onBackPressed();
-                    return;
-                }
-                new AlertDialog.Builder(requireContext())
-                        .setTitle("")
-                        .setMessage("您本次的运动记录未保存，需要保存它吗？")
-                        .setPositiveButton("保存", (dialog, which) -> {
-                            RecordBackUp recordBackUp = RecordRecordRepository.INSTANCE.getRecordBackUp().getValue();
-                            saveSportData(recordBackUp);
-                            setEnabled(false);//禁用自己，避免无限递归
-                            requireActivity().getOnBackPressedDispatcher().onBackPressed();
-                        })
-                        .setNegativeButton("不保存", (dialog, which) -> {
-                            setEnabled(false);
-                            requireActivity().getOnBackPressedDispatcher().onBackPressed();
-                        }) // 取消则什么也不做
-                        .show();
+                doBackPressedLogic();
             }
         };
         requireActivity().getOnBackPressedDispatcher().addCallback(this, callback);
+    }
+
+    private void doBackPressedLogic() {
+        if (callback == null) {
+            return;
+        }
+        if (!isUnSave) {
+            callback.setEnabled(false);
+            requireActivity().getOnBackPressedDispatcher().onBackPressed();
+            return;
+        }
+        new AlertDialog.Builder(requireContext())
+                .setTitle("")
+                .setMessage("您本次的运动记录未保存，需要保存它吗？")
+                .setPositiveButton("保存", (dialog, which) -> {
+                    RecordBackUp recordBackUp = RecordRecordRepository.INSTANCE.getRecordBackUp().getValue();
+                    saveSportData(recordBackUp);
+                    callback.setEnabled(false);//禁用自己，避免无限递归
+                    requireActivity().getOnBackPressedDispatcher().onBackPressed();
+                })
+                .setNegativeButton("不保存", (dialog, which) -> {
+                    callback.setEnabled(false);
+                    requireActivity().getOnBackPressedDispatcher().onBackPressed();
+                }) // 取消则什么也不做
+                .show();
     }
 
     @Nullable
@@ -153,6 +162,9 @@ public class RecordRecordFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View father = inflater.inflate(R.layout.fragment_record_record, container, false);
         TextView title = father.findViewById(R.id.title);
+        father.findViewById(R.id.backward).setOnClickListener(v -> {
+            doBackPressedLogic();
+        });
         //设置标题
         title.setText(this.type);
         //设置地图
@@ -336,9 +348,9 @@ public class RecordRecordFragment extends Fragment {
             recordService.summary();
             RecordBackUp recordBackUp = RecordRecordRepository.INSTANCE.getRecordBackUp().getValue();
             //提示用户是否要保存，允许用户取消
-            String startTime="?";
-            if (RecordRecordRepository.INSTANCE.getSportStartTime().getValue()!=null){
-                startTime=LocalDateTime.ofInstant(Instant.ofEpochMilli(RecordRecordRepository.INSTANCE.getSportStartTime().getValue()), ZoneId.systemDefault()).format(DATE_TIME_FORMATTER);
+            String startTime = "?";
+            if (RecordRecordRepository.INSTANCE.getSportStartTime().getValue() != null) {
+                startTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(RecordRecordRepository.INSTANCE.getSportStartTime().getValue()), ZoneId.systemDefault()).format(DATE_TIME_FORMATTER);
             }
             if (recordBackUp != null) {
                 new AlertDialog.Builder(requireContext())

@@ -3,20 +3,25 @@ package com.nyzg.swiftsail.service;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
-import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+import androidx.lifecycle.LifecycleService;
+import androidx.work.Constraints;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
 
 import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.bean.ChannelId;
+import com.nyzg.swiftsail.repository.SyncRepository;
+import com.nyzg.swiftsail.worker.ReportSyncWorker;
 
 
-public class ReportSyncService extends Service {
+public class ReportSyncService extends LifecycleService {
 
     public class MyBinder extends Binder {
         public ReportSyncService getService() {
@@ -25,11 +30,30 @@ public class ReportSyncService extends Service {
     }
 
     private final IBinder mBinder = new MyBinder();
+
     @Override
     public void onCreate() {
         super.onCreate();
         createNotificationChannel();
-        this.startForeground(2, createNotification());
+        this.startForeground(ChannelId.NOTIFICATION_ID.getAndIncrement(), createNotification());
+        OneTimeWorkRequest request = new OneTimeWorkRequest
+                .Builder(ReportSyncWorker.class)
+                .setConstraints(new Constraints.Builder().build())
+                .build();
+        WorkManager workManager = WorkManager.getInstance(this);
+        workManager.enqueue(request);
+        workManager.getWorkInfoByIdLiveData(request.getId())
+                .observe(this, workInfo -> {
+                    if (workInfo == null || (workInfo.getState() != WorkInfo.State.FAILED && workInfo.getState() != WorkInfo.State.SUCCEEDED)) {
+                        return;
+                    }
+                    if (workInfo.getState() == WorkInfo.State.FAILED) {
+
+                        return;
+                    }
+                    SyncRepository.getInstance().onSync.set(false);
+                    stopSelf();
+                });
     }
 
     private void createNotificationChannel() {
@@ -39,6 +63,7 @@ public class ReportSyncService extends Service {
                 NotificationManager.IMPORTANCE_DEFAULT // 重要性
         );
         serviceChannel.setDescription("正在后台同步您的运动报表");
+        serviceChannel.enableVibration(false);
 
         // 获取系统通知管理器并注册该渠道
         NotificationManager manager = getSystemService(NotificationManager.class);
@@ -57,22 +82,13 @@ public class ReportSyncService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        new Thread(()->{
-            while (true){
-                Log.v("myTag","waiting");
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }).start();
         return super.onStartCommand(intent, flags, startId);
     }
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
+        super.onBind(intent);
         return mBinder;
     }
 }

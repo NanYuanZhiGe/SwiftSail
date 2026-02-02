@@ -1,10 +1,7 @@
 package com.nyzg.swiftsail.fragment.report;
 
-import android.content.ComponentName;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +12,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.work.OneTimeWorkRequest;
 
 import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.fragment.report.pull.ReportAddDeviceFragment;
@@ -26,9 +22,9 @@ import com.nyzg.swiftsail.repository.SyncRepository;
 import com.nyzg.swiftsail.service.ReportSyncService;
 import com.nyzg.swiftsail.view.DateSelector;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ReportMain0Fragment extends Fragment {
+
     public static Fragment getInstance() {
         return new ReportMain0Fragment();
     }
@@ -100,12 +96,9 @@ public class ReportMain0Fragment extends Fragment {
         ReportRepository.getInstance().getReportMainAsync(epochDay);
     }
 
-
-    static private final AtomicBoolean onSync = new AtomicBoolean(false);
-
     private void onDataSyncClicked(View v) {
         //正在运行
-        if (!onSync.compareAndSet(false, true)) {
+        if (!SyncRepository.getInstance().onSync.compareAndSet(false, true)) {
             SyncRepository.getInstance().notificationPair.postValue(new Pair<>("您已经在同步数据了", null));
             return;
         }

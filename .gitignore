@@ -25,3 +25,5 @@ render.experimental.xml
 google-services.json
 # Android Profiling 文件
 *.hprof
+*/.idea
+*/.gradle

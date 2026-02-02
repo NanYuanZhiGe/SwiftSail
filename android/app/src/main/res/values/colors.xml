@@ -24,9 +24,16 @@
     <color name="lightBlue">#60A6B3</color>
     <color name="skyBlue">#5197CC</color>
 
+
+    <!-- record record-->
+    <color name="recordRecordDetail">#aeddff</color>
+
     <color name="nav_selected">#5AAE86</color>
     <color name="l_mainSelector">#EDEDED</color>
 
+    <!-- report -->
+    <color name="addDevBlue">#5078e1</color>
+    <color name="addDevPurple">#7264ec</color>
 
     <!-- colors for dock-->
     <color name="rainPurple">#e0dfe5</color>     <!-- 浅薰衣草 -->

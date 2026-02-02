@@ -10,11 +10,22 @@
         android:layout_height="wrap_content"
         android:text="正在尝试登录"
         android:textSize="24sp"
-        app:layout_constraintBottom_toTopOf="@id/progressBar"
+        app:layout_constraintBottom_toTopOf="@id/detailMsg"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed" />
+
+    <TextView
+        android:id="@+id/detailMsg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="使用上一次的登录账户"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@id/progressBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/progressText" />
 
     <ProgressBar
         android:id="@+id/progressBar"
@@ -23,5 +34,5 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/progressText" />
+        app:layout_constraintTop_toBottomOf="@id/detailMsg" />
 </androidx.constraintlayout.widget.ConstraintLayout>

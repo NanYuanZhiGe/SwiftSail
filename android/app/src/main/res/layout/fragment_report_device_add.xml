@@ -3,143 +3,213 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
-
+    android:background="@drawable/top_blue">
+<androidx.drawerlayout.widget.DrawerLayout
+    android:id="@+id/drawerLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="18dp"
-        app:layout_constraintBottom_toTopOf="@id/textDeviceName"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <ImageView
-            android:id="@+id/imageWatch"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:src="@drawable/watch"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:id="@+id/backward"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
+            android:layout_marginStart="18dp"
+            android:layout_marginTop="35dp"
+            android:background="@drawable/record_record_backward_bk"
+            android:gravity="center"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/black" />
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center"
+                android:background="@color/white"
+                android:src="@drawable/chevron_left"
+                app:tint="@color/black" />
+        </LinearLayout>
 
         <TextView
+            android:id="@+id/title"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="55dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/record_record_backward_bk"
+            android:gravity="center"
+            android:paddingHorizontal="36dp"
             android:text="添加可穿戴设备"
             android:textSize="20sp"
-            app:layout_constraintBottom_toBottomOf="@id/imageWatch"
-            app:layout_constraintStart_toEndOf="@id/imageWatch"
-            app:layout_constraintTop_toTopOf="@id/imageWatch" />
+            app:layout_constraintBottom_toBottomOf="@id/backward"
+            app:layout_constraintStart_toEndOf="@id/backward"
+            app:layout_constraintTop_toTopOf="@id/backward" />
+        <ImageView
+            android:id="@+id/notification"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/notifications"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/backward"
+            app:layout_constraintBottom_toBottomOf="@id/backward"
+            android:layout_marginEnd="18dp"
+            />
+        <TextView
+            android:id="@+id/companion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="携手同行"
+            android:textSize="36sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@id/backward"
+            app:layout_constraintTop_toBottomOf="@id/backward" />
+
+        <TextView
+            android:id="@+id/desc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxWidth="@dimen/reTextMaxLen"
+            android:text="填写信息后，点击「授权」跳转浏览器完成授权，返回应用点击「我已授权」，我们将自动管理您的手表数据"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="@id/backward"
+            app:layout_constraintTop_toBottomOf="@id/companion" />
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/desc">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/textDeviceName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="18dp"
+                    android:layout_marginTop="18dp"
+                    android:text="设备名"
+                    android:textSize="@dimen/textWithInput"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/inputDeviceName"
+                    android:layout_width="@dimen/reInputWidth"
+                    android:layout_height="@dimen/reInputHeight"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/report_add_device_input_bk"
+                    android:inputType="text"
+                    android:text="我的设备"
+                    android:textColor="@color/liteWhite"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/textDeviceName" />
+
+                <TextView
+                    android:id="@+id/textSelectDeviceType"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:text="设备品牌"
+                    android:textSize="@dimen/textWithInput"
+                    app:layout_constraintStart_toStartOf="@id/textDeviceName"
+                    app:layout_constraintTop_toBottomOf="@id/inputDeviceName" />
+
+                <Spinner
+                    android:id="@+id/inputDeviceType"
+                    android:layout_width="@dimen/reInputWidth"
+                    android:layout_height="@dimen/reInputHeight"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/report_add_device_input_bk"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/textSelectDeviceType" />
+
+                <TextView
+                    android:id="@+id/textClientId"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:text="客户端ID"
+                    android:textSize="@dimen/textWithInput"
+                    app:layout_constraintStart_toStartOf="@id/textDeviceName"
+                    app:layout_constraintTop_toBottomOf="@id/inputDeviceType" />
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/inputClientId"
+                    android:layout_width="@dimen/reInputWidth"
+                    android:layout_height="@dimen/reInputHeight"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/report_add_device_input_bk"
+                    android:inputType="text"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/textClientId" />
+
+                <TextView
+                    android:id="@+id/textClientSecret"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:text="客户端密钥"
+                    android:textSize="@dimen/textWithInput"
+                    app:layout_constraintStart_toStartOf="@id/textDeviceName"
+                    app:layout_constraintTop_toBottomOf="@id/inputClientId" />
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/inputClientSecret"
+                    android:layout_width="@dimen/reInputWidth"
+                    android:layout_height="@dimen/reInputHeight"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/report_add_device_input_bk"
+                    app:layout_constraintStart_toStartOf="@id/inputDeviceName"
+                    app:layout_constraintTop_toBottomOf="@id/textClientSecret" />
+
+                <TextView
+                    android:id="@+id/submit"
+                    android:layout_width="@dimen/reInputWidth"
+                    android:layout_height="@dimen/reInputHeight"
+                    android:layout_marginTop="18dp"
+                    android:background="@drawable/report_add_device_grant_bk"
+                    android:gravity="center"
+                    android:text="授权"
+                    android:textColor="@color/white"
+                    android:textSize="20sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/inputClientSecret" />
+
+                <TextView
+                    android:id="@+id/hasGranted"
+                    android:layout_width="@dimen/reInputWidth"
+                    android:layout_height="@dimen/reInputHeight"
+                    android:layout_marginTop="18dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="@drawable/report_add_report_has_grant_bk"
+                    android:gravity="center"
+                    android:text="我已授权"
+                    android:textColor="@color/white"
+                    android:textSize="20sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/submit" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.core.widget.NestedScrollView>
     </androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.recyclerview.widget.RecyclerView
+        android:paddingVertical="28dp"
+        android:id="@+id/msgBox"
+        android:layout_width="240dp"
+        android:layout_gravity="end"
+        android:paddingStart="12dp"
+        android:background="@color/white"
+        android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/textDeviceName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="给您的设备取一个名字："
-        android:textSize="@dimen/textWithInput"
-        app:layout_constraintBottom_toTopOf="@id/inputDeviceName"
-        app:layout_constraintStart_toStartOf="@id/inputDeviceName"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_chainStyle="packed" />
-
-    <com.google.android.material.textfield.TextInputEditText
-        android:id="@+id/inputDeviceName"
-        android:layout_width="@dimen/inputWidth"
-        android:layout_height="@dimen/inputHeight"
-        android:background="@drawable/register_input"
-        android:inputType="text"
-        android:text="我的设备"
-        android:textColor="@color/liteWhite"
-        app:layout_constraintBottom_toTopOf="@id/textSelectDeviceType"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textDeviceName" />
-
-    <TextView
-        android:id="@+id/textSelectDeviceType"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/inputTextMarginTop"
-        android:text="选择受支持的设备："
-        android:textSize="@dimen/textWithInput"
-        app:layout_constraintBottom_toTopOf="@id/inputDeviceType"
-        app:layout_constraintStart_toStartOf="@id/textDeviceName"
-        app:layout_constraintTop_toBottomOf="@id/inputDeviceName" />
-
-    <Spinner
-        android:id="@+id/inputDeviceType"
-        android:layout_width="@dimen/inputWidth"
-        android:layout_height="@dimen/inputHeight"
-        android:background="@drawable/register_input"
-        app:layout_constraintBottom_toTopOf="@id/textClientId"
-        app:layout_constraintStart_toStartOf="@id/inputDeviceName"
-        app:layout_constraintTop_toBottomOf="@id/textSelectDeviceType" />
-
-    <TextView
-        android:id="@+id/textClientId"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/inputTextMarginTop"
-        android:text="您手表的client_id："
-        android:textSize="@dimen/textWithInput"
-        app:layout_constraintBottom_toTopOf="@id/inputClientId"
-        app:layout_constraintStart_toStartOf="@id/textDeviceName"
-        app:layout_constraintTop_toBottomOf="@id/inputDeviceType" />
-
-    <com.google.android.material.textfield.TextInputEditText
-        android:id="@+id/inputClientId"
-        android:layout_width="@dimen/inputWidth"
-        android:layout_height="@dimen/inputHeight"
-        android:background="@drawable/register_input"
-        android:inputType="text"
-        app:layout_constraintBottom_toTopOf="@id/textClientSecret"
-        app:layout_constraintStart_toStartOf="@id/inputDeviceName"
-        app:layout_constraintTop_toBottomOf="@id/textClientId" />
-
-    <TextView
-        android:id="@+id/textClientSecret"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/inputTextMarginTop"
-        android:text="您手表的client_secret"
-        android:textSize="@dimen/textWithInput"
-        app:layout_constraintBottom_toTopOf="@id/inputClientSecret"
-        app:layout_constraintStart_toStartOf="@id/inputDeviceName"
-        app:layout_constraintTop_toBottomOf="@id/inputClientId" />
-
-    <com.google.android.material.textfield.TextInputEditText
-        android:id="@+id/inputClientSecret"
-        android:layout_width="@dimen/inputWidth"
-        android:layout_height="@dimen/inputHeight"
-        android:background="@drawable/register_input"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="@id/inputDeviceName"
-        app:layout_constraintTop_toBottomOf="@id/textClientSecret" />
-
-    <TextView
-        android:id="@+id/submit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/inputTextMarginTop"
-        android:background="@drawable/register_button"
-        android:paddingHorizontal="@dimen/submitBtnPaddingHor"
-        android:paddingVertical="@dimen/submitBtnPaddingVer"
-        android:text="授权"
-        android:textSize="@dimen/submitBtnTextSize"
-        app:layout_constraintEnd_toEndOf="@id/inputClientSecret"
-        app:layout_constraintTop_toBottomOf="@id/inputClientSecret" />
-
-    <TextView
-        android:id="@+id/hasGranted"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/inputTextMarginTop"
-        android:background="@drawable/verify_code_button"
-        android:paddingHorizontal="@dimen/submitBtnPaddingHor"
-        android:paddingVertical="@dimen/submitBtnPaddingVer"
-        android:text="我已授权"
-        android:textSize="@dimen/textWithInput"
-        app:layout_constraintEnd_toEndOf="@id/submit"
-        app:layout_constraintTop_toBottomOf="@id/submit" />
+    </androidx.recyclerview.widget.RecyclerView>
+</androidx.drawerlayout.widget.DrawerLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

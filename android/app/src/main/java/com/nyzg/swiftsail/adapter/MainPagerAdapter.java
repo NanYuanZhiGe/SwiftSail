@@ -22,19 +22,13 @@ public class MainPagerAdapter extends FragmentStateAdapter {
     @Override
     public Fragment createFragment(int position) {
         Fragment fragment = new RecordFragment();
-        switch (position) {
-            case 1:
-                fragment = new ReportFragment();
-                break;
-            case 2:
-                fragment = new ComprehenFragment();
-                break;
-            case 3:
-                fragment = new GeoFragment();
-                break;
-            case 4:
-                fragment = new MineFragment();
-        }
+        fragment = switch (position) {
+            case 1 -> new ReportFragment();
+            case 2 -> new ComprehenFragment();
+            case 3 -> new GeoFragment();
+            case 4 -> new MineFragment();
+            default -> fragment;
+        };
         return fragment;
     }
 

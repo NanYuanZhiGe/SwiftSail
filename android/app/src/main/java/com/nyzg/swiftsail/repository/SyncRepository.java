@@ -12,11 +12,13 @@ import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.bean.ChannelId;
 import com.nyzg.swiftsail.obj.Pair;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class SyncRepository {
     volatile private static SyncRepository INSTANCE;
 
     public MutableLiveData<Pair<String,Void>> notificationPair =new MutableLiveData<>();
-
+    public final AtomicBoolean onSync = new AtomicBoolean(false);
     private SyncRepository() {
     }
 

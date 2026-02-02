@@ -4,28 +4,29 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.nyzg.swiftsail.GlobalApplication;
 import com.nyzg.swiftsail.bean.GlobalInstance;
-import com.nyzg.swiftsail.bean.GlobalToast;
 import com.nyzg.swiftsail.bean.JsonSerializer;
+import com.nyzg.swiftsail.bean.NetWorkBuilder;
+import com.nyzg.swiftsail.bean.NetWorkHandler;
 import com.nyzg.swiftsail.bean.SQLiteDB;
 import com.nyzg.swiftsail.bean.ServerURL;
 import com.nyzg.swiftsail.dao.LastLoginTable;
 import com.nyzg.swiftsail.dao.UserTable;
 import com.nyzg.swiftsail.dbobj.LastLogin;
 import com.nyzg.swiftsail.dbobj.User;
-import com.nyzg.swiftsail.netobj.HttpResp;
 import com.nyzg.swiftsail.netobj.Token;
+import com.nyzg.swiftsail.obj.Pair;
 import com.nyzg.swiftsail.obj.SucceedOrNot;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
-import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
-import okhttp3.Response;
 
-public class LoginRepository{
+public class LoginRepository {
     private volatile static LoginRepository INSTANCE = null;
 
     public static LoginRepository getInstance() {
@@ -98,14 +99,14 @@ public class LoginRepository{
      * 如果上次登录用户为空，token过期，无法连接服务器，返回FAIL，
      * 如果拿到了token，返回SUCCESS，里面会post更新currentUser
      */
-    public CompletableFuture<SucceedOrNot> tryLastLoginAsync() {
+    public CompletableFuture<Pair<SucceedOrNot, String>> tryLastLoginAsync(Consumer<String> onFail) {
         return CompletableFuture.supplyAsync(() -> {
             if (onLastLogin) {
-                return SucceedOrNot.FAIL;
+                return new Pair<>(SucceedOrNot.FAIL, "正在登录");
             }
             onLastLogin = true;
             //下面的这个函数隐含了更新用户的token
-            Optional<User> lastLoginUser = checkLastLogin();
+            Optional<User> lastLoginUser = checkLastLogin(onFail);
             //上一次的登录用户不存在，或者上一次的登录凭证到现在失效或者是无法验证登录凭证
             //就统一进入登录页面
             if (!lastLoginUser.isPresent()) {
@@ -116,13 +117,13 @@ public class LoginRepository{
                 unListUser.id = -1L;
                 availableUserList.add(unListUser);
                 LoginRepository.INSTANCE.availableUserList.postValue(availableUserList);
-                return SucceedOrNot.FAIL;
+                return new Pair<>(SucceedOrNot.FAIL, "登录失败");
             }
             //如果成功，保存当前的登录账户，更新当前的user就行了
             User successCheckUser = lastLoginUser.get();
             LoginRepository.INSTANCE.login(successCheckUser);
             onLastLogin = false;
-            return SucceedOrNot.SUCCEED;
+            return new Pair<>(SucceedOrNot.SUCCEED, "登录成功");
         });
     }
 
@@ -139,7 +140,7 @@ public class LoginRepository{
      * 用于辅助tryLastLoginAsync
      * 检查上一次的登录是否有效
      */
-    private Optional<User> checkLastLogin() {
+    private Optional<User> checkLastLogin(Consumer<String> onFail) {
         SQLiteDB sqLiteDB = SQLiteDB.getDatabase(GlobalApplication.getAppContext());
         LastLoginTable lastLoginTable = sqLiteDB.lastLoginTable();
         List<LastLogin> lastLoginTableList = lastLoginTable.selectAllFromLastLoginTable();
@@ -162,7 +163,7 @@ public class LoginRepository{
             return Optional.empty();
         }
         //网路错误或者验签错误。需要重新登录
-        Optional<String> newToken = acquireNewTokenSyncNullAtFail(oldToken);
+        Optional<String> newToken = acquireNewTokenSyncNullAtFail(oldToken,onFail);
         if (!newToken.isPresent()) {
             return Optional.empty();
         }
@@ -175,28 +176,28 @@ public class LoginRepository{
      * 用于辅助tryLastLoginAsync
      * 根据上一次登录用户的token，获取新的token
      */
-    private Optional<String> acquireNewTokenSyncNullAtFail(String oldToken) {
-        OkHttpClient httpClient = GlobalInstance.OK_HTTP_NO_PROXY;
-        Request request = new Request.Builder().url(ServerURL.URL_VERIFY_AND_GET_TOKEN).method(ServerURL.POST, RequestBody.create(JsonSerializer.serialize(new Token(oldToken)), ServerURL.APPLICATION_JSON)).build();
-        HttpResp httpResp;
-        try (Response response = httpClient.newCall(request).execute()) {
-            if (response.body() == null) {//没有响应数据
-                return Optional.empty();
-            }
-            httpResp = JsonSerializer.deSerialize(response.body().string(), HttpResp.class);
-            if (!httpResp.isSuccess()) {//验证失败
-                GlobalToast.COMMON_TOAST.accept(httpResp.getMessage());
-                return Optional.empty();
-            }
-            //返回的就是新的token
-            Token token = JsonSerializer.mapToObject(httpResp.getContent(), Token.class).orElse(null);
-            if (token == null || token.getToken() == null || token.getToken().isEmpty()) {
-                return Optional.empty();
-            }
-            return Optional.of(token.getToken());
-        } catch (Exception e) {
-            return Optional.empty();
-        }
+    private Optional<String> acquireNewTokenSyncNullAtFail(String oldToken, Consumer<String> onFail) {
+        AtomicReference<Optional<String>> result= new AtomicReference<>(Optional.empty());
+        NetWorkHandler.handleNetRespBeforeLogin(
+                NetWorkBuilder.doChunkRequest(
+                        new Request.Builder()
+                                .url(ServerURL.URL_VERIFY_AND_GET_TOKEN)
+                                .method(
+                                        ServerURL.POST,
+                                        RequestBody.create(JsonSerializer.serialize(new Token(oldToken)), ServerURL.APPLICATION_JSON))
+                                .build()
+                ),
+                onFail,
+                token -> {
+                    if (token == null || token.getToken() == null || token.getToken().isEmpty()) {
+                        result.set(Optional.empty());
+                        return;
+                    }
+                    result.set(Optional.of(token.getToken()));
+                },
+                Token.class
+        );
+        return result.get();
     }
 
     /**

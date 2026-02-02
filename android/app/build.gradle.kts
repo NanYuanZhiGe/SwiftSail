@@ -26,8 +26,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 
@@ -72,4 +72,8 @@ dependencies {
     //新版recycler view，解决在nested scroll view下wrap content的问题
     //然而并没有解决，用了其他的方式解决UnsafeButFixProb
     implementation("androidx.recyclerview:recyclerview:1.3.2")
+
+    implementation("androidx.lifecycle:lifecycle-service:2.4.1")
+
+    implementation("com.github.skydoves:balloon:1.7.3")
 }

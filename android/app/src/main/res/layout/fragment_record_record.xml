@@ -3,92 +3,129 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:clickable="true"
-    android:background="@color/white">
+    android:background="@color/liteWhite"
+    android:clickable="true">
+
+    <org.maplibre.android.maps.MapView
+        android:id="@+id/mapView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/record_record_map_bk"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/backward"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_marginStart="18dp"
+        android:layout_marginTop="35dp"
+        android:background="@drawable/record_record_backward_bk"
+        android:gravity="center"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="center"
+            android:background="@color/white"
+            android:src="@drawable/chevron_left"
+            app:tint="@color/black" />
+    </LinearLayout>
+
 
     <TextView
         android:id="@+id/title"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
+        android:layout_height="55dp"
+        android:layout_marginStart="8dp"
+        android:background="@drawable/record_record_backward_bk"
+        android:gravity="center"
+        android:paddingHorizontal="36dp"
         android:text="未知"
-        android:textSize="26sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="@id/backward"
+        app:layout_constraintStart_toEndOf="@id/backward"
+        app:layout_constraintTop_toTopOf="@id/backward" />
 
-    <org.maplibre.android.maps.MapView
-        android:id="@+id/mapView"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="350dp"
-        android:layout_height="250dp"
-        android:layout_marginTop="8dp"
-        android:background="@drawable/record_record_map_bk"
+        android:layout_height="150dp"
+        android:layout_marginTop="18dp"
+        android:background="@drawable/record_record_detail_bk"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/title" />
+        app:layout_constraintTop_toBottomOf="@id/title">
 
-    <TextView
-        android:id="@+id/durationTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:text="时长（分:秒）"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/mapView" />
+        <TextView
+            android:id="@+id/durationTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="12dp"
+            android:text="时长（分:秒）"
+            android:textSize="@dimen/recordRecordTextSize"
+            app:layout_constraintBottom_toBottomOf="@id/duration"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/duration" />
 
-    <TextView
-        android:id="@+id/duration"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="00:00"
-        android:textSize="56sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/durationTitle" />
+        <TextView
+            android:id="@+id/duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_marginEnd="32dp"
+            android:text="00:00"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/distanceTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16sp"
-        android:text="距离（公里）"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/duration" />
+        <TextView
+            android:id="@+id/distanceTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="距离（公里）"
+            android:textSize="@dimen/recordRecordTextSize"
+            app:layout_constraintBottom_toBottomOf="@id/distanceKilo"
+            app:layout_constraintStart_toStartOf="@id/durationTitle"
+            app:layout_constraintTop_toTopOf="@id/distanceKilo" />
 
-    <TextView
-        android:id="@+id/distanceKilo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="0"
-        android:textColor="@color/darkGreen"
-        android:textSize="88sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/distanceTitle" />
+        <TextView
+            android:id="@+id/distanceKilo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:textColor="@color/darkGreen"
+            android:textSize="@dimen/recordRecordTextSize"
+            app:layout_constraintBottom_toTopOf="@id/speed"
+            app:layout_constraintEnd_toEndOf="@id/duration"
+            app:layout_constraintTop_toBottomOf="@id/duration" />
 
-    <TextView
-        android:id="@+id/speedTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="配速（米每秒）"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/distanceKilo" />
+        <TextView
+            android:id="@+id/speedTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="配速（米每秒）"
+            android:textSize="@dimen/recordRecordTextSize"
+            app:layout_constraintBottom_toBottomOf="@id/speed"
+            app:layout_constraintStart_toStartOf="@id/durationTitle"
+            app:layout_constraintTop_toTopOf="@id/speed" />
 
-    <TextView
-        android:id="@+id/speed"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="--"
-        android:textSize="42sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/speedTitle" />
+        <TextView
+            android:id="@+id/speed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:text="--"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/duration" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     <ImageView
         android:id="@+id/cancel"

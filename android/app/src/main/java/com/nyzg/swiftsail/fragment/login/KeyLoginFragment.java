@@ -165,7 +165,8 @@ public class KeyLoginFragment extends BackPressPopFragment {
                                         //成功登录
                                         LoginRepository.getInstance().login(innerUser);
                                         //返回主界面
-                                        ContextCompat.getMainExecutor(GlobalApplication.getAppContext()).execute(() -> MainActivity.popUntilTheInitOne(requireActivity().getSupportFragmentManager()));
+                                        ContextCompat.getMainExecutor(GlobalApplication.getAppContext())
+                                                .execute(() -> MainActivity.toMainPage(requireActivity().getSupportFragmentManager()));
                                     } catch (Exception e) {
                                         GlobalToast.SERVER_RESP_UNACCEPTABLE.run();
                                     }

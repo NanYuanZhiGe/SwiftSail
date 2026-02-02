@@ -143,7 +143,7 @@ public class MailLoginFragment extends BackPressPopFragment {
                 //成功登录
                 LoginRepository.getInstance().login(tokenUser);
                 //返回主界面
-                GlobalInstance.mainHandler.post(() -> MainActivity.popUntilTheInitOne(requireActivity().getSupportFragmentManager()));
+                GlobalInstance.mainHandler.post(() -> MainActivity.toMainPage(requireActivity().getSupportFragmentManager()));
             } catch (Exception e) {
                 GlobalToast.SERVER_RESP_UNACCEPTABLE.run();
             }
