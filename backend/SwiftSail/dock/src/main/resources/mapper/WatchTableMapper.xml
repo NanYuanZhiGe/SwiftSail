@@ -8,15 +8,32 @@
                                         `authorizeHeader`,
                                         `codeVerifier`,
                                         `clientId`,
+                                        `activate`,
                                         `userId`)
         VALUES (#{name},
                 #{watchType},
                 #{authorizeHeader},
                 #{codeVerifier},
                 #{clientId},
+                #{activate},
                 #{userId})
     </insert>
-
+    <update id="updateWatch">
+        UPDATE `watchTable`
+        SET `name`=#{watch.name},
+            `authorizeHeader`=#{watch.authorizeHeader},
+            `codeVerifier`=#{watch.codeVerifier},
+            `activate`=#{watch.activate}
+        WHERE `userId` = #{watch.userId}
+          AND `clientId` = #{clientId};
+    </update>
+    <update id="updateWatchOffline">
+        UPDATE watchTable
+        SET expireTime=0,
+            activate=0
+        WHERE userId = #{userId}
+          AND clientId = #{clientId};
+    </update>
     <update id="updateWatchToken">
         UPDATE `watchTable`
         SET `clientId`=#{clientId},
@@ -26,17 +43,39 @@
             `expireTime`=#{expireTime}
         WHERE `clientId` = clientId;
     </update>
-
+    <select id="checkSyncStatus">
+        SELECT `clientId`,`expireTime` FROM `watchTable`
+        WHERE `userId`=#{userId} AND `clientId` IN
+        (<foreach collection="clientIdList" item="clientId" separator=",">#{clientId}</foreach>);
+    </select>
+    <select id="getWatchUserId">
+        SELECT `watchUserId`
+        FROM `watchTable`
+        WHERE `userId` = #{userId}
+          AND `clientId` = #{clientId};
+    </select>
+    <delete id="deleteWatch">
+        DELETE
+        FROM `watchTable`
+        WHERE `userId` = #{userId}
+          AND `clientId` = #{clientId};
+    </delete>
     <select id="selectWatchByClientId">
         SELECT *
         FROM `watchTable`
-        WHERE `clientId` = #{clientId};
+        WHERE `userId` = #{userId}
+          AND `clientId` = #{clientId};
     </select>
 
     <select id="checkExpireTime">
-        SELECT `expireTime`, `authorizeHeader`
+        SELECT `expireTime`, `authorizeHeader`, `refreshToken`
         FROM `watchTable`
         WHERE `clientId` = #{clientId};
+    </select>
+    <select id="selectWatchByUserId">
+        SELECT *
+        FROM watchTable
+        WHERE userId = #{userId};
     </select>
     <update id="updateRefreshToken">
         UPDATE `watchTable`

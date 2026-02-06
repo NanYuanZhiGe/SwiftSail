@@ -15,4 +15,28 @@
                 #{epochMonth},
                 #{epochYear});
     </insert>
+
+    <insert id="insertRecordListIntoTable">
+        INSERT INTO `recordTable` VALUES
+        <foreach collection="recordList" separator="," item="record">
+            (null,
+            #{record.userId},
+            #{record.recordId},
+            #{record.type},
+            #{record.exposeValue},
+            #{record.detailValue},
+            #{record.epochDay},
+            #{record.epochWeek},
+            #{record.epochMonth},
+            #{record.epochYear})
+        </foreach>
+    </insert>
+
+    <select id="selectRecordFromAndEnd">
+        SELECT *
+        FROM `recordTable`
+        WHERE `userId` = #{userId}
+          AND `epochDay` BETWEEN #{fromDay} AND #{endDay}
+        ORDER BY `epochDay`;
+    </select>
 </mapper>
