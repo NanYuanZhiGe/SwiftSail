@@ -3,6 +3,7 @@ package com.nyzg.dock.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyzg.common.DateUtils;
+import com.nyzg.common.Pair;
 import com.nyzg.dock.dbobj.Record;
 import com.nyzg.dock.dbobj.Watch;
 import com.nyzg.dock.mapper.RecordTableMapper;
@@ -29,7 +30,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -48,17 +48,40 @@ public class FitbitWebApiService {
     @Resource
     WatchTableMapper watchTableMapper;
 
+    public enum QueryStatus{
+        SUCCEED,FAIL,NO_DATA
+    }
     /**
      * 去fitbit哪里进行网络请求获取数据
      * 返回空一般就都是网络错误了
      */
-    @Nullable
-    public DayRecord getDayRecordNullAtFail(
+    @NonNull
+    public Pair<QueryStatus,DayRecord> getDayRecordNullAtFail(
             long userId,
             @NonNull String accessToken,
             @NonNull String watchUserId,
             long epochDay) {
         LocalDate date = LocalDate.ofEpochDay(epochDay);
+        //先获取activity的数据，如果为空，则可能说明用户没有上传
+        Optional<List<Record>> activityRecord = Optional.empty();
+        for (int i = 0; i < 3; ++i) {
+            activityRecord = getActivityRecordNullAtFail(
+                    accessToken,
+                    watchUserId,
+                    date,
+                    userId,
+                    log::info
+            );
+            if (activityRecord.isPresent()) {
+                break;
+            }
+        }
+        //查不到数据或者是用户没有上传数据
+        if (activityRecord.isEmpty()) {
+            return new Pair<>(QueryStatus.FAIL,null);
+        }else if(activityRecord.get().isEmpty()){
+            return new Pair<>(QueryStatus.NO_DATA,null);
+        }
         Optional<Record> sleepRecord = Optional.empty();
         for (int i = 0; i < 3; ++i) {
             sleepRecord = getSleepRecordNullAtFail(
@@ -73,26 +96,10 @@ public class FitbitWebApiService {
             }
         }
         if (sleepRecord.isEmpty()) {
-            return null;
-        }
-        Optional<List<Record>> activityRecord = Optional.empty();
-        for (int i = 0; i < 3; ++i) {
-            activityRecord = getActivityRecordNullAtFail(
-                    accessToken,
-                    watchUserId,
-                    date,
-                    userId,
-                    log::info
-            );
-            if (activityRecord.isPresent()) {
-                break;
-            }
-        }
-        if (activityRecord.isEmpty()) {
-            return null;
+            return new Pair<>(QueryStatus.FAIL,null);
         }
         activityRecord.get().add(sleepRecord.get());
-        return new DayRecord(activityRecord.get());
+        return new Pair<>(QueryStatus.SUCCEED,new DayRecord(activityRecord.get()));
     }
 
     public Optional<List<DayRecord>> getRangeRecordAndSyncToDatabaseNullAtFail(
@@ -277,6 +284,11 @@ public class FitbitWebApiService {
                     MyHeartRate myHeartRate = new MyHeartRate();
                     myHeartRate.setRest(obj.getSummary().getRestingHeartRate());
                     int count = 0;
+                    //连心率数据都没有，不可能，用户一定是没有上传
+                    if (obj.getSummary().getHeartRateZones() == null || obj.getSummary().getHeartRateZones().isEmpty()) {
+                        result.set(appendList);
+                        return;
+                    }
                     for (FitbitActivitySummary.HeartRateZones zone : obj.getSummary().getHeartRateZones()) {
                         if (zone.getMinutes() > 0) {//用户的心率在这个区间
                             myHeartRate.getCaloriesOut()[count] = (float) zone.getCaloriesOut();
@@ -409,26 +421,6 @@ public class FitbitWebApiService {
             return;
         }
         onSuccess.accept(t);
-    }
-
-    public CompletableFuture<Optional<FitbitOath2Token>> getTokenAsync(
-            @NonNull String clientId,
-            @NonNull String authorizeHeader,
-            @NonNull String code,
-            @NonNull String codeVerifier) {
-        HttpClient httpClient = HttpClient.newBuilder().proxy(PROXY_SELECTOR).build();
-        CompletableFuture<HttpResponse<String>> future = httpClient.sendAsync(
-                getGetTokenRequest(clientId, authorizeHeader, code, codeVerifier),
-                HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
-        );
-        return future.thenApply(HttpResponse::body)
-                .thenApply(body -> {
-                    try {
-                        return Optional.of(OBJECT_MAPPER.readValue(body, FitbitOath2Token.class));
-                    } catch (Exception e) {
-                        return Optional.empty();
-                    }
-                });
     }
 
     public Optional<FitbitOath2Token> getTokenSync(

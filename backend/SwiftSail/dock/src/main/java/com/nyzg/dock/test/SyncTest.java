@@ -18,7 +18,7 @@ public class SyncTest {
     @Test
     public void testGetDay() {
         GetDataDayReq getDataDayReq=new GetDataDayReq();
-        getDataDayReq.setDay(LocalDate.now().toEpochDay());
+        getDataDayReq.setDay(LocalDate.now().toEpochDay()+2);
         HttpResp resp=syncController.getDataDay("1994999817200902144", getDataDayReq);
         log.info(resp.toString());
     }

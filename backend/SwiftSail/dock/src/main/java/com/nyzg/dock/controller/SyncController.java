@@ -12,7 +12,6 @@ import com.nyzg.dock.service.FitbitWebApiService;
 import com.nyzg.dock.service.SyncService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,6 +35,7 @@ public class SyncController {
     private final static HttpResp INVALID_DAY = new HttpResp(false, HttpResp.COMMON_ERROR_CODE, "不合法的日期");
     private final static HttpResp NETWORK_FAIL = new HttpResp(false, HttpResp.COMMON_ERROR_CODE, "请求手表数据网络错误");
     private final static HttpResp NO_WORKING_WATCH = new HttpResp(false, HttpResp.COMMON_ERROR_CODE, "没有正在工作的手表");
+    private final static HttpResp USER_NO_PUSH_DATA = new HttpResp(false, HttpResp.COMMON_ERROR_CODE, "用户未上传数据");
     @Resource
     SyncService syncService;
     @Resource
@@ -64,21 +64,23 @@ public class SyncController {
         if (currentWatch == null) {
             return NO_WORKING_WATCH;
         }
-        DayRecord dayRecord = fitbitWebApiService.getDayRecordNullAtFail(
+        Pair<FitbitWebApiService.QueryStatus, DayRecord> pair = fitbitWebApiService.getDayRecordNullAtFail(
                 queryUserId,
                 currentWatch.getAccessToken(),
                 currentWatch.getWatchUserId(),
                 req.getDay()
         );
-        if (dayRecord == null) {
+        if (pair.getA() == FitbitWebApiService.QueryStatus.FAIL) {
             return NETWORK_FAIL;
+        } else if (pair.getA() == FitbitWebApiService.QueryStatus.NO_DATA) {
+            return USER_NO_PUSH_DATA;
         }
         //异步写入数据库，这里就算写不进也没有关系，如果有东西出错，下一次请求会写入的
         CompletableFuture.supplyAsync(() -> {
-            syncService.insertDataIntoDb(queryUserId, req.getDay(), dayRecord.getRecordList());
+            syncService.insertDataIntoDb(queryUserId, req.getDay(), pair.getB().getRecordList());
             return null;
         });
-        return new HttpResp(true, dayRecord);
+        return new HttpResp(true, pair.getB());
     }
 
 
