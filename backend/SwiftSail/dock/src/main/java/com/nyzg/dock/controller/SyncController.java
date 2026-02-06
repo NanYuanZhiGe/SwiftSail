@@ -4,16 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyzg.common.Pair;
 import com.nyzg.common.netobj.HttpResp;
 import com.nyzg.dock.dbobj.Record;
+import com.nyzg.dock.dbobj.Watch;
 import com.nyzg.dock.mapper.RecordTableMapper;
 import com.nyzg.dock.mapper.WatchTableMapper;
-import com.nyzg.dock.netobj.AcquireSyncDataReq;
-import com.nyzg.dock.netobj.DayRecord;
-import com.nyzg.dock.netobj.RecordBackUpAndroid;
-import com.nyzg.dock.netobj.SyncRecordBackUpReq;
+import com.nyzg.dock.netobj.*;
 import com.nyzg.dock.service.FitbitWebApiService;
 import com.nyzg.dock.service.SyncService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 
 @RestController
@@ -33,6 +33,9 @@ public class SyncController {
     private final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private final static byte[] CHANGE_LINE = "\n".getBytes(StandardCharsets.UTF_8);
     private final static byte[] END_RESPONSE = "{{\"_eof\":true}}".getBytes(StandardCharsets.UTF_8);
+    private final static HttpResp INVALID_DAY = new HttpResp(false, HttpResp.COMMON_ERROR_CODE, "不合法的日期");
+    private final static HttpResp NETWORK_FAIL = new HttpResp(false, HttpResp.COMMON_ERROR_CODE, "请求手表数据网络错误");
+    private final static HttpResp NO_WORKING_WATCH = new HttpResp(false, HttpResp.COMMON_ERROR_CODE, "没有正在工作的手表");
     @Resource
     SyncService syncService;
     @Resource
@@ -42,9 +45,46 @@ public class SyncController {
     @Resource
     FitbitWebApiService fitbitWebApiService;
 
+    @PostMapping(path = "/get/data/day")
+    public HttpResp getDataDay(
+            @RequestHeader("userId") String userId,
+            @RequestBody GetDataDayReq req) {
+        if (req == null || req.getDay() < LEAST_START_EPOCH) {
+            return INVALID_DAY;
+        }
+        long queryUserId = Long.parseLong(userId);
+        //先从数据库中查询数据
+        {
+            DayRecord dayRecord = syncService.getDayRecordFromDb(queryUserId, req.getDay());
+            if (dayRecord != null && !dayRecord.getRecordList().isEmpty()) {
+                return new HttpResp(true, dayRecord);
+            }
+        }
+        Watch currentWatch = syncService.getCurrentActivateWatch(queryUserId);
+        if (currentWatch == null) {
+            return NO_WORKING_WATCH;
+        }
+        DayRecord dayRecord = fitbitWebApiService.getDayRecordNullAtFail(
+                queryUserId,
+                currentWatch.getAccessToken(),
+                currentWatch.getWatchUserId(),
+                req.getDay()
+        );
+        if (dayRecord == null) {
+            return NETWORK_FAIL;
+        }
+        //异步写入数据库，这里就算写不进也没有关系，如果有东西出错，下一次请求会写入的
+        CompletableFuture.supplyAsync(() -> {
+            syncService.insertDataIntoDb(queryUserId, req.getDay(), dayRecord.getRecordList());
+            return null;
+        });
+        return new HttpResp(true, dayRecord);
+    }
+
+
     @PostMapping(path = "/acquire/sync/data")
     public ResponseEntity<StreamingResponseBody> acquireSyncData(
-            @RequestHeader String userId,
+            @RequestHeader("userId") String userId,
             @RequestBody AcquireSyncDataReq req) {
         //+++++++++++++++++++校验clientId的合法性+++++++++++++++
         //clientId不能为空

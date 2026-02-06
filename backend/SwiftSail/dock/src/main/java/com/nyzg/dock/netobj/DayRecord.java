@@ -15,4 +15,8 @@ public class DayRecord {
     public DayRecord() {
         recordList = new ArrayList<>(6);
     }
+
+    public DayRecord(List<Record> recordList) {
+        this.recordList = recordList;
+    }
 }

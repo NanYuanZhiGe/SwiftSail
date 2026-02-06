@@ -14,7 +14,6 @@ import jakarta.annotation.Resource;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
@@ -48,6 +47,53 @@ public class FitbitWebApiService {
 
     @Resource
     WatchTableMapper watchTableMapper;
+
+    /**
+     * 去fitbit哪里进行网络请求获取数据
+     * 返回空一般就都是网络错误了
+     */
+    @Nullable
+    public DayRecord getDayRecordNullAtFail(
+            long userId,
+            @NonNull String accessToken,
+            @NonNull String watchUserId,
+            long epochDay) {
+        LocalDate date = LocalDate.ofEpochDay(epochDay);
+        Optional<Record> sleepRecord = Optional.empty();
+        for (int i = 0; i < 3; ++i) {
+            sleepRecord = getSleepRecordNullAtFail(
+                    accessToken,
+                    watchUserId,
+                    date,
+                    userId,
+                    log::info
+            );
+            if (sleepRecord.isPresent()) {
+                break;
+            }
+        }
+        if (sleepRecord.isEmpty()) {
+            return null;
+        }
+        Optional<List<Record>> activityRecord = Optional.empty();
+        for (int i = 0; i < 3; ++i) {
+            activityRecord = getActivityRecordNullAtFail(
+                    accessToken,
+                    watchUserId,
+                    date,
+                    userId,
+                    log::info
+            );
+            if (activityRecord.isPresent()) {
+                break;
+            }
+        }
+        if (activityRecord.isEmpty()) {
+            return null;
+        }
+        activityRecord.get().add(sleepRecord.get());
+        return new DayRecord(activityRecord.get());
+    }
 
     public Optional<List<DayRecord>> getRangeRecordAndSyncToDatabaseNullAtFail(
             long userId,
@@ -454,15 +500,5 @@ public class FitbitWebApiService {
             return;
         }
         onSuccess.accept(tokenResp);
-    }
-
-    @Test
-    public void testRefreshToken() {
-        getRefreshToken(
-                "MjNUUjVYOmJjYTg2NGUwOTViNDAzZjM0NzRhMTczZTk1YmJlODQ3",
-                "bac6ce2dbf177a502b128db1758adcdce7a69115603f0903b3131b0484995f47",
-                log::info,
-                resp -> log.info(resp.toString())
-        );
     }
 }
