@@ -28,7 +28,7 @@ import com.nyzg.swiftsail.bean.ServerURL;
 import com.nyzg.swiftsail.bean.NetWorkHandler;
 import com.nyzg.swiftsail.bean.GlobalInstance;
 import com.nyzg.swiftsail.bean.GlobalToast;
-import com.nyzg.swiftsail.bean.JsonSerializer;
+import com.nyzg.swiftsail.bean.MyJsonSerializer;
 import com.nyzg.swiftsail.bean.MatchUtils;
 import com.nyzg.swiftsail.dbobj.User;
 import com.nyzg.swiftsail.listener.LoginCountingListener;
@@ -192,7 +192,7 @@ public class LoginFragment extends Fragment {
                         Request request = new Request.Builder()
                                 .url(new URL(ServerURL.URL_REGISTER_SUBMIT))
                                 .method("POST",
-                                        RequestBody.create(JsonSerializer.serialize(req),
+                                        RequestBody.create(MyJsonSerializer.serialize(req),
                                                 ServerURL.APPLICATION_JSON
                                         ))
                                 .build();
@@ -206,7 +206,7 @@ public class LoginFragment extends Fragment {
                     }, resp -> {
                         GlobalToast.RESPONSE_SUCCESS.accept(resp.getMessage());
                         try {
-                            User user = JsonSerializer.mapToObject(resp.getContent(), User.class).orElse(null);
+                            User user = MyJsonSerializer.mapToObject(resp.getContent(), User.class).orElse(null);
                             if (user == null) {
                                 GlobalToast.SERVER_RESP_UNACCEPTABLE.run();
                                 return;
@@ -246,7 +246,7 @@ public class LoginFragment extends Fragment {
                 Request request = new Request.Builder()
                         .url(ServerURL.URL_REGISTER_VERIFY_CODE)
                         .method("POST",
-                                RequestBody.create(JsonSerializer.serialize(new MailVerifyReq(strMailAddr)),
+                                RequestBody.create(MyJsonSerializer.serialize(new MailVerifyReq(strMailAddr)),
                                         ServerURL.APPLICATION_JSON
                                 ))
                         .build();

@@ -12,10 +12,10 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.nyzg.swiftsail.view.MyConstraintLayout
         android:id="@+id/mainSelector"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="80dp"
         android:background="@color/l_mainSelector"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -24,7 +24,7 @@
 
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/nav"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/transparent"
             app:labelVisibilityMode="labeled"
@@ -33,5 +33,5 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:menu="@menu/nav" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.nyzg.swiftsail.view.MyConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

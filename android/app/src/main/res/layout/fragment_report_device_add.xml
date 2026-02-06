@@ -213,7 +213,5 @@
         android:layout_gravity="end"
         android:background="@color/white"
         android:paddingVertical="28dp"
-        android:paddingStart="12dp">
-
-    </androidx.recyclerview.widget.RecyclerView>
+        android:paddingStart="12dp"/>
 </androidx.drawerlayout.widget.DrawerLayout>

@@ -1,31 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:background="@drawable/report_manage_device_bk">
 
-    <TextView
-        android:id="@+id/title"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/titleHeight"
-        android:gravity="center"
-        android:paddingTop="@dimen/titlePaddingTop"
-        android:text="我的设备"
-        android:textAlignment="center"
-        android:textSize="@dimen/titleTextSize"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:id="@+id/backward"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
+            android:layout_marginStart="18dp"
+            android:layout_marginTop="35dp"
+            android:background="@drawable/record_record_backward_bk"
+            android:gravity="center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center"
+                android:background="@color/white"
+                android:src="@drawable/chevron_left"
+                app:tint="@color/black" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="55dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/record_record_backward_bk"
+            android:gravity="center"
+            android:paddingHorizontal="36dp"
+            android:text="管理可穿戴设备"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="@id/backward"
+            app:layout_constraintStart_toEndOf="@id/backward"
+            app:layout_constraintTop_toTopOf="@id/backward" />
+
+        <ImageView
+            android:id="@+id/notification"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="18dp"
+            android:src="@drawable/notifications"
+            app:layout_constraintBottom_toBottomOf="@id/backward"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/backward" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/devices"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:orientation="vertical"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/title" />
+
+        <TextView
+            android:id="@+id/currentRunning"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="@color/liteWhite"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/devices" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/devices"
+        android:id="@+id/msgBox"
+        android:layout_width="240dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
         android:background="@color/white"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/title" />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:paddingVertical="28dp"
+        android:paddingStart="12dp" />
+</androidx.drawerlayout.widget.DrawerLayout>

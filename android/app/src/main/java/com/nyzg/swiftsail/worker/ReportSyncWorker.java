@@ -10,13 +10,13 @@ import androidx.work.WorkerParameters;
 import com.nyzg.swiftsail.GlobalApplication;
 import com.nyzg.swiftsail.bean.DateUtils;
 import com.nyzg.swiftsail.bean.GlobalInstance;
-import com.nyzg.swiftsail.bean.JsonSerializer;
+import com.nyzg.swiftsail.bean.MyJsonSerializer;
 import com.nyzg.swiftsail.bean.NetWorkBuilder;
 import com.nyzg.swiftsail.bean.SQLiteDB;
 import com.nyzg.swiftsail.bean.ServerURL;
 import com.nyzg.swiftsail.dao.RecordTable;
 import com.nyzg.swiftsail.dbobj.User;
-import com.nyzg.swiftsail.dbobj.Watch;
+import com.nyzg.swiftsail.netobj.report.Watch;
 import com.nyzg.swiftsail.netobj.report.AcquireSyncDataReq;
 import com.nyzg.swiftsail.netobj.report.DayRecord;
 import com.nyzg.swiftsail.obj.Pair;
@@ -42,7 +42,9 @@ public class ReportSyncWorker extends Worker {
         if (user == null || user.id == 0L) {//早不到用户或者本地用户，直接返回
             return Result.success();
         }
+        /*
         OkHttpClient okHttpClient = GlobalInstance.OK_HTTP_NO_PROXY;
+
         try {
             Watch watch = SQLiteDB.getDatabase(GlobalApplication.getAppContext()).watchTable().selectWatchActivated(user.id);
             if (watch == null || watch.clientId == null || watch.clientId.isEmpty()) {//如果没有可用的watch
@@ -101,7 +103,7 @@ public class ReportSyncWorker extends Worker {
                     }
 
                     // 处理有效 JSON 行
-                    DayRecord dayRecord = JsonSerializer.deSerialize(line, DayRecord.class);
+                    DayRecord dayRecord = MyJsonSerializer.deSerialize(line, DayRecord.class);
                     if (dayRecord == null || dayRecord.recordList == null || dayRecord.recordList.isEmpty()) {
                         continue;
                     }
@@ -123,6 +125,7 @@ public class ReportSyncWorker extends Worker {
         } catch (Exception e) {
             return Result.failure();
         }
+         */
         return Result.success();
     }
 }

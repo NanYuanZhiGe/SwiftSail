@@ -1,16 +1,20 @@
 package com.nyzg.swiftsail.fragment.login;
 
-import android.graphics.Rect;
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
 import android.os.Bundle;
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.github.boybeak.skbglobal.SoftKeyboardGlobal;
 import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.bean.NavManager;
 import com.nyzg.swiftsail.bean.UnsafeButFixProb;
@@ -22,36 +26,17 @@ public class MainFragment extends Fragment {
         return new MainFragment();
     }
 
-    private View nav;
+    View nav;
+    View root;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View father = inflater.inflate(R.layout.fragment_main, container, false);
         initNavManager(father);
-        nav = father.findViewById(R.id.nav);
-        shrinkNavOnKeyboardStatus();
+        nav = father.findViewById(R.id.mainSelector);
+        root = father;
         return father;
-    }
-
-    private void shrinkNavOnKeyboardStatus() {
-        if (getActivity() == null) {
-            return;
-        }
-        final View rootView = getActivity().getWindow().getDecorView();
-        rootView.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
-            Rect r = new Rect();
-            rootView.getWindowVisibleDisplayFrame(r);
-            int screenHeight = rootView.getHeight();//屏幕的高度
-            int keypadHeight = screenHeight - r.bottom;
-            UnsafeButFixProb.innerFragmentHeight.setValue(r.bottom);
-            boolean isKeyboardShown = keypadHeight > screenHeight * 0.15;
-            if (isKeyboardShown) {
-                nav.setVisibility(View.GONE);
-            } else {
-                nav.setVisibility(View.VISIBLE);
-            }
-        });
     }
 
     @Override
@@ -59,7 +44,32 @@ public class MainFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         View viewpager = view.findViewById(R.id.mainViewPager);
         viewpager.post(() -> UnsafeButFixProb.innerFragmentHeight.setValue(viewpager.getHeight()));
+        SoftKeyboardGlobal.INSTANCE.addSoftKeyboardCallback(new SoftKeyboardGlobal.SoftKeyboardCallback() {
+            @Override
+            public void onOpen(int i) {
+                nav.setVisibility(GONE);
+                root.post(() -> {
+                    int availableHeight = root.getHeight() - i;
+                    UnsafeButFixProb.innerFragmentHeight.setValue(availableHeight);
+                });
+            }
+
+            @Override
+            public void onClose() {
+                nav.setVisibility(VISIBLE);
+                nav.post(() -> {
+                    int availableHeight = root.getHeight() - nav.getHeight();
+                    UnsafeButFixProb.innerFragmentHeight.setValue(availableHeight);
+                });
+            }
+
+            @Override
+            public void onHeightChanged(int i) {
+
+            }
+        });
     }
+
 
     private void initNavManager(View father) {
         navManager.addView(father.findViewById(R.id.mainViewPager), father.findViewById(R.id.nav), this.requireActivity());

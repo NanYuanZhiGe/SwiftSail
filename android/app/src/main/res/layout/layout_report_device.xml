@@ -2,78 +2,100 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="56dp"
-    android:layout_marginBottom="4dp"
-    android:layout_marginHorizontal="8dp"
-    android:background="@drawable/report_device_bk">
+    android:layout_height="240dp"
+    android:layout_marginBottom="24dp">
 
-    <TextView
-        android:id="@+id/firstCharacter"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="18dp"
-        android:text="未"
-        android:textSize="30sp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/detail"
+        android:layout_width="340dp"
+        android:layout_height="220dp"
+        android:background="@drawable/report_device_bk"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:text="未知设备"
-        android:textSize="18sp"
-        app:layout_constraintStart_toEndOf="@id/firstCharacter"
-        app:layout_constraintTop_toTopOf="@id/firstCharacter" />
-
-    <TextView
-        android:id="@+id/status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="授权过期"
-        android:textColor="@color/lightRed"
-        android:textSize="10sp"
-        app:layout_constraintBottom_toBottomOf="@id/firstCharacter"
-        app:layout_constraintStart_toStartOf="@id/name"
-        app:layout_constraintTop_toBottomOf="@id/name" />
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/resetDevice"
-        android:layout_width="48dp"
-        android:layout_height="56dp"
-        android:background="@color/lightGreen"
-        app:layout_constraintEnd_toStartOf="@id/deleteDevice"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/refresh"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/white" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/deleteDevice"
-        android:layout_width="48dp"
-        android:layout_height="56dp"
-        android:background="@drawable/report_device_bk_1"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintStart_toStartOf="parent">
 
         <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/delete"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:id="@+id/image"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="28dp"
+            android:background="@drawable/report_manage_device_img_bk1"
+            android:padding="8dp"
+            android:src="@drawable/watch"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:tint="@color/white" />
+
+        <TextView
+            android:id="@+id/watchName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:text="我的设备"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@id/image"
+            app:layout_constraintTop_toBottomOf="@id/image" />
+
+        <TextView
+            android:id="@+id/watchType"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Fitbit-（离线）"
+            android:textColor="@color/liteWhite"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="@id/watchName"
+            app:layout_constraintTop_toBottomOf="@id/watchName" />
+
+        <ImageView
+            android:id="@+id/deleteDevice"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="28dp"
+            android:src="@drawable/delete"
+            app:tint="@color/lightRed"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="删除设备"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/deleteDevice"
+            app:layout_constraintStart_toStartOf="@id/deleteDevice" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/goOnline"
+            android:layout_width="60dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="30dp"
+            app:layout_constraintBottom_toBottomOf="@id/deleteDevice"
+            app:layout_constraintEnd_toStartOf="@id/deleteDevice"
+            app:layout_constraintTop_toTopOf="@id/deleteDevice" />
+
+        <TextView
+            android:id="@+id/lineText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="上线"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/goOnline"
+            app:layout_constraintStart_toStartOf="@id/goOnline" />
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <ImageView
+        android:id="@+id/bigImage"
+        android:layout_width="140dp"
+        android:layout_height="140dp"
+        android:layout_marginEnd="28dp"
+        android:src="@drawable/fitbit_charge"
+        app:layout_constraintEnd_toEndOf="@id/detail"
+        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

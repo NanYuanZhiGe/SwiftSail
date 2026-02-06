@@ -30,7 +30,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RecordFragment extends Fragment {
+public class RecordFragment extends MainBase {
     private final static List<BarEntry> EMPTY_BARS = new ArrayList<>();
 
     static {

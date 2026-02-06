@@ -4,7 +4,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.nyzg.swiftsail.GlobalApplication;
 import com.nyzg.swiftsail.bean.GlobalInstance;
-import com.nyzg.swiftsail.bean.JsonSerializer;
+import com.nyzg.swiftsail.bean.MyJsonSerializer;
 import com.nyzg.swiftsail.bean.NetWorkBuilder;
 import com.nyzg.swiftsail.bean.NetWorkHandler;
 import com.nyzg.swiftsail.bean.SQLiteDB;
@@ -184,7 +184,7 @@ public class LoginRepository {
                                 .url(ServerURL.URL_VERIFY_AND_GET_TOKEN)
                                 .method(
                                         ServerURL.POST,
-                                        RequestBody.create(JsonSerializer.serialize(new Token(oldToken)), ServerURL.APPLICATION_JSON))
+                                        RequestBody.create(MyJsonSerializer.serialize(new Token(oldToken)), ServerURL.APPLICATION_JSON))
                                 .build()
                 ),
                 onFail,

@@ -11,7 +11,7 @@ import androidx.fragment.app.Fragment;
 
 import com.nyzg.swiftsail.R;
 
-public class GeoFragment extends Fragment {
+public class GeoFragment extends MainBase {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {

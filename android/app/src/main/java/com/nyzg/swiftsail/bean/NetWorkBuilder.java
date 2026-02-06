@@ -1,15 +1,20 @@
 package com.nyzg.swiftsail.bean;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.nyzg.swiftsail.repository.LoginRepository;
 
 import java.net.URL;
+import java.util.concurrent.CompletableFuture;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.internal.http.HttpHeaders;
 
 public class NetWorkBuilder {
     /**
@@ -18,10 +23,17 @@ public class NetWorkBuilder {
      */
     public static <T> Request buildJsonRequestJwt(URL url, String method, T obj) {
         assert LoginRepository.getInstance().getCurrentUser().getValue() != null;
+        if (method.equals(ServerURL.GET)){
+            return new Request.Builder()
+                    .url(url)
+                    .addHeader("jwt-token", LoginRepository.getInstance().getCurrentUser().getValue().token)
+                    .get()
+                    .build();
+        }
         return new Request.Builder()
                 .url(url)
-                .method(method, RequestBody.create(
-                        JsonSerializer.serialize(obj), ServerURL.APPLICATION_JSON
+                .method(method, obj==null?RequestBody.create("{}",ServerURL.APPLICATION_JSON):RequestBody.create(
+                        MyJsonSerializer.serialize(obj), ServerURL.APPLICATION_JSON
                 ))
                 .addHeader("jwt-token", LoginRepository.getInstance().getCurrentUser().getValue().token)
                 .build();
@@ -34,5 +46,10 @@ public class NetWorkBuilder {
         } catch (Exception e) {
             return null;
         }
+    }
+
+
+    public static CompletableFuture<Response> doChunkRequestAsync(@NonNull Request request){
+        return CompletableFuture.supplyAsync(()-> doChunkRequest(request));
     }
 }

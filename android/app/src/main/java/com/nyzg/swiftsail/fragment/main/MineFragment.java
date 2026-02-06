@@ -7,19 +7,16 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 
 import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.fragment.mine.MineMainFragment;
 
-public class MineFragment extends Fragment {
+public class MineFragment extends MainBase {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View father = inflater.inflate(R.layout.layout_mine, container, false);
-        requireActivity()
-                .getSupportFragmentManager()
+        getChildFragmentManager()
                 .beginTransaction()
                 .replace(R.id.mineFragment, MineMainFragment.getInstance())
                 .commit();

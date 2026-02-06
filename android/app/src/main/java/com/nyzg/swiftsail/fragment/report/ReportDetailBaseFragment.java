@@ -21,7 +21,6 @@ import com.nyzg.swiftsail.bean.SQLiteDB;
 import com.nyzg.swiftsail.bean.UnsafeButFixProb;
 import com.nyzg.swiftsail.dao.RecordTable;
 import com.nyzg.swiftsail.dbobj.User;
-import com.nyzg.swiftsail.fragment.BackPressPopFragment;
 import com.nyzg.swiftsail.fragment.report.detail.ReportDetailRestPageFragment;
 import com.nyzg.swiftsail.obj.Pair;
 import com.nyzg.swiftsail.obj.SumType;
@@ -31,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-abstract public class ReportDetailBaseFragment extends BackPressPopFragment {
+abstract public class ReportDetailBaseFragment extends Fragment {
 
     @Override
     final public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {

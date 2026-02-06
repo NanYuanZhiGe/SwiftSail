@@ -18,8 +18,8 @@ public class GlobalInstance {
      */
     public final static OkHttpClient OK_HTTP_NO_PROXY = new OkHttpClient.Builder()
             .proxy(Proxy.NO_PROXY)
-            .connectTimeout(Duration.ofSeconds(5))
-            .readTimeout(Duration.ofSeconds(30))
+            .connectTimeout(Duration.ofSeconds(10))
+            .readTimeout(Duration.ofSeconds(60))
             .build();
     /**
      * 对于所有外面的请求，比如fitbit就需要使用有代理情况的http客户端

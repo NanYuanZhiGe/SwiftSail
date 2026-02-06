@@ -6,6 +6,7 @@
     android:layout_height="match_parent">
 
     <com.sothree.slidinguppanel.SlidingUpPanelLayout
+        android:id="@+id/slidingUpPanel"
         android:layout_width="match_parent"
         android:layout_height="800dp"
         android:background="@color/white"

@@ -19,7 +19,7 @@ public class NetWorkHandler {
     private static final String HTTP_SUCCESS_BUT_WITH = "http请求成功，但是";
     private static final String DESERIALIZE_ERROR = "HttpResp.content反序列化错误";
     private static final String CONTENT_PARSE_ERROR = "Http响应内容解析错误";
-    private static final String SERVER_NOT_FOUND = "404-找不到所请求的服务！检查http请求格式！";
+    private static final String SERVER_NOT_FOUND = "404-找不到所请求的服务！";
     private static final String REQUEST_NEED_FRESH_TOKEN = "401-您的登录状态已过期";
     private static final String REQUEST_FORBIDDEN = "403-您没有权限访问这个服务";
     private static final String INTERNAL_SERVER_ERROR = "服务器内部错误";
@@ -40,7 +40,7 @@ public class NetWorkHandler {
             return;
         }
         try {
-            HttpResp httpResp = JsonSerializer.deSerialize(response.body() != null ? response.body().string() : null, HttpResp.class);
+            HttpResp httpResp = MyJsonSerializer.deSerialize(response.body() != null ? response.body().string() : null, HttpResp.class);
             if (httpResp == null || !httpResp.isSuccess()) {
                 onFail.accept(String.format("%s,%s", HTTP_SUCCESS_BUT_WITH, httpResp == null ? "（缺失错误信息）" : httpResp.getMessage()));
                 response.close();
@@ -48,7 +48,7 @@ public class NetWorkHandler {
             }
             T content;
             if (!Void.class.equals(clz)) {
-                content = JsonSerializer.mapToObject(httpResp.getContent(), clz).orElse(null);
+                content = MyJsonSerializer.mapToObject(httpResp.getContent(), clz).orElse(null);
                 if (content == null) {
                     onFail.accept(CONTENT_PARSE_ERROR);
                     response.close();
@@ -80,8 +80,8 @@ public class NetWorkHandler {
             response.close();
             return;
         }
-        try {
-            HttpResp httpResp = JsonSerializer.deSerialize(response.body() != null ? response.body().string() : null, HttpResp.class);
+        try (response) {
+            HttpResp httpResp = MyJsonSerializer.deSerialize(response.body() != null ? response.body().string() : null, HttpResp.class);
             if (httpResp == null || !httpResp.isSuccess()) {
                 GlobalToast.RESPONSE_NOT_SUCCESS.accept(httpResp == null ? null : httpResp.getMessage());
                 onFail.run();
@@ -93,7 +93,6 @@ public class NetWorkHandler {
             GlobalToast.CONTENT_UNACCEPTABLE.run();
         } finally {
             onFail.run();
-            response.close();
         }
     }
 
@@ -154,14 +153,14 @@ public class NetWorkHandler {
         //对于合法请求，也要处理里面的成功和失败情况
         T content;
         try {
-            HttpResp httpResp = JsonSerializer.deSerialize(response.body() != null ? response.body().string() : null, HttpResp.class);
+            HttpResp httpResp = MyJsonSerializer.deSerialize(response.body() != null ? response.body().string() : null, HttpResp.class);
             if (httpResp == null || !httpResp.isSuccess()) {
                 GlobalToast.RESPONSE_NOT_SUCCESS.accept(httpResp == null ? statusCode + "" : httpResp.getMessage());
                 onFail.run();
                 response.close();
                 return;
             }
-            content = JsonSerializer.mapToObject(httpResp.getContent(), clz).orElse(null);
+            content = MyJsonSerializer.mapToObject(httpResp.getContent(), clz).orElse(null);
             if (content == null && clz != Void.class) {
                 GlobalToast.CONTENT_UNACCEPTABLE.run();
                 onFail.run();
@@ -207,8 +206,13 @@ public class NetWorkHandler {
             }
             return;
         } else if (statusCode == 404) {
-            onFail.accept(SERVER_NOT_FOUND);
+            onFail.accept(SERVER_NOT_FOUND + response.request().url());
             response.close();
+            return;
+        } else if (statusCode == 405) {
+            onFail.accept("Method Not Allow");
+            response.close();
+            return;
         } else if (statusCode >= 500) {
             onFail.accept(statusCode + INTERNAL_SERVER_ERROR);
             response.close();
@@ -217,16 +221,19 @@ public class NetWorkHandler {
         //下面的都是合法请求
         //对于合法请求，也要处理里面的成功和失败情况
         try {
-            HttpResp httpResp = JsonSerializer.deSerialize(response.body() != null ? response.body().string() : null, HttpResp.class);
-            if (httpResp == null || !httpResp.isSuccess()) {
-                GlobalToast.RESPONSE_NOT_SUCCESS.accept(httpResp == null ? statusCode + "" : httpResp.getMessage());
+            HttpResp httpResp = MyJsonSerializer.deSerialize(response.body() != null ? response.body().string() : null, HttpResp.class);
+            if (httpResp == null) {
                 onFail.accept(CONTENT_PARSE_ERROR);
+                response.close();
+                return;
+            } else if (!httpResp.isSuccess()) {
+                onFail.accept(httpResp.getMessage());
                 response.close();
                 return;
             }
             T content;
             if (!Void.class.equals(clz)) {
-                content = JsonSerializer.mapToObject(httpResp.getContent(), clz).orElse(null);
+                content = MyJsonSerializer.mapToObject(httpResp.getContent(), clz).orElse(null);
                 if (content == null) {
                     onFail.accept(DESERIALIZE_ERROR);
                     response.close();

@@ -55,8 +55,7 @@ public class MineMainFragment extends Fragment {
     }
 
     private void onUserEntranceClicked(View view) {
-        requireActivity()
-                .getSupportFragmentManager()
+        requireParentFragment().getChildFragmentManager()
                 .beginTransaction()
                 .replace(R.id.mineFragment, UserDataFragment.getInstance())
                 .addToBackStack(null)
@@ -64,7 +63,7 @@ public class MineMainFragment extends Fragment {
     }
 
     private void onSecurityClicked(View view) {
-        requireActivity().getSupportFragmentManager()
+        requireParentFragment().getChildFragmentManager()
                 .beginTransaction()
                 .replace(R.id.mineFragment, MineSecurityFragment.getInstance())
                 .addToBackStack(null)
@@ -104,7 +103,7 @@ public class MineMainFragment extends Fragment {
                         List<User> availableUserList = sqLiteDB.userTable().selectAllUser();
                         //需要额外添加一个用户：“账号未列出？”
                         User unListUser = new User();
-                        unListUser.id=-1L;
+                        unListUser.id = -1L;
                         availableUserList.add(unListUser);
                         LoginRepository.getInstance().availableUserList.postValue(availableUserList);
                         return null;

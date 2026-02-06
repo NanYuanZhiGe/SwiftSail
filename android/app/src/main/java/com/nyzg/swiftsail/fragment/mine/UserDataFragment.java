@@ -12,13 +12,12 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.nyzg.swiftsail.R;
-import com.nyzg.swiftsail.fragment.BackPressPopFragment;
 import com.nyzg.swiftsail.repository.LoginRepository;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-public class UserDataFragment extends BackPressPopFragment {
+public class UserDataFragment extends Fragment {
 
     public static Fragment getInstance() {
         return new UserDataFragment();

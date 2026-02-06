@@ -9,11 +9,17 @@ import static com.nyzg.swiftsail.R.id.nav_report;
 
 import android.view.View;
 
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.MutableLiveData;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.nyzg.swiftsail.adapter.MainPagerAdapter;
+import com.nyzg.swiftsail.repository.FragmentRepository;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class NavManager {
     static private volatile NavManager self;
@@ -47,14 +53,19 @@ public class NavManager {
             int currentItem = viewPager2.getCurrentItem();
             if (id == nav_record && currentItem != 0) {
                 viewPager2.setCurrentItem(0);
+                FragmentRepository.getInstance().currentPos=0;
             } else if (id == nav_report && currentItem != 1) {
                 viewPager2.setCurrentItem(1);
+                FragmentRepository.getInstance().currentPos=1;
             } else if (id == nac_comprehen && currentItem != 2) {
                 viewPager2.setCurrentItem(2);
+                FragmentRepository.getInstance().currentPos=2;
             } else if (id == nav_geo && currentItem != 3) {
                 viewPager2.setCurrentItem(3);
+                FragmentRepository.getInstance().currentPos=3;
             } else if (id == nav_mine && currentItem != 4) {
                 viewPager2.setCurrentItem(4);
+                FragmentRepository.getInstance().currentPos=4;
             }
             return true;
         });
@@ -68,19 +79,13 @@ public class NavManager {
 
     public void changeNav(int position) {
         int id = nav_record;
-        switch (position) {
-            case 1:
-                id = nav_report;
-                break;
-            case 2:
-                id = nac_comprehen;
-                break;
-            case 3:
-                id = nav_geo;
-                break;
-            case 4:
-                id = nav_mine;
-        }
+        id = switch (position) {
+            case 1 -> nav_report;
+            case 2 -> nac_comprehen;
+            case 3 -> nav_geo;
+            case 4 -> nav_mine;
+            default -> id;
+        };
         bottomNavigationView.setSelectedItemId(id);
     }
 }

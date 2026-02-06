@@ -28,11 +28,10 @@ import com.nyzg.swiftsail.bean.ServerURL;
 import com.nyzg.swiftsail.bean.NetWorkHandler;
 import com.nyzg.swiftsail.bean.GlobalInstance;
 import com.nyzg.swiftsail.bean.GlobalToast;
-import com.nyzg.swiftsail.bean.JsonSerializer;
+import com.nyzg.swiftsail.bean.MyJsonSerializer;
 import com.nyzg.swiftsail.dbobj.User;
 import com.nyzg.swiftsail.encrypt.Biometric;
 import com.nyzg.swiftsail.encrypt.Sha256;
-import com.nyzg.swiftsail.fragment.BackPressPopFragment;
 import com.nyzg.swiftsail.fragment.login.KeyLoginFragment;
 import com.nyzg.swiftsail.netobj.login.BiometricAddReq;
 import com.nyzg.swiftsail.netobj.login.BiometricAddResp;
@@ -47,7 +46,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class MineSecurityFragment extends BackPressPopFragment {
+public class MineSecurityFragment extends Fragment {
     public static Fragment getInstance() {
         return new MineSecurityFragment();
     }
@@ -142,7 +141,7 @@ class MyPopupWindow extends PopupWindow {
                 Request request = new Request.Builder()
                         .url(new URL(ServerURL.URL_REGISTER_BIOMETRIC))
                         .method(ServerURL.POST, RequestBody.create(
-                                JsonSerializer.serialize(req), ServerURL.APPLICATION_JSON
+                                MyJsonSerializer.serialize(req), ServerURL.APPLICATION_JSON
                         )).build();
                 return Optional.of(client.newCall(request).execute());
             } catch (Exception e) {
@@ -157,7 +156,7 @@ class MyPopupWindow extends PopupWindow {
                         return;
                     }
                     try {
-                        BiometricAddResp biometricAddResp = JsonSerializer.mapToObject(result.getContent(), BiometricAddResp.class).orElse(null);
+                        BiometricAddResp biometricAddResp = MyJsonSerializer.mapToObject(result.getContent(), BiometricAddResp.class).orElse(null);
                         if (biometricAddResp == null) {
                             GlobalToast.SERVER_RESP_UNACCEPTABLE.run();
                             return;

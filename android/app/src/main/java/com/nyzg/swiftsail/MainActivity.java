@@ -22,6 +22,7 @@ import android.widget.Toast;
 import com.nyzg.swiftsail.bean.ChannelId;
 import com.nyzg.swiftsail.fragment.login.MainFragment;
 import com.nyzg.swiftsail.fragment.main.WaitingFragment;
+import com.nyzg.swiftsail.repository.FragmentRepository;
 import com.nyzg.swiftsail.repository.SyncRepository;
 
 import java.util.List;
@@ -83,6 +84,15 @@ public class MainActivity extends AppCompatActivity {
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
+                FragmentRepository fragmentRepository = FragmentRepository.getInstance();
+                Fragment fragment = fragmentRepository.fragmentMap.get(fragmentRepository.currentPos);
+                if (fragment != null) {
+                    FragmentManager childFM = fragment.getChildFragmentManager();
+                    if (childFM.getBackStackEntryCount() > 0) {
+                        childFM.popBackStack();
+                        return;
+                    }
+                }
                 long currentPressedTime = System.currentTimeMillis();
                 if (lastBackPressedTime == 0L) {
                     Toast.makeText(MainActivity.this, "再按一次退出应用", Toast.LENGTH_SHORT).show();
@@ -116,9 +126,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public static void toMainPage(FragmentManager manager) {
-        List<Fragment> fragmentList=manager.getFragments();
-        FragmentTransaction transaction=manager.beginTransaction();
-        for (Fragment fragment:fragmentList){
+        List<Fragment> fragmentList = manager.getFragments();
+        FragmentTransaction transaction = manager.beginTransaction();
+        for (Fragment fragment : fragmentList) {
             transaction.remove(fragment);
         }
         transaction.commit();

@@ -22,10 +22,9 @@ import com.nyzg.swiftsail.bean.ServerURL;
 import com.nyzg.swiftsail.bean.NetWorkHandler;
 import com.nyzg.swiftsail.bean.GlobalInstance;
 import com.nyzg.swiftsail.bean.GlobalToast;
-import com.nyzg.swiftsail.bean.JsonSerializer;
+import com.nyzg.swiftsail.bean.MyJsonSerializer;
 import com.nyzg.swiftsail.dbobj.User;
 import com.nyzg.swiftsail.encrypt.Biometric;
-import com.nyzg.swiftsail.fragment.BackPressPopFragment;
 import com.nyzg.swiftsail.netobj.login.BiometricUser;
 import com.nyzg.swiftsail.netobj.login.KeyVerifyReq;
 import com.nyzg.swiftsail.repository.LoginRepository;
@@ -41,7 +40,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class KeyLoginFragment extends BackPressPopFragment {
+public class KeyLoginFragment extends Fragment {
     String email;
     private volatile boolean quitForbidden = false;
     private BiometricPrompt prompt;
@@ -135,7 +134,7 @@ public class KeyLoginFragment extends BackPressPopFragment {
                         Request request = new Request.Builder()
                                 .url(new URL(ServerURL.URL_LOGIN_WITH_KEY))
                                 .method(ServerURL.POST,
-                                        RequestBody.create(JsonSerializer.serialize(keyVerifyReq),
+                                        RequestBody.create(MyJsonSerializer.serialize(keyVerifyReq),
                                                 ServerURL.APPLICATION_JSON))
                                 .build();
                         return Optional.of(httpClient.newCall(request).execute());
@@ -150,7 +149,7 @@ public class KeyLoginFragment extends BackPressPopFragment {
                                 resp -> {
                                     quitForbidden = false;
                                     try {
-                                        BiometricUser user = JsonSerializer.mapToObject(resp.getContent(), BiometricUser.class).orElse(null);
+                                        BiometricUser user = MyJsonSerializer.mapToObject(resp.getContent(), BiometricUser.class).orElse(null);
                                         if (user == null) {
                                             GlobalToast.SERVER_RESP_UNACCEPTABLE.run();
                                             return;

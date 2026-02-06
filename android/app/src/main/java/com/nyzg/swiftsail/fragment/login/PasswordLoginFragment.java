@@ -19,10 +19,9 @@ import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.bean.ServerURL;
 import com.nyzg.swiftsail.bean.GlobalInstance;
 import com.nyzg.swiftsail.bean.GlobalToast;
-import com.nyzg.swiftsail.bean.JsonSerializer;
+import com.nyzg.swiftsail.bean.MyJsonSerializer;
 import com.nyzg.swiftsail.dbobj.User;
 import com.nyzg.swiftsail.encrypt.Sha256;
-import com.nyzg.swiftsail.fragment.BackPressPopFragment;
 import com.nyzg.swiftsail.listener.LoginWaitingListener;
 import com.nyzg.swiftsail.netobj.login.PasswordVerifyReq;
 import com.nyzg.swiftsail.repository.LoginRepository;
@@ -33,7 +32,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 
-public class PasswordLoginFragment extends BackPressPopFragment {
+public class PasswordLoginFragment extends Fragment {
     User user;
     private volatile boolean quitForbidden = false;
 
@@ -87,7 +86,7 @@ public class PasswordLoginFragment extends BackPressPopFragment {
                         .url(ServerURL.URL_LOGIN_WITH_PASSWORD)
                         .method(ServerURL.POST,
                                 RequestBody.create(
-                                        JsonSerializer.serialize(new PasswordVerifyReq(user.email, Sha256.generateSha256ByteArray(pwd))),
+                                        MyJsonSerializer.serialize(new PasswordVerifyReq(user.email, Sha256.generateSha256ByteArray(pwd))),
                                         ServerURL.APPLICATION_JSON
                                 ))
                         .build();
@@ -102,7 +101,7 @@ public class PasswordLoginFragment extends BackPressPopFragment {
                 return;
             }
             try {
-                User tokenUser = JsonSerializer.mapToObject(resp.getContent(), User.class).orElse(null);
+                User tokenUser = MyJsonSerializer.mapToObject(resp.getContent(), User.class).orElse(null);
                 if (tokenUser == null) {
                     GlobalToast.SERVER_RESP_UNACCEPTABLE.run();
                     return;

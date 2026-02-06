@@ -3,8 +3,9 @@ package com.nyzg.swiftsail;
 import android.app.Application;
 import android.content.Context;
 
+import com.github.boybeak.skbglobal.SoftKeyboardGlobal;
+
 import org.maplibre.android.MapLibre;
-import org.maplibre.android.maps.MapView;
 
 
 public class GlobalApplication extends Application {
@@ -15,6 +16,7 @@ public class GlobalApplication extends Application {
         super.onCreate();
         self = this;
         initMapBox();
+        SoftKeyboardGlobal.INSTANCE.install(this,false);
     }
 
     private void initMapBox() {

@@ -21,6 +21,7 @@ import com.nyzg.swiftsail.repository.ReportRepository;
 import com.nyzg.swiftsail.repository.SyncRepository;
 import com.nyzg.swiftsail.service.ReportSyncService;
 import com.nyzg.swiftsail.view.DateSelector;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 
 public class ReportMain0Fragment extends Fragment {
@@ -44,6 +45,26 @@ public class ReportMain0Fragment extends Fragment {
         View father = inflater.inflate(R.layout.fragment_report_main_0, container, false);
         View addDevice = father.findViewById(R.id.addDevice);
         View manageDevice = father.findViewById(R.id.mangeDevice);
+        SlidingUpPanelLayout slidingUpPanelLayout = father.findViewById(R.id.slidingUpPanel);
+        slidingUpPanelLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+            @Override
+            public void onPanelSlide(View panel, float slideOffset) {
+            }
+
+            @Override
+            public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
+                if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
+                    viewModel.openBottom = false;
+                } else if (newState == SlidingUpPanelLayout.PanelState.EXPANDED) {
+                    viewModel.openBottom = true;
+                }
+            }
+        });
+        if (viewModel.openBottom) {
+            slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+        } else {
+            slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+        }
         View food = father.findViewById(R.id.food);
         addDevice.setOnClickListener(this::onAddDeviceClicked);
         manageDevice.setOnClickListener(this::onManageDeviceClicked);
@@ -108,7 +129,7 @@ public class ReportMain0Fragment extends Fragment {
 
 
     private void onAddDeviceClicked(View v) {
-        requireActivity().getSupportFragmentManager()
+        requireParentFragment().getChildFragmentManager()
                 .beginTransaction()
                 .replace(R.id.reportFragment, ReportAddDeviceFragment.getInstance())
                 .addToBackStack(null)
@@ -116,7 +137,7 @@ public class ReportMain0Fragment extends Fragment {
     }
 
     private void onManageDeviceClicked(View v) {
-        requireActivity().getSupportFragmentManager()
+        requireParentFragment().getChildFragmentManager()
                 .beginTransaction()
                 .replace(R.id.reportFragment, ReportMangeDeviceFragment.getInstance())
                 .addToBackStack(null)
@@ -151,6 +172,7 @@ public class ReportMain0Fragment extends Fragment {
     }
 
     public static class MyViewModel extends ViewModel {
+        public boolean openBottom = false;
         public long selectedDate = -1L;
     }
 }

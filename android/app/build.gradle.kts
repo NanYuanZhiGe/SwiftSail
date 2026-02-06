@@ -76,4 +76,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-service:2.4.1")
 
     implementation("com.github.skydoves:balloon:1.7.3")
+
+    //用于解决键盘弹出和收回的监听方案
+    implementation("com.github.boybeak:skb-global:0.2.0")
 }

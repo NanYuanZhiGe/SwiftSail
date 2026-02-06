@@ -84,6 +84,9 @@ final public class EncryptThreadSafe {
     static public String transferStringToBase64EncodedString(@NonNull String s) {
         return BASE64_ENCODER.encodeToString(s.getBytes(StandardCharsets.UTF_8));
     }
+    static public String transferStringFromBase64EncodeedString(@NonNull String s){
+        return new String(BASE64_DECODER.decode(s),StandardCharsets.UTF_8);
+    }
 
     private static MessageDigest getDigestThreadLocal() {
         MessageDigest md_256 = THREAD_LOCAL_MD_256.get();

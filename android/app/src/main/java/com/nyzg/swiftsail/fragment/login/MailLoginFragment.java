@@ -19,9 +19,8 @@ import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.bean.ServerURL;
 import com.nyzg.swiftsail.bean.GlobalInstance;
 import com.nyzg.swiftsail.bean.GlobalToast;
-import com.nyzg.swiftsail.bean.JsonSerializer;
+import com.nyzg.swiftsail.bean.MyJsonSerializer;
 import com.nyzg.swiftsail.dbobj.User;
-import com.nyzg.swiftsail.fragment.BackPressPopFragment;
 import com.nyzg.swiftsail.listener.LoginWaitingListener;
 import com.nyzg.swiftsail.listener.LoginCountingListener;
 import com.nyzg.swiftsail.netobj.login.MailCodeVerifyReq;
@@ -35,7 +34,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 
 
-public class MailLoginFragment extends BackPressPopFragment {
+public class MailLoginFragment extends Fragment {
     private String email;
     private static final String EMAIL_KEY = "user_email";
     private volatile boolean quitForbidden = false;
@@ -91,7 +90,7 @@ public class MailLoginFragment extends BackPressPopFragment {
                         .url(ServerURL.URL_LOGIN_VERIFY_CODE)
                         .method("POST",
                                 RequestBody.create(
-                                        JsonSerializer.serialize(new MailVerifyReq(strEmail)),
+                                        MyJsonSerializer.serialize(new MailVerifyReq(strEmail)),
                                         ServerURL.APPLICATION_JSON
                                 ))
                         .build();
@@ -118,7 +117,7 @@ public class MailLoginFragment extends BackPressPopFragment {
                 Request request = new Request.Builder()
                         .url(ServerURL.URL_LOGIN_WITH_MAIL)
                         .method(ServerURL.POST, RequestBody.create(
-                                JsonSerializer.serialize(new MailCodeVerifyReq(email, verifyCode)),
+                                MyJsonSerializer.serialize(new MailCodeVerifyReq(email, verifyCode)),
                                 ServerURL.APPLICATION_JSON
                         ))
                         .build();
@@ -133,7 +132,7 @@ public class MailLoginFragment extends BackPressPopFragment {
                 return;
             }
             try {
-                User tokenUser = JsonSerializer.mapToObject(resp.getContent(), User.class).orElse(null);
+                User tokenUser = MyJsonSerializer.mapToObject(resp.getContent(), User.class).orElse(null);
                 if (tokenUser == null) {
                     GlobalToast.SERVER_RESP_UNACCEPTABLE.run();
                     return;

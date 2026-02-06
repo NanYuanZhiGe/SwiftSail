@@ -8,10 +8,12 @@
     <TextView
         android:id="@+id/text"
         android:layout_width="wrap_content"
-        android:layout_height="50dp"
+        android:maxWidth="200dp"
+        android:layout_height="wrap_content"
         android:background="@drawable/layout_speech_bk"
         android:gravity="center"
         android:paddingHorizontal="12dp"
+        android:paddingVertical="18dp"
         android:textSize="14sp"
         app:layout_constraintEnd_toStartOf="@id/img"
         app:layout_constraintTop_toTopOf="parent" />

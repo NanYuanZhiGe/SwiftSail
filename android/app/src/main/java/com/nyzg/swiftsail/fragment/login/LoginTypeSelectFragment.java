@@ -16,12 +16,11 @@ import com.nyzg.swiftsail.GlobalApplication;
 import com.nyzg.swiftsail.MainActivity;
 import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.dbobj.User;
-import com.nyzg.swiftsail.fragment.BackPressPopFragment;
 import com.nyzg.swiftsail.repository.LoginRepository;
 
 
 @SuppressLint("ClickableViewAccessibility")
-public class LoginTypeSelectFragment extends BackPressPopFragment {
+public class LoginTypeSelectFragment extends Fragment {
     User user;
 
     public static Fragment newInstance() {

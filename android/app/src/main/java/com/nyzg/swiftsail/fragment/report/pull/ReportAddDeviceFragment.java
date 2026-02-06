@@ -38,9 +38,7 @@ import com.nyzg.swiftsail.bean.NetWorkBuilder;
 import com.nyzg.swiftsail.bean.NetWorkHandler;
 import com.nyzg.swiftsail.bean.ServerURL;
 import com.nyzg.swiftsail.dbobj.User;
-import com.nyzg.swiftsail.dbobj.Watch;
-import com.nyzg.swiftsail.encrypt.Uuid;
-import com.nyzg.swiftsail.fragment.BackPressPopFragment;
+import com.nyzg.swiftsail.netobj.report.Watch;
 import com.nyzg.swiftsail.fragment.InnerFragment;
 import com.nyzg.swiftsail.netobj.report.WatchAddReq;
 import com.nyzg.swiftsail.obj.SucceedOrNot;
@@ -69,9 +67,41 @@ import okhttp3.Response;
  */
 public class ReportAddDeviceFragment extends InnerFragment {
 
+    private static final String NAME_KEY = "name";
+    private static final String TYPE_KEY = "type";
+    private static final String CLIENT_ID_KEY = "clientId";
+    private static final String SECRET_KEY = "secretKey";
+    private static final String FINAL_KEY = "final";
+
     public static Fragment getInstance() {
-        return new ReportAddDeviceFragment();
+        Bundle bundle = new Bundle();
+        bundle.putBoolean(FINAL_KEY, false);
+        Fragment fragment = new ReportAddDeviceFragment();
+        fragment.setArguments(bundle);
+        return fragment;
     }
+
+    public static Fragment getInstance(
+            @NonNull String name,
+            @NonNull String watchType,
+            @NonNull String clientId,
+            @NonNull String secretKey) {
+        Bundle bundle = new Bundle();
+        bundle.putString(NAME_KEY, name);
+        bundle.putString(TYPE_KEY, watchType);
+        bundle.putString(CLIENT_ID_KEY, clientId);
+        bundle.putString(SECRET_KEY, secretKey);
+        bundle.putBoolean(FINAL_KEY, true);
+        Fragment fragment = new ReportAddDeviceFragment();
+        fragment.setArguments(bundle);
+        return fragment;
+    }
+
+    private String preSetName;
+    private String preSetWatchType;
+    private String preSetClientId;
+    private String preSetSecretKey;
+    private boolean isFinal = false;
 
     private WatchViewModel watchViewModel;
     private TextInputEditText inputDeviceName;
@@ -90,6 +120,15 @@ public class ReportAddDeviceFragment extends InnerFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Bundle bundle = getArguments();
+        assert bundle != null;
+        isFinal = bundle.getBoolean(FINAL_KEY);
+        if (isFinal) {
+            preSetName = bundle.getString(NAME_KEY);
+            preSetWatchType = bundle.getString(TYPE_KEY);
+            preSetClientId = bundle.getString(CLIENT_ID_KEY);
+            preSetSecretKey = bundle.getString(SECRET_KEY);
+        }
         watchViewModel = new ViewModelProvider(this).get(WatchViewModel.class);
         callback = new OnBackPressedCallback(true) {
             @Override
@@ -105,7 +144,7 @@ public class ReportAddDeviceFragment extends InnerFragment {
             return;
         }
         if (quitForbidden) {
-            GlobalToast.COMMON_TOAST.accept("正在处理您的请求，很快就会完成！");
+            doNotification("正在处理您的请求，很快就会完成！");
             return;
         }
         Watch watch = watchViewModel.getWatch().getValue();
@@ -131,8 +170,6 @@ public class ReportAddDeviceFragment extends InnerFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View father = inflater.inflate(R.layout.fragment_report_device_add, container, false);
         father.findViewById(R.id.backward).setOnClickListener(v -> onBackPressedLogic());
-        inputDeviceName = father.findViewById(R.id.inputDeviceName);
-        inputDeviceType = father.findViewById(R.id.inputDeviceType);
         recyclerView = father.findViewById(R.id.msgBox);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setAdapter(new MyAdapter(notificationList));
@@ -155,9 +192,31 @@ public class ReportAddDeviceFragment extends InnerFragment {
                 android.R.layout.simple_spinner_item
         );
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        inputDeviceName = father.findViewById(R.id.inputDeviceName);
+        inputDeviceType = father.findViewById(R.id.inputDeviceType);
         inputDeviceType.setAdapter(adapter);
         inputClientId = father.findViewById(R.id.inputClientId);
         inputClientSecret = father.findViewById(R.id.inputClientSecret);
+        if (isFinal) {//如果是预设模式，禁止任何用户数据
+            inputDeviceName.setText(preSetName);
+            inputDeviceName.setEnabled(false);
+            CharSequence[] items = getResources().getTextArray(R.array.reportAddDeviceType);
+            int position = -1;
+            for (int i = 0; i < items.length; i++) {
+                if (preSetWatchType.equals(items[i].toString())) {
+                    position = i;
+                    break;
+                }
+            }
+            if (position != -1) {
+                inputDeviceType.setSelection(position);
+            }
+            inputDeviceType.setEnabled(false);
+            inputClientId.setText(preSetClientId);
+            inputClientId.setEnabled(false);
+            inputClientSecret.setText(preSetSecretKey);
+            inputClientSecret.setEnabled(false);
+        }
         father.findViewById(R.id.submit).setOnClickListener(this::onGrantSubmit);
         grantedBtn = father.findViewById(R.id.hasGranted);
         grantedBtn.setOnClickListener(this::onGrantedCheck);
@@ -167,29 +226,27 @@ public class ReportAddDeviceFragment extends InnerFragment {
 
     private void doNotification(String msg) {
         //使用balloon来提醒用户
-        Context context = getContext();
-        if (context != null) {
-            Balloon balloon = new Balloon.Builder(context)
-                    .setArrowSize(10)
-                    .setArrowOrientation(ArrowOrientation.TOP)
-                    .setArrowPositionRules(ArrowPositionRules.ALIGN_ANCHOR)
-                    .setArrowPosition(0.5f)
-                    .setWidth(BalloonSizeSpec.WRAP)
-                    .setHeight(65)
-                    .setPaddingHorizontal(12)
-                    .setTextSize(15f)
-                    .setCornerRadius(4f)
-                    .setAlpha(0.9f)
-                    .setText(msg)
-                    .setTextColor(ContextCompat.getColor(context, R.color.black))
-                    .setTextIsHtml(false)
-                    .setBackgroundColor(ContextCompat.getColor(context, R.color.recordRecordDetail))
-                    .setBalloonAnimation(BalloonAnimation.FADE)
-                    .setLifecycleOwner(getViewLifecycleOwner())
-                    .build();
-            balloon.showAlignBottom(this.notification);
-            balloon.dismissWithDelay(2000L);//2秒自己结束
-        }
+        Context context = requireContext();
+        Balloon balloon = new Balloon.Builder(context)
+                .setArrowSize(10)
+                .setArrowOrientation(ArrowOrientation.TOP)
+                .setArrowPositionRules(ArrowPositionRules.ALIGN_ANCHOR)
+                .setArrowPosition(0.5f)
+                .setWidth(BalloonSizeSpec.WRAP)
+                .setHeight(65)
+                .setPaddingHorizontal(12)
+                .setTextSize(15f)
+                .setCornerRadius(4f)
+                .setAlpha(0.9f)
+                .setText(msg)
+                .setTextColor(ContextCompat.getColor(context, R.color.black))
+                .setTextIsHtml(false)
+                .setBackgroundColor(ContextCompat.getColor(context, R.color.recordRecordDetail))
+                .setBalloonAnimation(BalloonAnimation.FADE)
+                .setLifecycleOwner(getViewLifecycleOwner())
+                .build();
+        balloon.showAlignBottom(this.notification);
+        balloon.dismissWithDelay(2000L);//2秒自己结束
         //添加消息到列表中，用户可以滑动查看消息
         notificationList.add(msg);
         MyAdapter myAdapter = (MyAdapter) recyclerView.getAdapter();
@@ -230,61 +287,41 @@ public class ReportAddDeviceFragment extends InnerFragment {
             doNotification("请您先登录或填写完整的信息");
             return;
         }
-        CompletableFuture.supplyAsync(() -> {
-            //禁止用户退出以及继续提交其他内容
-            quitForbidden = true;
-            submitDataForbidden = true;
-            WatchAddReq req = new WatchAddReq(
-                    user.id,
-                    watch.clientId,
-                    watch.name,
-                    watch.type,
-                    watch.authorizeHeader,
-                    codeVerifier,
-                    state
-            );
-            OkHttpClient client = GlobalInstance.OK_HTTP_NO_PROXY;
-            Request request = NetWorkBuilder.buildJsonRequestJwt(
-                    ServerURL.URL_IS_WATCH_ADDED,
-                    ServerURL.POST,
-                    req
-            );
-            Response response;//response后面会自动释放
-            try {
-                response = client.newCall(request).execute();
-            } catch (IOException e) {
-                GlobalToast.SERVER_NOT_RESPONSE.run();
-                return SucceedOrNot.FAIL;
-            }
-            AtomicBoolean success = new AtomicBoolean(true);
+        //禁止用户退出以及继续提交其他内容
+        quitForbidden = true;
+        submitDataForbidden = true;
+        WatchAddReq req = new WatchAddReq(
+                user.id,
+                watch.clientId,
+                watch.name,
+                watch.watchType,
+                watch.authorizeHeader,
+                codeVerifier,
+                state
+        );
+        grantedBtn.setText("授权中...");
+        NetWorkBuilder.doChunkRequestAsync(NetWorkBuilder.buildJsonRequestJwt(
+                ServerURL.URL_IS_WATCH_ADDED,
+                ServerURL.POST,
+                req
+        )).thenAcceptAsync(response -> {
             NetWorkHandler.handleNetRespAfterLogin(
                     requireActivity().getSupportFragmentManager(),
                     response,
-                    this::doNotification,
-                    action -> {/*
-                    请求成功，什么都不要做
-                    对于以前的版本，会写到数据库中，但是这样子除了增加业务的复杂度之外，没有任何作用
-                    因为你用户回到“设备管理”界面，甭管你本地有没有设备，都需要进行网络查询设备的状态
-                    那你还不如直接网络请求设备的信息就好了，这样子还容易保持数据的一致性
-                    */
+                    msg -> {
+                        doNotification(msg);
+                        grantedBtn.setText("点击授权");
+                    },
+                    action -> {
+                        watchViewModel.clean();
+                        doNotification("手表添加成功！");
+                        grantedBtn.setText("已成功授权");
                     },
                     Void.class
             );
-            return success.get() ? SucceedOrNot.SUCCEED : SucceedOrNot.FAIL;
-        }).thenAcceptAsync(res -> {
             quitForbidden = false;
             submitDataForbidden = false;
-            //操作成功
-            if (res == SucceedOrNot.SUCCEED) {
-                //删除已经提交的信息
-                watchViewModel.clean();
-                doNotification("手表添加成功！");
-                return;
-            }
-            //state一定要清空，标志用户需要进行授权
-            watchViewModel.getState().setValue(null);
-            doNotification("手表添加失败！");
-        }, ContextCompat.getMainExecutor(requireContext()));
+        }, ContextCompat.getMainExecutor(GlobalApplication.getAppContext()));
     }
 
     /**
@@ -353,12 +390,11 @@ public class ReportAddDeviceFragment extends InnerFragment {
         Watch watch = new Watch();
         watch.userId = currentUser.id;
         watch.clientId = clientId;
-        watch.type = deviceType;
+        watch.watchType = deviceType;
         watch.name = deviceName;
         watch.authorizeHeader = EncryptThreadSafe.transferStringToBase64EncodedString(clientId + ":" + clientSecret);
-        watch.accessible = true;
         watchViewModel.state.setValue(EncryptThreadSafe.getBase64UrlSha256WithCertainString(
-                String.format("%d:%s:%s:%s", watch.userId, watch.clientId, watch.type, watch)
+                String.format("%d:%s:%s:%s", watch.userId, watch.clientId, watch.watchType, watch.authorizeHeader)
         ));
         return watch;
     }
