@@ -1,0 +1,17 @@
+name: CICD backend SwiftSail
+
+on:
+  push:
+    branches: ["backend"]
+jobs:
+  test:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Print Java Version
+        run: java --version
+
+      - name: Say Hello
+        run: echo "✅ GitHub Actions detected my deploy.yml!"
