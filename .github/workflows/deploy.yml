@@ -7,5 +7,10 @@ jobs:
   test:
     runs-on: self-hosted
     steps:
+      -name: clone files
+       run: actions/checkout@v4
+
+      -name: list files
+       run: ls -la&pwd
       - name: Say Hello
         run: echo "This is a Hello World! "
