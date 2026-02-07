@@ -10,6 +10,6 @@ jobs:
       - name: clone files
         uses: actions/checkout@v4
       - name: list files
-        run: ls -la&pwd
+        run: ls -la
       - name: Say Hello
         run: echo "This is a Hello World! "
