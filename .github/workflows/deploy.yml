@@ -7,9 +7,6 @@ jobs:
   test:
     runs-on: self-hosted
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
       - name: Print Java Version
         run: java --version
 
