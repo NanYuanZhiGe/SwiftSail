@@ -28,6 +28,7 @@ public class ServerURL {
     final public static URL URL_GET_WATCH_LIST;
     final public static URL URL_WATCH_DELETE;
     final public static URL URL_GO_OFFLINE;
+    final public static URL URL_GET_DAY_DATA;
     static {
         try {
             URL_SYNC_BACKUP_RECORD = new URL(BASE_HOST + URL_DOCK_PREFIX + "/sync/record/backup");
@@ -38,6 +39,7 @@ public class ServerURL {
             URL_GET_WATCH_LIST=new URL(BASE_HOST + URL_DOCK_PREFIX + "/get/watchList");
             URL_WATCH_DELETE=new URL(BASE_HOST + URL_DOCK_PREFIX + "/watch/delete");
             URL_GO_OFFLINE=new URL(BASE_HOST + URL_DOCK_PREFIX + "/go/offline");
+            URL_GET_DAY_DATA=new URL(BASE_HOST + URL_DOCK_PREFIX + "/get/data/day");
         } catch (MalformedURLException e) {//正常情况下是不会发生的
             throw new RuntimeException(e);
         }

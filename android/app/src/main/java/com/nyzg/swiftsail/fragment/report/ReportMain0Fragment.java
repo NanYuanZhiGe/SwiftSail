@@ -12,15 +12,19 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.fragment.report.pull.ReportAddDeviceFragment;
 import com.nyzg.swiftsail.fragment.report.pull.ReportMangeDeviceFragment;
 import com.nyzg.swiftsail.obj.Pair;
+import com.nyzg.swiftsail.obj.ParsedReport;
 import com.nyzg.swiftsail.repository.ReportRepository;
 import com.nyzg.swiftsail.repository.SyncRepository;
 import com.nyzg.swiftsail.service.ReportSyncService;
 import com.nyzg.swiftsail.view.DateSelector;
+import com.nyzg.swiftsail.view.ReportCircle;
+import com.nyzg.swiftsail.view.ReportMain0Rect;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 
@@ -32,6 +36,18 @@ public class ReportMain0Fragment extends Fragment {
 
     private DateSelector date;
     private MyViewModel viewModel;
+    private SwipeRefreshLayout refreshLayout;
+    private ReportMain0Rect sleepLayout;
+    private ReportMain0Rect stepLayout;
+    private ReportMain0Rect distanceLayout;
+    private ReportMain0Rect consumptionLayout;
+    private ReportMain0Rect heartRateLayout;
+    private ReportMain0Rect foodLayout;
+
+    private ReportCircle sleepCircle;
+    private ReportCircle stepCircle;
+    private ReportCircle heartRateCircle;
+    private ReportCircle caloricCircle;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -45,6 +61,7 @@ public class ReportMain0Fragment extends Fragment {
         View father = inflater.inflate(R.layout.fragment_report_main_0, container, false);
         View addDevice = father.findViewById(R.id.addDevice);
         View manageDevice = father.findViewById(R.id.mangeDevice);
+        //----------------保存用户是否拉起底部的菜单栏-------------------
         SlidingUpPanelLayout slidingUpPanelLayout = father.findViewById(R.id.slidingUpPanel);
         slidingUpPanelLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
             @Override
@@ -79,6 +96,14 @@ public class ReportMain0Fragment extends Fragment {
         if (viewModel.selectedDate > 0L) {//说明这个fragment重建过
             date.setDate(viewModel.selectedDate);
         }
+        refreshLayout = father.findViewById(R.id.refreshLayout);
+        refreshLayout.setOnRefreshListener(() -> {
+            if (viewModel.selectedDate > 0L) {
+                ReportRepository.getInstance().getReportMainAsync(viewModel.selectedDate, () -> refreshLayout.setRefreshing(false));
+            } else {
+                refreshLayout.setRefreshing(false);
+            }
+        });
         return father;
     }
 
@@ -86,27 +111,46 @@ public class ReportMain0Fragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         //获取当前日期的数据
-        ReportRepository.getInstance().getReportMainAsync(date.getDate());
+        ReportRepository.getInstance().getReportMainAsync(date.getDate(), null);
         //根据Report动态更新界面元素
-        ReportRepository.getInstance()
-                .mainReport.observe(getViewLifecycleOwner(), report -> {
-                    setTextNullAtNoData(view.findViewById(R.id.sleepTime), report.sleepTime);
-                    setTextNullAtNoData(view.findViewById(R.id.sleepScore), report.sleepScore);
-                    setTextNullAtNoData(view.findViewById(R.id.stepCount), report.stepCount);
-                    setTextNullAtNoData(view.findViewById(R.id.distanceCount), report.stepDistance);
-                    setTextNullAtNoData(view.findViewById(R.id.fireCount), report.caloric);
-                    setTextNullAtNoData(view.findViewById(R.id.heartRange), report.heartRange);
-                    setTextNullAtNoData(view.findViewById(R.id.hearCalm), report.restHeartBeat);
-                    setTextNullAtNoData(view.findViewById(R.id.foodCount), report.nutrition);
-                });
+        ReportRepository.getInstance().mainReport.observe(getViewLifecycleOwner(), this::updateUi);
     }
 
-    private void setTextNullAtNoData(View v, String s) {
-        if (s == null) {
-            ((TextView) v).setText("无数据");
-            return;
-        }
-        ((TextView) v).setText(s);
+    /**
+     * 更新UI
+     *
+     * @param report 解析好的report
+     */
+    private void updateUi(ParsedReport report) {
+        sleepLayout.updateUi(report.sleepTime, "睡眠得分 · " + report.sleepScore, report.sleepProgress);
+        stepLayout.updateUi(report.stepCount, "", report.stepProgress);
+        distanceLayout.updateUi(report.stepDistance, "", report.distanceProgress);
+        consumptionLayout.updateUi(report.caloric, "", report.caloricProgress);
+        heartRateLayout.updateUi(report.heartRange, "静息心率 · " + report.restHeartBeat, report.heartProgress);
+        foodLayout.updateUi(report.nutrition, "", report.nutritionProgress);
+        sleepCircle.updateUi(report.sleepTime, report.sleepProgress);
+        stepCircle.updateUi(report.stepCount, report.stepProgress);
+        heartRateCircle.updateUi(report.restHeartBeat, report.heartProgress);
+        caloricCircle.updateUi(report.caloric, report.caloricProgress);
+    }
+
+    private void initReportMainView(View father) {
+        sleepCircle = father.findViewById(R.id.sleep);
+        stepCircle = father.findViewById(R.id.step);
+        heartRateCircle = father.findViewById(R.id.heart);
+        caloricCircle = father.findViewById(R.id.consumtion);
+        sleepLayout = father.findViewById(R.id.sleepLayout);
+        stepLayout = father.findViewById(R.id.stepLayout);
+        distanceLayout = father.findViewById(R.id.distanceLayout);
+        consumptionLayout = father.findViewById(R.id.fireLayout);
+        heartRateLayout = father.findViewById(R.id.heartLayout);
+        foodLayout = father.findViewById(R.id.foodLayout);
+        sleepLayout.setOnClickListener(v -> showDetailFragment(ReportDetailSleepFragment.getInstance()));
+        stepLayout.setOnClickListener(v -> showDetailFragment(ReportDetailStepFragment.getInstance()));
+        distanceLayout.setOnClickListener(v -> showDetailFragment(ReportDetailDistanceFragment.getInstance()));
+        consumptionLayout.setOnClickListener(v -> showDetailFragment(ReportDetailCaloricFragment.getInstance()));
+        heartRateLayout.setOnClickListener(v -> showDetailFragment(ReportDetailHeartFragment.getInstance()));
+        foodLayout.setOnClickListener(v -> showDetailFragment(ReportDetailFoodFragment.getInstance()));
     }
 
     /**
@@ -114,7 +158,7 @@ public class ReportMain0Fragment extends Fragment {
      */
     private void onDateSelected(Long epochDay) {
         viewModel.selectedDate = epochDay;
-        ReportRepository.getInstance().getReportMainAsync(epochDay);
+        ReportRepository.getInstance().getReportMainAsync(epochDay, null);
     }
 
     private void onDataSyncClicked(View v) {
@@ -148,23 +192,8 @@ public class ReportMain0Fragment extends Fragment {
 
     }
 
-    private void initReportMainView(View father) {
-        View sleepLayout = father.findViewById(R.id.sleepLayout);
-        View stepLayout = father.findViewById(R.id.stepLayout);
-        View distanceLayout = father.findViewById(R.id.distanceLayout);
-        View caloricLayout = father.findViewById(R.id.fireLayout);
-        View heartLayout = father.findViewById(R.id.heartLayout);
-        View foodLayout = father.findViewById(R.id.foodLayout);
-        sleepLayout.setOnClickListener(v -> showDetailFragment(ReportDetailSleepFragment.getInstance()));
-        stepLayout.setOnClickListener(v -> showDetailFragment(ReportDetailStepFragment.getInstance()));
-        distanceLayout.setOnClickListener(v -> showDetailFragment(ReportDetailDistanceFragment.getInstance()));
-        caloricLayout.setOnClickListener(v -> showDetailFragment(ReportDetailCaloricFragment.getInstance()));
-        heartLayout.setOnClickListener(v -> showDetailFragment(ReportDetailHeartFragment.getInstance()));
-        foodLayout.setOnClickListener(v -> showDetailFragment(ReportDetailFoodFragment.getInstance()));
-    }
-
     private void showDetailFragment(Fragment fragment) {
-        requireActivity().getSupportFragmentManager()
+        requireParentFragment().getChildFragmentManager()
                 .beginTransaction()
                 .replace(R.id.reportFragment, fragment)
                 .addToBackStack(null)

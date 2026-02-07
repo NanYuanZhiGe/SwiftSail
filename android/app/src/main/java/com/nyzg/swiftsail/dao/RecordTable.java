@@ -19,11 +19,15 @@ public abstract class RecordTable {
     @Query("SELECT COUNT(1) FROM `recordTable` WHERE `userId`=:userId;")
     public abstract int countRecord(long userId);
 
+    @Query("SELECT COUNT(1) FROM `recordTable` WHERE `userId`=:userId AND `epochDay`=:epochDay;")
+    public abstract int countRecordWithDay(long userId, long epochDay);
+
     @Query("SELECT `epochDay` FROM `recordTable` WHERE `userId`=:userId GROUP BY `epochDay` ORDER BY `epochDay`;")
     public abstract List<Long> getEpochDay(long userId);
 
     @Insert
     public abstract void insertRecord(Record record);
+
     @Insert
     public abstract void insertRecordList(List<Record> recordList);
 

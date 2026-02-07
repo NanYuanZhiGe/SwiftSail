@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <declare-styleable name="ReportMain0Rect">
+        <attr name="title1Text" format="string" />
+        <attr name="contentText" format="string" />
+        <attr name="content1Text" format="string" />
+        <attr name="rCircleBk" format="color|reference" />
+        <attr name="rCircleBk2" format="color|reference" />
+        <attr name="rImageBk" format="reference" />
+    </declare-styleable>
     <declare-styleable name="SportLayout">
         <attr name="sportName" format="string" />
         <attr name="sportIcon" format="reference" />
@@ -18,12 +26,13 @@
 
     <declare-styleable name="ReportCircle">
         <attr name="circleSize" format="dimension" />
-        <attr name="circleBarWidth" format="float"/>
+        <attr name="circleBarWidth" format="float" />
         <attr name="circleBk" format="color|reference" />
         <attr name="circleBk2" format="color|reference" />
         <attr name="imageSize" format="dimension" />
         <attr name="imageBk" format="reference" />
         <attr name="textSize" format="dimension" />
+        <attr name="detailName" format="string"/>
     </declare-styleable>
 
     <declare-styleable name="RoundedBarChart">

@@ -2,13 +2,22 @@ package com.nyzg.swiftsail.repository;
 
 import android.annotation.SuppressLint;
 
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.MutableLiveData;
 
 import com.nyzg.swiftsail.GlobalApplication;
+import com.nyzg.swiftsail.bean.GlobalToast;
+import com.nyzg.swiftsail.bean.NetWorkBuilder;
+import com.nyzg.swiftsail.bean.NetWorkHandler;
 import com.nyzg.swiftsail.bean.RecordType;
 import com.nyzg.swiftsail.bean.SQLiteDB;
+import com.nyzg.swiftsail.bean.ServerURL;
 import com.nyzg.swiftsail.dbobj.User;
+import com.nyzg.swiftsail.netobj.report.DayRecord;
+import com.nyzg.swiftsail.netobj.report.GetDataDayReq;
 import com.nyzg.swiftsail.obj.ParsedReport;
+
+import org.jspecify.annotations.Nullable;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -18,6 +27,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -69,7 +79,7 @@ public class ReportRepository {
      * 有缓存优化，
      * 通过线程池的设计，保证用户在快速的切换的时候不会过度堆积任务，而且能够保证响应速度
      */
-    public void getReportMainAsync(Long day) {
+    public void getReportMainAsync(Long day, Runnable afterDone) {
         CompletableFuture.supplyAsync(() -> {
             ParsedReport parsedReport;
             parsedReportCacheLock.readLock().lock();
@@ -82,7 +92,9 @@ public class ReportRepository {
                 mainReport.postValue(parsedReport);
                 return null;
             }
-            //没有数据就去数据库中查询，然后加写锁写入数据
+            //没有数据就去数据库中查询
+            //数据库中没有就去网络查询拿到数据
+            //然后加写锁写入数据
             /*
             这里不用双重检查的原因如下：
             1. 当用户连续选择同一天的时候DateSelector不会重复提交任务
@@ -103,22 +115,54 @@ public class ReportRepository {
                 parsedReportCacheLock.writeLock().unlock();
             }
             return null;
-        }, THREAD_POOL);
+        }, THREAD_POOL).thenAcceptAsync(action -> {
+            if (afterDone == null) {
+                return;
+            }
+            afterDone.run();
+        }, ContextCompat.getMainExecutor(GlobalApplication.getAppContext()));
     }
 
     /**
      * 从数据库中查询exposeValue，然后解析出来
      */
     @SuppressLint("DefaultLocale")
+    @Nullable
     private ParsedReport getExposeValueAndParseNullAtFail(Long day) {
         SQLiteDB sqLiteDB = SQLiteDB.getDatabase(GlobalApplication.getAppContext());
-        ParsedReport result = new ParsedReport();
         User user = LoginRepository.getInstance().currentUser.getValue();
         if (user == null) {
-            return result;
+            return null;
         }
         long userId = user.id;
+        //检查数据库中是否有数据
+        int count = sqLiteDB.recordTable().countRecordWithDay(userId, day);
+        if (count > 0) {//如果数据库中有数据
+            return getParsedReportBaseOnDb(userId, day);
+        }
+        //进行网络操作
+        AtomicBoolean success = new AtomicBoolean(false);
+        NetWorkHandler.handleNetRespAfterLogin(
+                null,
+                NetWorkBuilder.doChunkRequest(NetWorkBuilder.buildJsonRequestJwt(
+                        ServerURL.URL_GET_DAY_DATA, ServerURL.POST, new GetDataDayReq(day)
+                )),
+                GlobalToast.COMMON_TOAST,
+                dayRecord -> {//写入数据库
+                    sqLiteDB.recordTable().insertRecordList(dayRecord.recordList);
+                    success.set(true);
+                },
+                DayRecord.class
+        );
+        return success.get() ? getParsedReportBaseOnDb(userId, day) : null;
+    }
+
+    @SuppressLint("DefaultLocale")
+    @Nullable
+    private ParsedReport getParsedReportBaseOnDb(long userId, long day) {
+        SQLiteDB sqLiteDB = SQLiteDB.getDatabase(GlobalApplication.getAppContext());
         try {
+            ParsedReport result = new ParsedReport();
             Long caloric = sqLiteDB.recordTable().getExposeValue(userId, RecordType.CALORIC, day);
             if (caloric != null) {
                 result.caloric = caloric + "卡";
@@ -153,10 +197,10 @@ public class ReportRepository {
             if (step != null) {
                 result.stepCount = step + "";
             }
+            return result;
         } catch (Exception ignore) {
             return null;
         }
-        return result;
     }
 
     /**
