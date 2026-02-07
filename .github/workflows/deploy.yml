@@ -7,8 +7,5 @@ jobs:
   test:
     runs-on: self-hosted
     steps:
-      - name: Print Java Version
-        run: java --version
-
       - name: Say Hello
-        run: echo "✅ GitHub Actions detected my deploy.yml!"
+        run: echo "This is a Hello World! "
