@@ -29,8 +29,8 @@ jobs:
 
       - name: who ami
         run: whoami
-        
+
       - name: reload and restart SwiftSail.gateway service
         run:
-          sudo -n systemctl daemon-reload
-          sudo -n systemctl restart swiftsail.gateway.service
+          systemctl daemon-reload
+          systemctl restart swiftsail.gateway.service
