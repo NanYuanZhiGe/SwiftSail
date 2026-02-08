@@ -29,5 +29,5 @@ jobs:
 
       - name: reload and restart SwiftSail.gateway service
         run:
-          sudo systemctl daemon-reload
-          sudo systemctl restart swiftsail.gateway.service
+          sudo -n systemctl daemon-reload
+          sudo -n systemctl restart swiftsail.gateway.service
