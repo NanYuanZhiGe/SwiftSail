@@ -27,6 +27,9 @@ jobs:
         working-directory: ./backend/SwiftSail
         run: mv gateway/target/gateway-0.0.1-SNAPSHOT.jar /usr/swiftsail/target/
 
+      - name: who ami
+        run: whoami
+        
       - name: reload and restart SwiftSail.gateway service
         run:
           sudo -n systemctl daemon-reload
