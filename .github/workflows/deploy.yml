@@ -17,6 +17,9 @@ jobs:
       - name: stop last
         run: sudo systemctl stop swiftsail.gateway.service
 
+      - name: Wait for process to exit
+        run: timeout 10s bash -c 'while pgrep -f gateway-0.0.1-SNAPSHOT\.jar > /dev/null; do sleep 1; done' || true
+
       - name: remove last
         run: rm -rf /usr/swiftsail/target/gateway-0.0.1-SNAPSHOT.jar
 
