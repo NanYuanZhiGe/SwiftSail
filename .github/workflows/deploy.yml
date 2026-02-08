@@ -30,7 +30,8 @@ jobs:
       - name: who ami
         run: whoami
 
-      - name: reload and restart SwiftSail.gateway service
-        run:
-          systemctl daemon-reload
-          systemctl restart swiftsail.gateway.service
+      - name: reload SwiftSail.gateway service
+        run: systemctl daemon-reload
+
+      - name: restart SwiftSail.gateway service
+        run: systemctl restart swiftsail.gateway.service
