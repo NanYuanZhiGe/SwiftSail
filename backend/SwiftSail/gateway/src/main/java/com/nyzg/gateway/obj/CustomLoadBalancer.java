@@ -1,4 +1,4 @@
-package com.nzyg.gateway.obj;
+package com.nyzg.gateway.obj;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cloud.client.ServiceInstance;

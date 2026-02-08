@@ -9,7 +9,22 @@ jobs:
     steps:
       - name: clone files
         uses: actions/checkout@v4
-      - name: list files
-        run: ls -la
-      - name: Say Hello
-        run: echo "This is a Hello World! "
+
+      - name: Maven clean and build gateway
+        working-directory: ./backend/SwiftSail
+        run: mvn clean package -pl gateway -am
+
+      - name: stop last
+        run: sudo systemctl stop swiftsail.gateway.service
+
+      - name: remove last
+        run: rm -rf /usr/swiftsail/target/gateway-0.0.1-SNAPSHOT.jar
+
+      - name: move target
+        working-directory: ./backend/SwiftSail
+        run: mv gateway/target/gateway-0.0.1-SNAPSHOT.jar /usr/swiftsail/target/
+
+      - name: reload and restart SwiftSail.gateway service
+        run:
+          sudo systemctl daemon-reload
+          sudo systemctl restart swiftsail.gateway.service

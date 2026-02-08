@@ -1,4 +1,4 @@
-package com.nzyg.gateway.filter;
+package com.nyzg.gateway.filter;
 
 import com.nyzg.common.Pair;
 import com.nyzg.common.ss_utils.JwtThreadSafe;
