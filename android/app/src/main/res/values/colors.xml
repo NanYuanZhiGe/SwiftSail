@@ -37,7 +37,7 @@
 
     <!-- colors for dock-->
     <color name="rainPurple">#9F99B0</color>     <!-- 浅薰衣草 -->
-    <color name="heavyPurple">#7A6BCC</color>    <!-- 饱满紫罗兰 -->
+    <color name="heavyPurple">#5F5791</color>    <!-- 饱满紫罗兰 -->
 
     <!-- 绿色系：更鲜活自然 -->
     <color name="rainGreen">#cde2dd</color>      <!-- 薄荷青 -->

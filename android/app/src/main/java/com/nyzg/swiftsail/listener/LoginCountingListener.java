@@ -57,7 +57,7 @@ public class LoginCountingListener<T> implements View.OnTouchListener {
             case MotionEvent.ACTION_UP:
                 view.setPressed(false);
                 Optional<T> result = handleVerify.get();
-                if (!result.isPresent()) {
+                if (result.isEmpty()) {
                     break;
                 }
                 //发送网络请求

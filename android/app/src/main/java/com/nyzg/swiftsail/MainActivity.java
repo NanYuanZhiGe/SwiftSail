@@ -23,6 +23,7 @@ import com.nyzg.swiftsail.bean.ChannelId;
 import com.nyzg.swiftsail.fragment.login.MainFragment;
 import com.nyzg.swiftsail.fragment.main.WaitingFragment;
 import com.nyzg.swiftsail.repository.FragmentRepository;
+import com.nyzg.swiftsail.repository.LoginRepository;
 import com.nyzg.swiftsail.repository.SyncRepository;
 
 import java.util.List;
@@ -84,6 +85,11 @@ public class MainActivity extends AppCompatActivity {
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
+                //正在登录的状态
+                if (LoginRepository.getInstance().currentUser.getValue() == null) {
+                    getSupportFragmentManager().popBackStack();
+                    return;
+                }
                 FragmentRepository fragmentRepository = FragmentRepository.getInstance();
                 Fragment fragment = fragmentRepository.fragmentMap.get(fragmentRepository.currentPos);
                 if (fragment != null) {

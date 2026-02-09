@@ -111,7 +111,7 @@ public class LoginFragment extends Fragment {
 
     private void showLoginPage(View father, List<User> userList) {
         father.findViewById(R.id.loginMainPage).setVisibility(View.VISIBLE);
-        if (userList == null || userList.size() == 0) {
+        if (userList == null || userList.isEmpty()) {
             switchToRegister(father);
         } else {
             putUserIntoRecycleView(father.findViewById(R.id.accountList), userList);
@@ -362,15 +362,16 @@ public class LoginFragment extends Fragment {
                 )));
                 return;
             }
-            firstCharacter.setText(user.nickName.substring(0,1));
+            firstCharacter.setText(user.nickName.substring(0, 1));
             nickName.setText(user.nickName);
             email.setText(user.email);
             itemView.setOnClickListener(view -> {
                 LoginRepository.getInstance().onLoginUser.setValue(user);
-                MainActivity.addFragmentToStackTop(
-                        requireActivity().getSupportFragmentManager(),
-                        LoginTypeSelectFragment.newInstance()
-                );
+                requireActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.mainFragment, LoginTypeSelectFragment.newInstance())
+                        .addToBackStack(null)
+                        .commit();
             });
         }
     }

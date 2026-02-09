@@ -13,7 +13,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.nyzg.swiftsail.GlobalApplication;
-import com.nyzg.swiftsail.MainActivity;
 import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.dbobj.User;
 import com.nyzg.swiftsail.repository.LoginRepository;
@@ -55,10 +54,11 @@ public class LoginTypeSelectFragment extends Fragment {
                 case MotionEvent.ACTION_CANCEL:
                 case MotionEvent.ACTION_UP:
                     view.setPressed(false);
-                    MainActivity.addFragmentToStackTop(
-                            requireActivity().getSupportFragmentManager(),
-                            fragment
-                    );
+                    requireActivity().getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.mainFragment, fragment)
+                            .addToBackStack(null)
+                            .commit();
                     break;
             }
             return true;

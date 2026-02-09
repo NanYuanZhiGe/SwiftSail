@@ -40,7 +40,14 @@ public class MailLoginFragment extends Fragment {
     private volatile boolean quitForbidden = false;
 
     public static Fragment newInstance() {
-        return new MailLoginFragment();
+        Fragment fragment=new MailLoginFragment();
+        Bundle bundle=new Bundle();
+        User user=LoginRepository.getInstance().onLoginUser.getValue();
+        if (user!=null){
+            bundle.putString(EMAIL_KEY,user.email);
+        }
+        fragment.setArguments(bundle);
+        return fragment;
     }
 
     @Override

@@ -15,6 +15,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.nyzg.swiftsail.R;
+import com.nyzg.swiftsail.bean.DateUtils;
 import com.nyzg.swiftsail.fragment.report.pull.ReportAddDeviceFragment;
 import com.nyzg.swiftsail.fragment.report.pull.ReportMangeDeviceFragment;
 import com.nyzg.swiftsail.obj.Pair;
@@ -26,6 +27,8 @@ import com.nyzg.swiftsail.view.DateSelector;
 import com.nyzg.swiftsail.view.ReportCircle;
 import com.nyzg.swiftsail.view.ReportMain0Rect;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
+
+import java.time.LocalDate;
 
 
 public class ReportMain0Fragment extends Fragment {
@@ -48,6 +51,7 @@ public class ReportMain0Fragment extends Fragment {
     private ReportCircle stepCircle;
     private ReportCircle heartRateCircle;
     private ReportCircle caloricCircle;
+    private TextView syncStatus;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -91,15 +95,19 @@ public class ReportMain0Fragment extends Fragment {
         View reportMainView = father.findViewById(R.id.reportMainView);
         initReportMainView(reportMainView);
         //点击选择日期来展示数据
+        syncStatus = father.findViewById(R.id.syncStatus);
         date = father.findViewById(R.id.date);
-        date.setOnDateSelectedFunc(this::onDateSelected);
+        date.setOnDateSelectedFunc(epochDay->{
+            viewModel.selectedDate = epochDay;
+            syncData(()->{});
+        });
         if (viewModel.selectedDate > 0L) {//说明这个fragment重建过
             date.setDate(viewModel.selectedDate);
         }
         refreshLayout = father.findViewById(R.id.refreshLayout);
         refreshLayout.setOnRefreshListener(() -> {
             if (viewModel.selectedDate > 0L) {
-                ReportRepository.getInstance().getReportMainAsync(viewModel.selectedDate, () -> refreshLayout.setRefreshing(false));
+                syncData(() -> refreshLayout.setRefreshing(false));
             } else {
                 refreshLayout.setRefreshing(false);
             }
@@ -111,9 +119,19 @@ public class ReportMain0Fragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         //获取当前日期的数据
-        ReportRepository.getInstance().getReportMainAsync(date.getDate(), null);
+        syncData(() -> {
+        });
         //根据Report动态更新界面元素
         ReportRepository.getInstance().mainReport.observe(getViewLifecycleOwner(), this::updateUi);
+    }
+
+    private void syncData(Runnable r) {
+        long epochDay = date.getDate();
+        syncStatus.setText(String.format("正在同步 %s 的数据", LocalDate.ofEpochDay(epochDay).format(DateUtils.YYYY_MM_DD)));
+        ReportRepository.getInstance().getReportMainAsync(epochDay, msg -> {
+            syncStatus.setText(msg);
+            r.run();
+        });
     }
 
     /**
@@ -151,14 +169,6 @@ public class ReportMain0Fragment extends Fragment {
         consumptionLayout.setOnClickListener(v -> showDetailFragment(ReportDetailCaloricFragment.getInstance()));
         heartRateLayout.setOnClickListener(v -> showDetailFragment(ReportDetailHeartFragment.getInstance()));
         foodLayout.setOnClickListener(v -> showDetailFragment(ReportDetailFoodFragment.getInstance()));
-    }
-
-    /**
-     * 当用户选择了某一天后，触发这个逻辑，从数据库汇总查询数据返回
-     */
-    private void onDateSelected(Long epochDay) {
-        viewModel.selectedDate = epochDay;
-        ReportRepository.getInstance().getReportMainAsync(epochDay, null);
     }
 
     private void onDataSyncClicked(View v) {

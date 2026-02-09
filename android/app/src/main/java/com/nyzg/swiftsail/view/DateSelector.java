@@ -29,21 +29,19 @@ public class DateSelector extends androidx.appcompat.widget.AppCompatTextView {
 
     @SuppressLint("DefaultLocale")
     protected void onClicked(View v) {
-        LocalDate localDate = LocalDate.now();
+        LocalDate lastDate = LocalDate.ofEpochDay(this.date);
         DatePickerDialog dialog = new DatePickerDialog(this.getContext(), (datePicker, year, month, day) -> {
             //用户选好之后就后台执行统计逻辑
             LocalDate selectedDate = LocalDate.of(year, month + 1, day);
-            updateText(selectedDate, localDate);
-            this.date = selectedDate.toEpochDay();
+            updateText(selectedDate);
+            long currentSelected = selectedDate.toEpochDay();
+            this.date = currentSelected;
             if (onDateSelectedFunc == null) {
                 return;
             }
             //用户选到是同一天
-            if (selectedDate.toEpochDay() == this.date) {
-                return;
-            }
-            onDateSelectedFunc.accept(this.date);
-        }, localDate.getYear(), localDate.getMonthValue() - 1, localDate.getDayOfMonth());
+            onDateSelectedFunc.accept(currentSelected);
+        }, lastDate.getYear(), lastDate.getMonthValue() - 1, lastDate.getDayOfMonth());
         dialog.show();
     }
 
@@ -56,14 +54,12 @@ public class DateSelector extends androidx.appcompat.widget.AppCompatTextView {
      */
     public void setDate(long date) {
         this.date = date;
-        updateText(LocalDate.ofEpochDay(date), null);
+        updateText(LocalDate.ofEpochDay(date));
     }
 
     @SuppressLint("DefaultLocale")
-    protected void updateText(LocalDate date, LocalDate now) {
-        if (now == null) {
-            now = LocalDate.now();
-        }
+    protected void updateText(LocalDate date) {
+        LocalDate now = LocalDate.now();
         if (date.equals(now)) {
             this.setText("今天");
         } else if (date.getYear() == now.getYear()) {

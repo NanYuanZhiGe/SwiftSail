@@ -1,8 +1,11 @@
 package com.nyzg.swiftsail.bean;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class DateUtils {
+
+    public static final DateTimeFormatter YYYY_MM_DD=DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     public static final long MIN_CREATE_DATE=LocalDate.of(2025,11,1).toEpochDay();
     public static long getEpochWeek(long epochDay) {

@@ -47,14 +47,15 @@ public class ReportCircle extends ConstraintLayout {
             int imageBk = a.getResourceId(R.styleable.ReportCircle_imageBk, R.drawable.moon);
             String detailName = a.getString(R.styleable.ReportCircle_detailName);
             textDesc = findViewById(R.id.textDesc);
+            textDesc.setTextSize(textSize);
             ((TextView) findViewById(R.id.name)).setText(detailName);
             barWidth = a.getFloat(R.styleable.ReportCircle_circleBarWidth, 14f);
             circularSeekBar = findViewById(R.id.circular_seek_bar);
+            circularSeekBar.setMax(1.0f);
+            circularSeekBar.setMin(.0f);
             innerImageView = findViewById(R.id.innerImage);
-            TextView textView = findViewById(R.id.textDesc);
             innerImageView.setImageTintList(ContextCompat.getColorStateList(context, circleBk2));
             innerImageView.setImageDrawable(ContextCompat.getDrawable(context, imageBk));
-            textView.setTextSize(textSize);
             trackColor = ContextCompat.getColor(context, circleBk);
             progressColorArray = new int[]{ContextCompat.getColor(context, circleBk2), ContextCompat.getColor(context, circleBk2)};
 

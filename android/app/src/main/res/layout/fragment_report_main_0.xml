@@ -43,42 +43,20 @@
                         android:layout_marginBottom="32dp"
                         android:background="@color/white">
 
-                        <TextView
-                            android:id="@+id/reportText"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="28dp"
-                            android:text="运动报表"
-                            android:textSize="18sp"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                        <com.nyzg.swiftsail.view.DateSelector
-                            android:id="@+id/date"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:text="今天"
-                            android:textSize="18sp"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toBottomOf="@id/reportText" />
-
                         <androidx.constraintlayout.widget.ConstraintLayout
                             android:id="@+id/fourMainLayout"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="32dp"
+                            android:layout_marginTop="108dp"
                             app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="@id/date">
+                            app:layout_constraintTop_toTopOf="parent">
 
                             <com.nyzg.swiftsail.view.ReportCircle
                                 android:id="@+id/sleep"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="12dp"
-                                app:circleBarWidth="20"
+                                app:circleBarWidth="26"
                                 app:circleSize="160dp"
                                 app:detailName="睡眠"
                                 app:imageSize="70dp"
@@ -94,7 +72,7 @@
                                 android:layout_marginTop="12dp"
                                 app:circleBk="@color/rainGreen"
                                 app:circleBk2="@color/heavyGreen"
-                                app:circleSize="90dp"
+                                app:circleSize="76dp"
                                 app:detailName="步数"
                                 app:imageBk="@drawable/step"
                                 app:imageSize="30dp"
@@ -109,8 +87,8 @@
                                 android:layout_height="wrap_content"
                                 app:circleBk="@color/rainBlue"
                                 app:circleBk2="@color/heavyBlue"
-                                app:circleSize="90dp"
-                                app:detailName="心率"
+                                app:circleSize="76dp"
+                                app:detailName="静息心率"
                                 app:imageBk="@drawable/heart"
                                 app:imageSize="30dp"
                                 app:layout_constraintEnd_toStartOf="@id/consumtion"
@@ -124,7 +102,7 @@
                                 android:layout_height="wrap_content"
                                 app:circleBk="@color/rainGreen"
                                 app:circleBk2="@color/heavyGreen"
-                                app:circleSize="90dp"
+                                app:circleSize="76dp"
                                 app:detailName="消耗热量"
                                 app:imageBk="@drawable/consumtion"
                                 app:imageSize="30dp"
@@ -206,7 +184,7 @@
                                 app:layout_constraintTop_toBottomOf="@id/stepLayout"
                                 app:rCircleBk="@color/rainGreen"
                                 app:rCircleBk2="@color/heavyGreen"
-                                app:rImageBk="@drawable/step"
+                                app:rImageBk="@drawable/location"
                                 app:title1Text="运动距离" />
 
                             <com.nyzg.swiftsail.view.ReportMain0Rect
@@ -279,6 +257,31 @@
                         </androidx.constraintlayout.widget.ConstraintLayout>
                     </androidx.constraintlayout.widget.ConstraintLayout>
                 </androidx.core.widget.NestedScrollView>
+
+                <com.nyzg.swiftsail.view.DateSelector
+                    android:id="@+id/date"
+                    android:layout_width="match_parent"
+                    android:layout_height="70dp"
+                    android:gravity="bottom|center_horizontal"
+                    android:text="今天"
+                    android:background="@color/white"
+                    android:textAlignment="center"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:background="@color/white"
+                    android:id="@+id/syncStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textAlignment="center"
+                    android:textColor="@color/liteWhite"
+                    android:textSize="11sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/date" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
