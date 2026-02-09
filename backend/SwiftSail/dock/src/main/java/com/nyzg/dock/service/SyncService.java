@@ -15,8 +15,11 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.sql.PreparedStatement;
 import java.util.HashMap;
@@ -36,34 +39,57 @@ public class SyncService {
     WatchTableMapper watchTableMapper;
     @Resource
     JdbcTemplate jdbcTemplate;
+    @Resource
+    PlatformTransactionManager transactionManager;
 
-    @Transactional(rollbackFor = Exception.class)
-    public void insertDataIntoDb(long userId, long epochDay, @NonNull List<Record> recordList) {
-        try {
-            jdbcTemplate.update("""
-                    DELETE FROM `recordTable` WHERE `userId`=? AND `epochDay`=?;
-                    """, userId, epochDay);
-            jdbcTemplate.batchUpdate("""
-                            INSERT INTO recordTable\s
-                            (id, userId, recordId, type, exposeValue, detailValue, epochDay, epochWeek, epochMonth, epochYear)\s
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                            """, recordList, recordList.size(),
-                    (PreparedStatement ps, Record r) -> {
-                        ps.setObject(1, null);
-                        ps.setLong(2, r.getUserId());
-                        ps.setString(3, UUID.randomUUID().toString());
-                        ps.setString(4, r.getType());
-                        ps.setLong(5, r.getExposeValue());
-                        ps.setString(6, r.getDetailValue());
-                        ps.setLong(7, r.getEpochDay());
-                        ps.setLong(8, r.getEpochWeek());
-                        ps.setLong(9, r.getEpochMonth());
-                        ps.setLong(10, r.getEpochYear());
-                    }
-            );
-        } catch (Exception e) {
-            log.info(e.getCause().getMessage());
-        }
+    /**
+     * 插入数据，不会多插或重复插
+     */
+    @Async
+    public void insertDataIntoDbAsync(long userId, long epochDay, @NonNull List<Record> recordList) {
+        new TransactionTemplate(transactionManager).execute(action -> {
+            try {
+            /*
+            这里必须使用for update来强制保证事务之间顺序进行。举一个例子，假设用户快速地查询同一天的数据，
+            然后这一天的数据并没有在数据库中，第一次请求还没有写数据库的时候第二次请求就查完数据了，导致两个
+            请求都通过网络请求拿到了数据，然后来到这个地方异步更新数据库。它们的数据都是一样的
+            当前项目数据库的事务隔离级别是RR，也就是说，这两个事务A、B进来的时候，MVCC会给它们分配唯一一个数据库视图
+            而由于这两个事务都可能是活动事务，导致它们都认为数据库是空的，导致它们全部都执行delete和insert，这就很没有必要了
+            所以必须select的时候加一个for update加锁，如果你select到了数据，说明别人已经插入了数据，你就不用了
+             */
+                Integer count = jdbcTemplate.queryForObject("""
+                        SELECT COUNT(1) FROM `recordTable` WHERE `userId`=? AND `epochDay`=? FOR UPDATE;
+                        """, new BeanPropertyRowMapper<>(Integer.class), userId, epochDay);
+                if (count != null && count > 0) {
+                    return null;
+                }
+                //如果有数据干扰的话，这里也是能够删除的
+                jdbcTemplate.update("""
+                        DELETE FROM `recordTable` WHERE `userId`=? AND `epochDay`=?;
+                        """, userId, epochDay);
+                jdbcTemplate.batchUpdate("""
+                                INSERT INTO recordTable\s
+                                (id, userId, recordId, type, exposeValue, detailValue, epochDay, epochWeek, epochMonth, epochYear)\s
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                """, recordList, recordList.size(),
+                        (PreparedStatement ps, Record r) -> {
+                            ps.setObject(1, null);
+                            ps.setLong(2, r.getUserId());
+                            ps.setString(3, UUID.randomUUID().toString());
+                            ps.setString(4, r.getType());
+                            ps.setLong(5, r.getExposeValue());
+                            ps.setString(6, r.getDetailValue());
+                            ps.setLong(7, r.getEpochDay());
+                            ps.setLong(8, r.getEpochWeek());
+                            ps.setLong(9, r.getEpochMonth());
+                            ps.setLong(10, r.getEpochYear());
+                        }
+                );
+            } catch (Exception e) {
+                log.info(e.getCause().getMessage());
+            }
+            return null;
+        });
     }
 
     @Nullable

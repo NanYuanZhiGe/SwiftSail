@@ -320,7 +320,7 @@ public class FitbitWebApiService {
                     //caloric
                     record = new Record();
                     MyConsumption myConsumption = getMyConsumption(obj);
-                    record.setExposeValue(myConsumption.getActivityCalories());
+                    record.setExposeValue(myConsumption.getCaloriesOut());
                     parseRecordSucceedAppend(appendList, record, myConsumption, userId, RecordType.CALORIC, date);
                     result.set(appendList);
                 }, FitbitActivitySummary.class);

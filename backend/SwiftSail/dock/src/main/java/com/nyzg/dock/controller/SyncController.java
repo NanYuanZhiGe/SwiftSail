@@ -21,7 +21,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 
 @RestController
@@ -63,7 +62,10 @@ public class SyncController {
         }
         long queryUserId = Long.parseLong(userId);
         //先从数据库中查询数据
-        {
+        boolean isToday = LocalDate.now().toEpochDay() == req.getDay();
+        //需要注意的是，如果用户查询的数据是今天，不能走数据库的逻辑，因为“今天”的数据是不完整的
+        //比如用户中午的数据和晚上的数据是会不一致的，所以不能直接写入数据库，那自然这里也没有必要查数据库
+        if (!isToday) {
             DayRecord dayRecord = syncService.getDayRecordFromDb(queryUserId, req.getDay());
             if (dayRecord != null && !dayRecord.getRecordList().isEmpty()) {
                 return new HttpResp(true, dayRecord);
@@ -85,10 +87,9 @@ public class SyncController {
             return USER_NO_PUSH_DATA;
         }
         //异步写入数据库，这里就算写不进也没有关系，如果有东西出错，下一次请求会写入的
-        CompletableFuture.supplyAsync(() -> {
-            syncService.insertDataIntoDb(queryUserId, req.getDay(), pair.getB().getRecordList());
-            return null;
-        });
+        if (!isToday) {
+            syncService.insertDataIntoDbAsync(queryUserId, req.getDay(), pair.getB().getRecordList());
+        }
         return new HttpResp(true, pair.getB());
     }
 
