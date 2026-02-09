@@ -18,7 +18,7 @@ spring:
                 redis-rate-limiter.burstCapacity: 200   # 令牌桶最大容量
                 key-resolver: "#{@remoteAddrKeyResolver}" # 使用 SpEL 引用 Bean
         - id: swift-sail-dock-websocket-service
-          uri: lb://swift-sail-dock-service
+          uri: ws://localhost:5030
           predicates:
             - Path=/api/dock/ws/dock/**
         - id: swift-sail-dock-service
