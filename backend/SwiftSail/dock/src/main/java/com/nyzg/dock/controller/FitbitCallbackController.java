@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static com.nyzg.dock.controller.FinalHttpResp.*;
+import static com.nyzg.dock.netobj.FinalHttpResp.*;
 
 /**
  * 这个类的主要作用是完成手表状态机的转换。

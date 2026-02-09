@@ -45,6 +45,15 @@ public class SyncController {
     @Resource
     FitbitWebApiService fitbitWebApiService;
 
+    /**
+     * 获取某一天的数据，一个DayRecord就是一个List<Record>
+     * 里面包含了不同类型的Record
+     * 这个方法是原子性的，要么获取往所有的Record，要么就失败
+     * 不会出现DayRecord中部分包含某一天的Record，比如就只有睡眠的Record，没有其他的
+     *
+     * @param req 内部是epochDay long
+     * @return content为DayRecord
+     */
     @PostMapping(path = "/get/data/day")
     public HttpResp getDataDay(
             @RequestHeader("userId") String userId,

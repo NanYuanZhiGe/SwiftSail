@@ -1,4 +1,4 @@
-package com.nyzg.dock.controller;
+package com.nyzg.dock.netobj;
 
 import com.nyzg.common.netobj.HttpResp;
 
