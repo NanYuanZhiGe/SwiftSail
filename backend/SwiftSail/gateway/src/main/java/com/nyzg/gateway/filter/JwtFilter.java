@@ -34,7 +34,9 @@ public class JwtFilter implements GlobalFilter {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getURI().getPath();
         //如果是登录相关的请求，直接放行
-        if (path.startsWith("/api/user/login")||path.startsWith("/api/dock/oauth")) {
+        if (path.startsWith("/api/user/login")
+                || path.startsWith("/api/dock/oauth")
+                || path.startsWith("/api/dock/ws/dock")) {
             log.info("放行" + request.getURI());
             return chain.filter(exchange);
         }
@@ -46,9 +48,11 @@ public class JwtFilter implements GlobalFilter {
             statusMapPair = JwtThreadSafe.validateJwtTokenHMac(jwt, hsKey);
             //如果token为空或者token校验不过，不允许往后走
             if (jwt == null || statusMapPair.getA() != JwtThreadSafe.Status.SUCCESS) {
+                log.info("no token: " + path);
                 return noToken(exchange, request);
             }
         } catch (Exception e) {
+            log.info("解析请求jwt-token请求头出错：" + e.getCause());
             return noToken(exchange, request);
         }
         //解析token，重写请求头
