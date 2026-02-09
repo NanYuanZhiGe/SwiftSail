@@ -17,6 +17,10 @@ spring:
                 redis-rate-limiter.replenishRate: 100   # 每秒填充令牌数
                 redis-rate-limiter.burstCapacity: 200   # 令牌桶最大容量
                 key-resolver: "#{@remoteAddrKeyResolver}" # 使用 SpEL 引用 Bean
+        - id: swift-sail-dock-websocket-service
+          uri: lb:ws://swift-sail-dock-service
+          predicates:
+            - Path=/api/dock/ws/dock/**
         - id: swift-sail-dock-service
           uri: lb://swift-sail-dock-service
           predicates:
@@ -27,10 +31,6 @@ spring:
                 redis-rate-limiter.replenishRate: 100   # 每秒填充令牌数
                 redis-rate-limiter.burstCapacity: 200   # 令牌桶最大容量
                 key-resolver: "#{@remoteAddrKeyResolver}" # 使用 SpEL 引用 Bean
-        - id: swift-sail-dock-websocket-service
-          uri: lb:ws://swift-sail-dock-service
-          predicates:
-            - Path=/ws/dock/**
 
   data:
     redis:
