@@ -2,14 +2,16 @@ package com.nyzg.dock.service;
 
 import com.nyzg.common.netobj.HttpResp;
 import com.nyzg.dock.jobs.JobFitbitEightHour;
-import com.nyzg.dock.mapper.WatchTableMapper;
 import com.nyzg.dock.obj.FitbitOath2Token;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+
+import static com.nyzg.dock.conf.JobConf.*;
 
 
 @Service
@@ -18,11 +20,9 @@ public class QuartzService {
     @Resource
     FitbitWebApiService fitbitWebApiService;
     @Resource
-    WatchTableMapper watchTableMapper;
+    JdbcTemplate jdbcTemplate;
     @Resource
     Scheduler scheduler;
-    private static final String TRIGGER_FITBIT_EIGHT_HOUR_PREFIX = "jobFitbitEightHour-";
-    private static final String TRIGGER_FITBIT_EIGHT_HOUR_GROUP = "TriggerFitbitEightHour";
     private static final HttpResp GET_FIRST_TOKEN_FAIL = new HttpResp(false, HttpResp.COMMON_ERROR_CODE, "初次获取fitbit的accessToken失败");
     private static final HttpResp UPDATE_WATCH_TOKEN_FAIL = new HttpResp(false, HttpResp.COMMON_ERROR_CODE, "更新手表授权码错误");
     private static final HttpResp START_SCHEDULER_ERROR = new HttpResp(false, HttpResp.COMMON_ERROR_CODE, "后台定时任务启动失败");
@@ -44,15 +44,15 @@ public class QuartzService {
         FitbitOath2Token token = result.get();
         //这里获取了fitbit的token，然后写一次数据库
         //过期时间是28800秒，然后转化为毫秒就是乘以1000
-        long expireTime = System.currentTimeMillis() + 28800 * 1000;
+        long expireTime = System.currentTimeMillis() + token.getExpiresIn() * 1000L;
         try {
-            watchTableMapper.updateWatchToken(
-                    clientId,
-                    token.getAccessToken(),
-                    token.getRefreshToken(),
-                    token.getUserId(),
-                    expireTime
-            );
+            //Controller层保证进入到这个代码的时候，数据库中没有activate=1的手表
+            jdbcTemplate.update("""
+                    UPDATE `watchTable`\s
+                    SET\s
+                    `accessToken`=?,`refreshToken`=?,`watchUserId`=?,`expireTime`=?,`activate`=1\s
+                    WHERE `userId`=? AND `clientId`=?;
+                    """, token.getAccessToken(), token.getRefreshToken(), token.getUserId(), expireTime, userId, clientId);
         } catch (Exception e) {
             return UPDATE_WATCH_TOKEN_FAIL;
         }
@@ -60,11 +60,12 @@ public class QuartzService {
         //--------------------------每7小时refresh一波token------------------------------------
         try {
             TriggerKey triggerKey = new TriggerKey(TRIGGER_FITBIT_EIGHT_HOUR_PREFIX + clientId, TRIGGER_FITBIT_EIGHT_HOUR_GROUP);
-            if (!scheduler.checkExists(triggerKey)) {
+            if (!scheduler.checkExists(triggerKey)) {//不存在就添加任务
                 //执行拉取数据的job
                 JobDetail jobDetailEightHour = JobBuilder.newJob(JobFitbitEightHour.class)
                         .withIdentity("jobFitbitEightHour-" + clientId, "JobFitbitEightHour")
-                        .usingJobData("clientId", clientId)
+                        .usingJobData(KEY_USER_ID, userId)
+                        .usingJobData(KEY_CLIENT_ID, clientId)
                         .build();
                 Trigger triggerEightHour = TriggerBuilder.newTrigger()
                         .withIdentity(TRIGGER_FITBIT_EIGHT_HOUR_PREFIX + clientId, TRIGGER_FITBIT_EIGHT_HOUR_GROUP)
@@ -76,7 +77,7 @@ public class QuartzService {
                 scheduler.scheduleJob(jobDetailEightHour, triggerEightHour);
             }
         } catch (Exception e) {
-            log.error("无法启动Fitbit每周任务" + clientId + e.getCause());
+            log.error("无法启动Fitbit刷新数据库的任务" + clientId + e.getCause());
             stopSchedulerAndDelete(userId, clientId);
             return START_SCHEDULER_ERROR;
         }
@@ -95,7 +96,9 @@ public class QuartzService {
         );
         try {
             scheduler.unscheduleJob(triggerKey1);
-            watchTableMapper.deleteWatch(userId, clientId);
+            jdbcTemplate.update("""
+                    DELETE FROM `watchTable` WHERE `userId`=? AND `clientId`=?;
+                    """, userId, clientId);
         } catch (Exception e) {
             log.info(e.getCause().getMessage());
         }

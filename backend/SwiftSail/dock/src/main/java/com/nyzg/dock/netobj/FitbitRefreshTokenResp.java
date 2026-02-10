@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FitbitRefreshTokenResp {
     String accessToken;
+    //固定为28800
     int expiresIn;
     String refreshToken;
     String tokenType;//固定为 “Bearer”
