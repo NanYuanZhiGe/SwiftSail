@@ -237,7 +237,7 @@ public class LongSyncController extends TextWebSocketHandler {
                         });
                         return Result.SUCCESS;
                     } catch (Exception e) {
-                        log.info(String.format("email:%s 进行数据同步，出现未知错误%s", email, Arrays.toString(e.getStackTrace())));
+                        log.error("email: {} 进行数据同步时发生异常{}", email,e.getCause(), e);
                         return Result.UNKNOWN_ERROR;
                     }
                 }
