@@ -30,6 +30,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -102,7 +103,10 @@ public class FitbitWebApiService {
         return new Pair<>(QueryStatus.SUCCEED,new DayRecord(activityRecord.get()));
     }
 
-    public Optional<List<DayRecord>> getRangeRecordAndSyncToDatabaseNullAtFail(
+    /**
+     * @return 返回空表示错误
+     */
+    public Optional<List<DayRecord>> getRangeRecordAndAsyncToDatabase(
             long userId,
             @NonNull String clientId,
             long fromEpoch, long endEpoch) {
@@ -149,7 +153,11 @@ public class FitbitWebApiService {
                 }
             }
         }
-        recordTableMapper.insertRecordListIntoTable(resultList);
+        //异步插入数据库
+        CompletableFuture.supplyAsync(()->{
+            recordTableMapper.insertRecordListIntoTable(resultList);
+            return null;
+        });
         //整理resultList，返回DayRecord
         List<DayRecord> dayRecords = new ArrayList<>(resultList.stream()
                 .collect(Collectors.groupingBy(

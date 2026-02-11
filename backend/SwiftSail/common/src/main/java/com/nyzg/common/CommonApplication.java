@@ -3,6 +3,7 @@ package com.nyzg.common;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.lang.NonNull;
 
+import java.util.Optional;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
@@ -37,8 +38,13 @@ public class CommonApplication {
     static final private DelayQueue<Message> delayQueue = new DelayQueue<>();
 
     public static void main(String[] args) throws InterruptedException {
-        delayQueue.add(new Message(System.currentTimeMillis()+5*1000L,Status.HEAR_BEAT));
-        Message message=delayQueue.take();
-        System.out.println(message);
+        try{
+            Optional.of("abc").ifPresent(str->{
+                System.out.println(str);
+                throw  new RuntimeException("");
+            });
+        }catch (Exception e){
+            System.out.println("hello");
+        }
     }
 }
