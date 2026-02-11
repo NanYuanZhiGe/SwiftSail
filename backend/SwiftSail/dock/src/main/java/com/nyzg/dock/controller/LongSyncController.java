@@ -222,13 +222,14 @@ public class LongSyncController extends TextWebSocketHandler {
                                 }
                             }
                         }
+                        log.info(String.format("email:%s 进行数据同步，采用local-network模式, 请求数据结束",email));
                         AFTER_SUCCESS.add(session -> {
                             try {
                                 session.sendMessage(new TextMessage(String.format(
                                         DT_PATTERN, OBJECT_MAPPER.writeValueAsString(new LongSyncResp(dayRecords))
                                 )));
-                                log.info(String.format("email:%s 进行数据同步，采用local-network模式，数据发送失败", email));
                             } catch (Exception e) {
+                                log.info(String.format("email:%s 进行数据同步，采用local-network模式，数据发送失败%s", email,e.getCause()));
                                 return Result.NETWORK_ERROR;
                             }
                             log.info(String.format("email:%s 进行数据同步，采用local-network模式，数据成功发送", email));

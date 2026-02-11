@@ -76,7 +76,7 @@ public class SyncController {
         }
         //异步写入数据库，这里就算写不进也没有关系，如果有东西出错，下一次请求会写入的
         if (!isToday) {
-            syncService.insertDataIntoDbAsync(queryUserId, req.getDay(), pair.getB().getRecordList());
+            syncService.insertDataIntoDbAsync(pair.getB().getRecordList());
         }
         return new HttpResp(true, pair.getB());
     }
