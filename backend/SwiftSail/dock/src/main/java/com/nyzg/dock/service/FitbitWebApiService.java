@@ -223,7 +223,7 @@ public class FitbitWebApiService {
                     }
                     List<Record> list = new ArrayList<>(resp.getSleep().size());
                     for (FitbitSleepResp single : resp.getSleep()) {
-                        if (single.getSleep().isEmpty()) {
+                        if (single.getSleep() == null || single.getSleep().isEmpty()) {
                             continue;
                         }
                         try {
