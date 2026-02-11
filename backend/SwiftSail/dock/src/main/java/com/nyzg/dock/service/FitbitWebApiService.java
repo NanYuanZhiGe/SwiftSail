@@ -6,7 +6,6 @@ import com.nyzg.common.DateUtils;
 import com.nyzg.common.Pair;
 import com.nyzg.dock.dbobj.Record;
 import com.nyzg.dock.dbobj.Watch;
-import com.nyzg.dock.mapper.RecordTableMapper;
 import com.nyzg.dock.mapper.WatchTableMapper;
 import com.nyzg.dock.netobj.*;
 import com.nyzg.dock.obj.*;
@@ -16,6 +15,7 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpHeaders;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -43,21 +43,22 @@ public class FitbitWebApiService {
     private final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private final static ProxySelector PROXY_SELECTOR = ProxySelector.of(new InetSocketAddress("127.0.0.1", 7890));
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    @Resource
-    RecordTableMapper recordTableMapper;
 
     @Resource
     WatchTableMapper watchTableMapper;
+    @Resource
+    JdbcTemplate jdbcTemplate;
 
-    public enum QueryStatus{
-        SUCCEED,FAIL,NO_DATA
+    public enum QueryStatus {
+        SUCCEED, FAIL, NO_DATA
     }
+
     /**
      * 去fitbit哪里进行网络请求获取数据
      * 返回空一般就都是网络错误了
      */
     @NonNull
-    public Pair<QueryStatus,DayRecord> getDayRecordNullAtFail(
+    public Pair<QueryStatus, DayRecord> getDayRecordNullAtFail(
             long userId,
             @NonNull String accessToken,
             @NonNull String watchUserId,
@@ -79,9 +80,9 @@ public class FitbitWebApiService {
         }
         //查不到数据或者是用户没有上传数据
         if (activityRecord.isEmpty()) {
-            return new Pair<>(QueryStatus.FAIL,null);
-        }else if(activityRecord.get().isEmpty()){
-            return new Pair<>(QueryStatus.NO_DATA,null);
+            return new Pair<>(QueryStatus.FAIL, null);
+        } else if (activityRecord.get().isEmpty()) {
+            return new Pair<>(QueryStatus.NO_DATA, null);
         }
         Optional<Record> sleepRecord = Optional.empty();
         for (int i = 0; i < 3; ++i) {
@@ -97,10 +98,10 @@ public class FitbitWebApiService {
             }
         }
         if (sleepRecord.isEmpty()) {
-            return new Pair<>(QueryStatus.FAIL,null);
+            return new Pair<>(QueryStatus.FAIL, null);
         }
         activityRecord.get().add(sleepRecord.get());
-        return new Pair<>(QueryStatus.SUCCEED,new DayRecord(activityRecord.get()));
+        return new Pair<>(QueryStatus.SUCCEED, new DayRecord(activityRecord.get()));
     }
 
     /**
@@ -154,8 +155,20 @@ public class FitbitWebApiService {
             }
         }
         //异步插入数据库
-        CompletableFuture.supplyAsync(()->{
-            recordTableMapper.insertRecordListIntoTable(resultList);
+        CompletableFuture.supplyAsync(() -> {
+            String placeHolders = resultList.stream().map(record -> "(?,?,?,?,?,?,?,?,?,?)").collect(Collectors.joining(","));
+            String sql = """
+                    INSERT IGNORE INTO `recordTable` (id, userId, recordId, type, exposeValue, detailValue, epochDay, epochWeek, epochMonth, epochYear) VALUES \s
+                    """ + placeHolders;
+            Object[] flatArgs = resultList.stream()
+                    .map(record -> new Object[]{
+                            null, record.userId, record.recordId, record.type,
+                            record.exposeValue, record.detailValue, record.epochDay, record.epochWeek,
+                            record.epochMonth, record.epochYear
+                    })
+                    .flatMap(Arrays::stream)
+                    .toArray();
+            jdbcTemplate.update(sql, flatArgs);
             return null;
         });
         //整理resultList，返回DayRecord
