@@ -218,7 +218,7 @@ public class FitbitWebApiService {
                 String.format("https://api.fitbit.com/1.2/user/%s/sleep/date/%s/%s.json", watchUserId, fromDate.format(DATE_FORMATTER), endDate.format(DATE_FORMATTER)),
                 onError,
                 resp -> {
-                    if (resp == null) {
+                    if (resp == null || resp.getSleep() == null) {
                         return;
                     }
                     List<Record> list = new ArrayList<>(resp.getSleep().size());
@@ -247,7 +247,7 @@ public class FitbitWebApiService {
             @Nullable FitbitSleepResp resp,
             @NonNull LocalDate date,
             long userId, Consumer<Record> afterConvert) {
-        if (resp == null) {
+        if (resp == null || resp.getSleep() == null) {
             return;
         }
         Record recordSleep = new Record();
@@ -299,6 +299,9 @@ public class FitbitWebApiService {
                 String.format("https://api.fitbit.com/1/user/%s/activities/date/%s.json", watchUserId, date.format(DATE_FORMATTER)),
                 onError,
                 obj -> {
+                    if (obj == null || obj.getSummary() == null) {
+                        return;
+                    }
                     List<Record> appendList = new ArrayList<>(4);//解析查询四种指标
                     //heart
                     Record record = new Record();
@@ -368,8 +371,11 @@ public class FitbitWebApiService {
     }
 
     @NotNull
-    private MyDistance getMyDistance(FitbitActivitySummary obj) {
+    private MyDistance getMyDistance(@NonNull FitbitActivitySummary obj) {
         MyDistance myDistance = new MyDistance();
+        if (obj.getSummary() == null) {
+            return myDistance;
+        }
         for (FitbitActivitySummary.Distances distance : obj.getSummary().getDistances()) {
             switch (distance.getActivity()) {
                 case "total" -> myDistance.setDistance(distance.getDistance());
@@ -383,8 +389,11 @@ public class FitbitWebApiService {
     }
 
     @NotNull
-    private MyConsumption getMyConsumption(FitbitActivitySummary obj) {
+    private MyConsumption getMyConsumption(@NonNull FitbitActivitySummary obj) {
         MyConsumption myConsumption = new MyConsumption();
+        if (obj.getSummary() == null) {
+            return myConsumption;
+        }
         myConsumption.setActivityCalories(obj.getSummary().getActivityCalories());
         myConsumption.setCaloriesOut(obj.getSummary().getCaloriesOut());
         myConsumption.setLightlyActiveMinutes(obj.getSummary().getLightlyActiveMinutes());

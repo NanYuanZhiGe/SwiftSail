@@ -2,6 +2,7 @@ package com.nyzg.dock.netobj;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.annotation.Nullable;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FitbitActivitySummary {
-    Summary summary;
+    @Nullable Summary summary;
     @Data
     @NoArgsConstructor
     @JsonIgnoreProperties(ignoreUnknown = true)

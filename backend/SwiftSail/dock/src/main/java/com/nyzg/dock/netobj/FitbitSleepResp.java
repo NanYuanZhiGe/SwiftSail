@@ -2,6 +2,7 @@ package com.nyzg.dock.netobj;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nullable;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FitbitSleepResp {
-    List<SleepRecord> sleep;
+    @Nullable List<SleepRecord> sleep;
     Summary summary;
 
     @Data
