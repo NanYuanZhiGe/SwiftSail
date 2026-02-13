@@ -205,7 +205,30 @@ public class ReportDetailRestPageFragment extends Fragment {
         });
     }
 
-    private void notifyBarChartDatasetChange(long offset, List<BarEntry> entries) {
+    private void notifyBarChartDatasetChange(long offset, @NonNull List<BarEntry> entries) {
+        int oldSize = entries.size();
+        switch (sumType) {
+            case WEEK -> {//不到7天就给它填充到7天
+                for (int i = oldSize; i < 7; ++i) {
+                    entries.add(new BarEntry(i, new float[]{0f}));
+                }
+            }
+            case MONTH -> {//不到4周就给它填充到4周
+                for (int i = oldSize; i < 4; ++i) {
+                    entries.add(new BarEntry(i, new float[]{0f}));
+                }
+            }
+            case YEAR -> {//不到12个月就给它填充到12个月
+                for (int i = oldSize; i < 12; ++i) {
+                    entries.add(new BarEntry(i, new float[]{0f}));
+                }
+            }
+            case TOTAL -> {//不到5年就给它填充到5年
+                for (int i = oldSize; i < 5; ++i) {
+                    entries.add(new BarEntry(i, new float[]{0f}));
+                }
+            }
+        }
         if (this.barDataSet != null) {//已经初始化过了
             //对于total，需要重新刷新一次X轴，因为offset发生了变化
             if (sumType == SumType.TOTAL) {
@@ -218,7 +241,7 @@ public class ReportDetailRestPageFragment extends Fragment {
                 });
             }
             //再刷一次y轴
-            avoidMinClipped(barChart.getAxisRight(), entries);
+            avoidMinClipped(barChart.getAxisRight(), entries,oldSize);
             barDataSet.setValues(entries);
             barChart.notifyDataSetChanged();
             barChart.invalidate();
@@ -264,7 +287,7 @@ public class ReportDetailRestPageFragment extends Fragment {
                 return yAxisFormatter.apply(value);
             }
         });
-        avoidMinClipped(yAxis, entries);
+        avoidMinClipped(yAxis, entries,oldSize);
 
 
         barChart.setDescription(null);
@@ -275,8 +298,13 @@ public class ReportDetailRestPageFragment extends Fragment {
         barChart.invalidate();
     }
 
-    private void avoidMinClipped(@NonNull YAxis yAxis, @NonNull List<BarEntry> entries) {
-        LimitLine limitLine = new LimitLine((float) entries.stream().mapToDouble(BarEntry::getY).average().orElse(0), "");
+    private void avoidMinClipped(@NonNull YAxis yAxis, @NonNull List<BarEntry> entries, int oldSize) {
+        LimitLine limitLine;
+        if (oldSize == 0) {
+            limitLine = new LimitLine(0f);
+        } else {
+            limitLine = new LimitLine((float) entries.stream().mapToDouble(BarEntry::getY).sum() / oldSize);
+        }
         limitLine.setLineWidth(2.5f);
         limitLine.setLineColor(themeColor);
         yAxis.removeAllLimitLines();
