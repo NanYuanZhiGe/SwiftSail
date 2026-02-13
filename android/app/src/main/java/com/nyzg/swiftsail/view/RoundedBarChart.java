@@ -38,12 +38,9 @@ public class RoundedBarChart extends BarChart {
         readRadiusAttr(context, attrs);
     }
 
-    private void readRadiusAttr(Context context, AttributeSet attrs){
-        TypedArray a = context.getTheme().obtainStyledAttributes(attrs, R.styleable.RoundedBarChart, 0, 0);
-        try {
+    private void readRadiusAttr(Context context, AttributeSet attrs) {
+        try (TypedArray a = context.getTheme().obtainStyledAttributes(attrs, R.styleable.RoundedBarChart, 0, 0)) {
             setRadius(a.getDimensionPixelSize(R.styleable.RoundedBarChart_radius, 0));
-        } finally {
-            a.recycle();
         }
     }
 
@@ -51,9 +48,10 @@ public class RoundedBarChart extends BarChart {
         setRenderer(new RoundedBarChartRenderer(this, getAnimator(), getViewPortHandler(), radius));
     }
 
+
     private class RoundedBarChartRenderer extends BarChartRenderer {
-        private int mRadius;
-        private RectF mBarShadowRectBuffer = new RectF();
+        private final int mRadius;
+        private final RectF mBarShadowRectBuffer = new RectF();
 
         RoundedBarChartRenderer(BarDataProvider chart, ChartAnimator animator, ViewPortHandler viewPortHandler, int mRadius) {
             super(chart, animator, viewPortHandler);
@@ -170,9 +168,45 @@ public class RoundedBarChart extends BarChart {
             buffer.setBarWidth(mChart.getBarData().getBarWidth());
 
             buffer.feed(dataSet);
-
+            float[] save = new float[buffer.buffer.length / 2];
+            for (int j = 0; j < buffer.size(); j += 4) {
+                save[j / 2] = buffer.buffer[j + 1];//save top
+                save[j / 2 + 1] = buffer.buffer[j + 3];//save bottom
+            }
             trans.pointValuesToPixel(buffer.buffer);
-
+            //retransform
+            float axisMax = 0.001f;
+            float axisMin = 0f;
+            float contentTop = mViewPortHandler.contentTop();
+            float contentBottom = mViewPortHandler.contentBottom();
+            boolean doTransform = true;
+            if (mAxisRight.isEnabled()) {
+                axisMax = mAxisRight.mAxisMaximum;
+                axisMin = mAxisRight.mAxisMinimum;
+            } else if (mAxisLeft.isEnabled()) {
+                axisMax = mAxisLeft.mAxisMaximum;
+                axisMin = mAxisLeft.mAxisMinimum;
+            } else {
+                doTransform = false;
+            }
+            if (doTransform) {
+                float k = (contentTop - contentBottom) / (axisMax - axisMin);
+                float b = (contentBottom * axisMax - contentTop * axisMin) / (axisMax - axisMin);
+                for (int j = 0; j < save.length; j += 2) {
+                    float oldTop = save[j];
+                    float oldBottom = save[j + 1];
+                    if (oldBottom < axisMin) {
+                        oldBottom = axisMin;
+                    }
+                    if (oldTop > axisMax) {
+                        oldTop = axisMax;
+                    }
+                    float newTop = k * oldTop + b;
+                    float newBottom = k * oldBottom + b;
+                    buffer.buffer[j * 2 + 1] = newTop;
+                    buffer.buffer[j * 2 + 3] = newBottom;
+                }
+            }
             final boolean isSingleColor = dataSet.getColors().size() == 1;
 
             if (isSingleColor) {
@@ -180,7 +214,6 @@ public class RoundedBarChart extends BarChart {
             }
 
             for (int j = 0; j < buffer.size(); j += 4) {
-
                 if (!mViewPortHandler.isInBoundsLeft(buffer.buffer[j + 2]))
                     continue;
 
@@ -218,10 +251,8 @@ public class RoundedBarChart extends BarChart {
                                     android.graphics.Shader.TileMode.MIRROR));
                 }
 
-
                 c.drawRoundRect(buffer.buffer[j], buffer.buffer[j + 1], buffer.buffer[j + 2],
                         buffer.buffer[j + 3], mRadius, mRadius, mRenderPaint);
-
                 if (drawBorder) {
                     c.drawRoundRect(buffer.buffer[j], buffer.buffer[j + 1], buffer.buffer[j + 2],
                             buffer.buffer[j + 3], mRadius, mRadius, mBarBorderPaint);

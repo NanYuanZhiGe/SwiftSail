@@ -1,7 +1,9 @@
 package com.nyzg.swiftsail.dao;
 
 import androidx.room.Dao;
+import androidx.room.Ignore;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Transaction;
 
@@ -22,13 +24,11 @@ public abstract class RecordTable {
     @Query("SELECT COUNT(1) FROM `recordTable` WHERE `userId`=:userId AND `epochDay`=:epochDay;")
     public abstract int countRecordWithDay(long userId, long epochDay);
 
-    @Query("SELECT `epochDay` FROM `recordTable` WHERE `userId`=:userId GROUP BY `epochDay` ORDER BY `epochDay`;")
+    @Query("SELECT DISTINCT `epochDay` FROM `recordTable` WHERE `userId`=:userId ORDER BY `epochDay` ;")
     public abstract List<Long> getEpochDay(long userId);
 
-    @Insert
-    public abstract void insertRecord(Record record);
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     public abstract void insertRecordList(List<Record> recordList);
 
     @Query("SELECT `exposeValue` FROM `recordTable` WHERE `userId`=:userId AND `type`=:type AND `epochDay`=:epochDay;")

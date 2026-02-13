@@ -79,4 +79,7 @@ dependencies {
 
     //用于解决键盘弹出和收回的监听方案
     implementation("com.github.boybeak:skb-global:0.2.0")
+
+    //websocket支持
+    implementation("org.java-websocket:Java-WebSocket:1.6.0")
 }

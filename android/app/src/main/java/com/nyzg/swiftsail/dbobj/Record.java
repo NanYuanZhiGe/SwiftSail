@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey;
 @Entity(
         tableName = "recordTable",
         indices = {
+                @Index(value = {"userId", "type", "epochDay"}, unique = true),
                 @Index({"userId", "type", "epochDay", "exposeValue"}),
                 @Index({"userId", "type", "epochWeek", "epochDay", "exposeValue"}),
                 @Index({"userId", "type", "epochMonth", "epochDay", "exposeValue"}),

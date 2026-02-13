@@ -18,6 +18,8 @@ public class SyncRepository {
     volatile private static SyncRepository INSTANCE;
 
     public MutableLiveData<Pair<String,Void>> notificationPair =new MutableLiveData<>();
+
+    public MutableLiveData<Float> totalSyncProgress=new MutableLiveData<>(.0f);
     public final AtomicBoolean onSync = new AtomicBoolean(false);
     private SyncRepository() {
     }

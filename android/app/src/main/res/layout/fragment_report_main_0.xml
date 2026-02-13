@@ -262,9 +262,9 @@
                     android:id="@+id/date"
                     android:layout_width="match_parent"
                     android:layout_height="70dp"
+                    android:background="@color/white"
                     android:gravity="bottom|center_horizontal"
                     android:text="今天"
-                    android:background="@color/white"
                     android:textAlignment="center"
                     android:textSize="24sp"
                     android:textStyle="bold"
@@ -272,16 +272,24 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:background="@color/white"
                     android:id="@+id/syncStatus"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="@color/white"
                     android:text=""
                     android:textAlignment="center"
                     android:textColor="@color/liteWhite"
                     android:textSize="11sp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/date" />
+
+                <View
+                    android:id="@+id/totalSyncProgress"
+                    android:layout_width="match_parent"
+                    android:layout_height="4dp"
+                    android:background="@color/heavyGreen"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/syncStatus" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 

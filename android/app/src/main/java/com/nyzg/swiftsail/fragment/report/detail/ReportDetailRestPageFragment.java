@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.AbsoluteSizeSpan;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,6 +41,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -215,6 +217,7 @@ public class ReportDetailRestPageFragment extends Fragment {
         }
         //第一次执行
         barDataSet = new BarDataSet(entries, "");
+        Log.v("myTag", Arrays.toString(entries.toArray()));
         barDataSet.setColors(ContextCompat.getColor(requireContext(), themeColor));
         float barWidth = 0.2f;
         if (sumType == SumType.YEAR) {
@@ -248,14 +251,16 @@ public class ReportDetailRestPageFragment extends Fragment {
         yAxis.setDrawAxisLine(false);
         yAxis.setDrawGridLines(false);
         LimitLine limitLine = new LimitLine((float) entries.stream().mapToDouble(BarEntry::getY).average().orElse(0), "");
-        limitLine.setLineWidth(3f);
+        limitLine.setLineWidth(2.5f);
         limitLine.setLineColor(themeColor);
         yAxis.addLimitLine(limitLine);
+        yAxis.setAxisMinimum(0f);
 
         barChart.setDescription(null);
         barChart.setTouchEnabled(false);
         barChart.setData(barData);
         barChart.setFitBars(true);
+        barChart.notifyDataSetChanged();
         barChart.invalidate();
     }
 

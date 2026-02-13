@@ -23,7 +23,7 @@ import com.nyzg.swiftsail.dbobj.User;
                 //和fitbit的同步数据的类
                 Record.class
         },
-        version = 13,
+        version = 16,
         exportSchema = false)
 public abstract class SQLiteDB extends RoomDatabase {
     private volatile static SQLiteDB self;

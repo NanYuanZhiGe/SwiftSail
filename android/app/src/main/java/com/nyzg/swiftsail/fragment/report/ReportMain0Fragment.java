@@ -1,7 +1,11 @@
 package com.nyzg.swiftsail.fragment.report;
 
+import static android.view.View.INVISIBLE;
+import static android.view.View.VISIBLE;
+
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,6 +56,7 @@ public class ReportMain0Fragment extends Fragment {
     private ReportCircle heartRateCircle;
     private ReportCircle caloricCircle;
     private TextView syncStatus;
+    private View totalSyncProgress;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -65,6 +70,29 @@ public class ReportMain0Fragment extends Fragment {
         View father = inflater.inflate(R.layout.fragment_report_main_0, container, false);
         View addDevice = father.findViewById(R.id.addDevice);
         View manageDevice = father.findViewById(R.id.mangeDevice);
+        totalSyncProgress = father.findViewById(R.id.totalSyncProgress);
+        SyncRepository.getInstance().totalSyncProgress.observe(getViewLifecycleOwner(), progress -> totalSyncProgress.post(() -> {
+            float p = progress;
+            if (p < 0f) {
+                p = 0f;
+            } else if (p > 1f) {
+                p = 1f;
+            }
+            if (p < 1e3) {
+                totalSyncProgress.setVisibility(INVISIBLE);
+                return;
+            } else {
+                totalSyncProgress.setVisibility(VISIBLE);
+            }
+            DisplayMetrics metrics = getResources().getDisplayMetrics();
+            int screenWidth = metrics.widthPixels;
+            int targetWidth = (int) (screenWidth * p);
+            ViewGroup.LayoutParams params = totalSyncProgress.getLayoutParams();
+            if (params != null) {
+                params.width = targetWidth;
+                totalSyncProgress.setLayoutParams(params);
+            }
+        }));
         //----------------保存用户是否拉起底部的菜单栏-------------------
         SlidingUpPanelLayout slidingUpPanelLayout = father.findViewById(R.id.slidingUpPanel);
         slidingUpPanelLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
@@ -97,9 +125,10 @@ public class ReportMain0Fragment extends Fragment {
         //点击选择日期来展示数据
         syncStatus = father.findViewById(R.id.syncStatus);
         date = father.findViewById(R.id.date);
-        date.setOnDateSelectedFunc(epochDay->{
+        date.setOnDateSelectedFunc(epochDay -> {
             viewModel.selectedDate = epochDay;
-            syncData(()->{});
+            syncData(() -> {
+            });
         });
         if (viewModel.selectedDate > 0L) {//说明这个fragment重建过
             date.setDate(viewModel.selectedDate);
