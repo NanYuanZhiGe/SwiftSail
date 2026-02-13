@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ThreadPool {
-    public static final ExecutorService REPORT_DETAIL_THREAD_POOL = new ThreadPoolExecutor(
+    public static final ExecutorService QUICK_CHANGE_THREAD_POOL = new ThreadPoolExecutor(
             2, 2,
             5 * 60, TimeUnit.SECONDS,
             new ArrayBlockingQueue<>(1),

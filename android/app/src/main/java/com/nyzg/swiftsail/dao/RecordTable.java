@@ -1,7 +1,6 @@
 package com.nyzg.swiftsail.dao;
 
 import androidx.room.Dao;
-import androidx.room.Ignore;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
@@ -10,10 +9,19 @@ import androidx.room.Transaction;
 import com.nyzg.swiftsail.dbobj.Record;
 import com.nyzg.swiftsail.obj.Pair;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.List;
 
 @Dao
 public abstract class RecordTable {
+
+    /**
+     * 获取具体某一天的数据，不会多拿
+     * 因为这个三个东西构成了唯一索引
+     */
+    @Query("SELECT * FROM `recordTable` WHERE `userId`=:userId AND `type`=:type AND `epochDay`=:epochDay;")
+    public abstract @Nullable Record getSpecificationRecord(long userId, String type, long epochDay);
 
     /**
      * 获取有多少条数据

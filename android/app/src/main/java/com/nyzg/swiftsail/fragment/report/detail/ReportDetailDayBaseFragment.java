@@ -15,11 +15,13 @@ import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.nyzg.swiftsail.R;
-import com.nyzg.swiftsail.bean.ThreadPool;
 
 import java.time.LocalDate;
 import java.util.function.Consumer;
 
+/**
+ * 这个东西的作用就是封装了一个DateSelector
+ */
 abstract public class ReportDetailDayBaseFragment extends Fragment {
     final protected static String LAYOUT_KEY = "layout_key";
     private int layoutResource;
@@ -56,8 +58,17 @@ abstract public class ReportDetailDayBaseFragment extends Fragment {
      */
     protected abstract void init(View father);
 
+
+    /**
+     * layout 里面是否有DateSelector，要求执行：
+     * TextView dateSelector = dateSelectorContainer.findViewById(R.id.dateSelector);
+     * 不报错
+     */
     protected abstract boolean hasDateSelector();
 
+    /**
+     * 回调函数，同步执行，LocalDate是用户选择好的日期
+     */
     protected Consumer<LocalDate> getDateSelectorCallback() {
         return null;
     }
@@ -69,42 +80,25 @@ abstract public class ReportDetailDayBaseFragment extends Fragment {
     private void setOnDateSelectorClicked(View dateSelectorContainer, Consumer<LocalDate> onDateSelected) {
         TextView dateSelector = dateSelectorContainer.findViewById(R.id.dateSelector);
         dateSelectorContainer.setOnClickListener(view -> {
-            LocalDate localDate = LocalDate.now();
+            LocalDate localDate = viewModel.selectedDay > 0L ? LocalDate.ofEpochDay(viewModel.selectedDay) : LocalDate.now();
             DatePickerDialog dialog = new DatePickerDialog(requireContext(), (datePicker, year, month, day) -> {
                 //用户选好之后就后台执行统计逻辑
                 LocalDate selectedDate = LocalDate.of(year, month + 1, day);
                 if (selectedDate.equals(localDate)) {
                     dateSelector.setText("今天");
                     return;
+                } else if (selectedDate.getMonthValue() == localDate.getMonthValue()) {
+                    dateSelector.setText(String.format("%d号", selectedDate.getDayOfMonth()));
                 } else if (selectedDate.getYear() == localDate.getYear()) {
                     dateSelector.setText(String.format("%d月%d日", selectedDate.getMonthValue(), selectedDate.getDayOfMonth()));
                 } else {
                     dateSelector.setText(String.format("%d年%d月%d日", selectedDate.getYear(), selectedDate.getMonthValue(), selectedDate.getDayOfMonth()));
                 }
+                viewModel.selectedDay = selectedDate.toEpochDay();
                 onDateSelected.accept(selectedDate);
             }, localDate.getYear(), localDate.getMonthValue() - 1, localDate.getDayOfMonth());
             dialog.show();
         });
-        if (viewModel.selectedDay > 0L) {
-            LocalDate lastDate = LocalDate.ofEpochDay(viewModel.selectedDay);
-            LocalDate now = LocalDate.now();
-            if (lastDate.equals(now)) {
-                dateSelector.setText("今天");
-            } else if (lastDate.getYear() == now.getYear()) {
-                dateSelector.setText(String.format("%d月%d日", lastDate.getMonthValue(), lastDate.getDayOfMonth()));
-            } else {
-                dateSelector.setText(String.format("%d年%d月%d日", lastDate.getYear(), lastDate.getMonthValue(), lastDate.getDayOfMonth()));
-            }
-            ThreadPool.REPORT_DETAIL_THREAD_POOL.execute(
-                    () -> onDateSelected.accept(lastDate)
-            );
-        } else {
-            LocalDate now = LocalDate.now();
-            dateSelector.setText("今天");
-            ThreadPool.REPORT_DETAIL_THREAD_POOL.execute(
-                    () -> onDateSelected.accept(now)
-            );
-        }
     }
 
     public static class MyViewModel extends ViewModel {

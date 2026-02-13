@@ -12,7 +12,6 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.nyzg.swiftsail.GlobalApplication;
-import com.nyzg.swiftsail.MainActivity;
 import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.fragment.login.LoginFragment;
 import com.nyzg.swiftsail.fragment.login.MainFragment;
