@@ -16,7 +16,7 @@ public class ReportDetailCaloricFragment extends ReportDetailBaseFragment {
     }
 
     @SuppressLint("DefaultLocale")
-    private final static Function<Float, String> AVG_FORMATTER = aFloat -> String.format("%.2f卡", aFloat);
+    private final static Function<Float, String> AVG_FORMATTER = aFloat -> String.format("%.1f卡", aFloat);
     private final static Function<Double, Float> POST_PROCESSOR = d -> (float) (double) d;
 
     @Override

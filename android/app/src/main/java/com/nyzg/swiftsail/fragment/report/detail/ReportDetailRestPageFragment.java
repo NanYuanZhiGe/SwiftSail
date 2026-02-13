@@ -306,7 +306,7 @@ public class ReportDetailRestPageFragment extends Fragment {
             limitLine = new LimitLine((float) entries.stream().mapToDouble(BarEntry::getY).sum() / oldSize);
         }
         limitLine.setLineWidth(2.5f);
-        limitLine.setLineColor(themeColor);
+        limitLine.setLineColor(ContextCompat.getColor(requireContext(), themeColor));
         yAxis.removeAllLimitLines();
         yAxis.addLimitLine(limitLine);
         if (entries.size() > 1) {
