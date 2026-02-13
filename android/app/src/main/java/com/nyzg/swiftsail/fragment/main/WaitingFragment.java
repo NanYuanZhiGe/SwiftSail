@@ -49,7 +49,7 @@ public class WaitingFragment extends Fragment {
     private void checkAndDoLogin() {
         assert getActivity() != null;
         LoginRepository.getInstance()
-                .tryLastLoginAsync(msg -> detailText.setText(msg))
+                .tryLastLoginAsync(msg -> detailText.post(()->detailText.setText(msg)))
                 .thenAcceptAsync(result -> {
                     if (result.getA() == SucceedOrNot.FAIL) {
                         //使用上一次的登录账户登录失败，添加登录页面，

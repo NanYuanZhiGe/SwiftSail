@@ -43,8 +43,7 @@ abstract public class ReportDetailBaseFragment extends Fragment {
         tabLayout.addTab(tabLayout.newTab().setText("月"));
         tabLayout.addTab(tabLayout.newTab().setText("年"));
         tabLayout.addTab(tabLayout.newTab().setText("总"));
-        father.findViewById(R.id.backspace).setOnClickListener(v -> requireActivity().getSupportFragmentManager()
-                .popBackStack());
+        father.findViewById(R.id.backward).setOnClickListener(v -> requireParentFragment().getChildFragmentManager().popBackStack());
         ViewPager2 viewPager2 = father.findViewById(R.id.summaries);
         viewPager2.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
         viewPager2.setAdapter(new ReportDetailAdapter(

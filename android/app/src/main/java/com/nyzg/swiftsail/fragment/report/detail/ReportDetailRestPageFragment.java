@@ -241,7 +241,7 @@ public class ReportDetailRestPageFragment extends Fragment {
                 });
             }
             //再刷一次y轴
-            avoidMinClipped(barChart.getAxisRight(), entries,oldSize);
+            avoidMinClipped(barChart.getAxisRight(), entries, oldSize);
             barDataSet.setValues(entries);
             barChart.notifyDataSetChanged();
             barChart.invalidate();
@@ -287,7 +287,7 @@ public class ReportDetailRestPageFragment extends Fragment {
                 return yAxisFormatter.apply(value);
             }
         });
-        avoidMinClipped(yAxis, entries,oldSize);
+        avoidMinClipped(yAxis, entries, oldSize);
 
 
         barChart.setDescription(null);
@@ -357,12 +357,14 @@ public class ReportDetailRestPageFragment extends Fragment {
         //导致这个fragment被销毁，就会执行destroy，然后这个就不会执行
         //当然，如果这个先提前执行，然后用户进行操作，导致fragment被销毁了也没有关系
         //这里使用了viewModel，保证UI的更新安全
-        FUNC_CACHE.computeIfPresent(funcKey, (k, v) -> {
-            Function<FuncParam, Pair<Long, List<BarEntry>>> function = v.getB();
-            CompletableFuture.supplyAsync(() -> function.apply(funcParam), THREAD_POOL)
-                    .thenAcceptAsync(barEntryResult -> viewModel.funcResult.setValue(barEntryResult), ContextCompat.getMainExecutor(requireContext()));
-            return null;
-        });
+        Pair<SumType, Function<FuncParam, Pair<Long, List<BarEntry>>>> sumTypeFunctionPair = FUNC_CACHE.get(funcKey);
+        if (sumTypeFunctionPair == null) {
+            return;
+        }
+        Function<FuncParam, Pair<Long, List<BarEntry>>> function = sumTypeFunctionPair.getB();
+        CompletableFuture.supplyAsync(() -> function.apply(funcParam), THREAD_POOL)
+                .thenAcceptAsync(barEntryResult -> viewModel.funcResult.setValue(barEntryResult),
+                        ContextCompat.getMainExecutor(requireContext()));
     }
 
     /**
@@ -372,7 +374,7 @@ public class ReportDetailRestPageFragment extends Fragment {
     private void initDateSelectorContainer(View view, SumType sumType) {
         //popup一个窗口，让用户选择日期
         view.setOnClickListener(v -> {
-            LocalDate localDate = LocalDate.now();
+            LocalDate localDate = viewModel.selectedDate == null ? LocalDate.now() : viewModel.selectedDate;
             DatePickerDialog dialog = new DatePickerDialog(requireContext(), (datePicker, year, month, day) -> {
                 //用户选好之后就后台执行统计逻辑
                 LocalDate selectedDate = LocalDate.of(year, month + 1, day);
@@ -380,6 +382,7 @@ public class ReportDetailRestPageFragment extends Fragment {
                 if (selectedDate.equals(localDate)) {
                     return;
                 }
+                viewModel.selectedDate = selectedDate;
                 doLogicFunc(getFuncParam(selectedDate, sumType));
             }, localDate.getYear(), localDate.getMonthValue() - 1, localDate.getDayOfMonth());
             dialog.show();
@@ -390,12 +393,48 @@ public class ReportDetailRestPageFragment extends Fragment {
     private void setDateSelectorContainerText(View dateSelectorContainer, LocalDate date) {
         TextView dateSelector = dateSelectorContainer.findViewById(R.id.dateSelector);
         LocalDate now = LocalDate.now();
-        if (date.equals(now)) {
-            dateSelector.setText("今天");
-        } else if (date.getYear() == now.getYear()) {
-            dateSelector.setText(String.format("%d月%d日", date.getMonthValue(), date.getDayOfMonth()));
-        } else
-            dateSelector.setText(String.format("%d年%d月%d日", date.getYear(), date.getMonthValue(), date.getDayOfMonth()));
+        switch (sumType) {
+            case WEEK -> {//周记按每天计算
+                if (date.equals(now)) {
+                    dateSelector.setText("今天");
+                } else if (date.getMonthValue() == now.getMonthValue()) {
+                    dateSelector.setText(String.format("%d号", date.getDayOfMonth()));
+                } else if (date.getYear() == now.getYear()) {
+                    dateSelector.setText(String.format("%d月%d日", date.getMonthValue(), date.getDayOfMonth()));
+                } else {
+                    dateSelector.setText(String.format("%d年%d月%d日", date.getYear(), date.getMonthValue(), date.getDayOfMonth()));
+                }
+            }
+            case MONTH -> {//月记按周计算
+                long nowWeek = DateUtils.getEpochWeek(now.toEpochDay());
+                long dateWeek = DateUtils.getEpochWeek(date.toEpochDay());
+                if (nowWeek == dateWeek) {
+                    dateSelector.setText("本周");
+                } else if (dateWeek + 1 == nowWeek) {
+                    dateSelector.setText("上周");
+                } else if (date.getYear() == now.getYear()) {
+                    dateSelector.setText(String.format("%d月 第%d周", date.getMonthValue(), date.getDayOfMonth() / 7 + 1));
+                } else {
+                    dateSelector.setText(String.format("%d年%d月 第%d周", date.getYear(), date.getMonthValue(), date.getDayOfMonth() / 7 + 1));
+                }
+            }
+            case YEAR -> {//年记按月计算
+                if (date.getMonthValue() == now.getMonthValue()) {
+                    dateSelector.setText("本月");
+                } else if (date.getYear() == now.getYear()) {
+                    dateSelector.setText(String.format("%d月", date.getMonthValue()));
+                } else {
+                    dateSelector.setText(String.format("%d年%d月", date.getYear(), date.getMonthValue()));
+                }
+            }
+            case TOTAL -> {//总记按年计算
+                if (date.getYear() == now.getYear()) {
+                    dateSelector.setText("今年");
+                } else {
+                    dateSelector.setText(String.format("%d年", date.getYear()));
+                }
+            }
+        }
     }
 
     private FuncParam getFuncParam(LocalDate date, SumType sumType) {

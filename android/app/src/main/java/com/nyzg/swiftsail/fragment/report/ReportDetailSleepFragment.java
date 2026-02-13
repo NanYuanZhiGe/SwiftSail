@@ -52,7 +52,7 @@ public class ReportDetailSleepFragment extends ReportDetailBaseFragment {
 
     @Override
     protected String getTitleText() {
-        return "睡觉";
+        return "睡眠";
     }
 
     @SuppressLint("DefaultLocale")
