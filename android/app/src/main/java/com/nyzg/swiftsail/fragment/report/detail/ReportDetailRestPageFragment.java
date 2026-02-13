@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.AbsoluteSizeSpan;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,7 +40,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -73,6 +71,7 @@ public class ReportDetailRestPageFragment extends Fragment {
      */
     private static final Map<String, Pair<SumType, Function<FuncParam, Pair<Long, List<BarEntry>>>>> FUNC_CACHE = new ConcurrentHashMap<>();
     private static final Map<String, Function<Float, String>> FUNC_AVG_FORMATTER = new ConcurrentHashMap<>();
+    private static final Map<String, Function<Float, String>> FUNC_YAXIS_FORMATTER = new ConcurrentHashMap<>();
     /*
     这个线程池被设计为静态的目的是防止用户多次提交任务导致大量任务堆积，
     同时保证用户在频繁切换UI+提交的时候保证数据的最新。
@@ -97,6 +96,7 @@ public class ReportDetailRestPageFragment extends Fragment {
     private static final String THEME_COLOR_KEY = "color_key";
     private static final String SYNC_FUNC_KEY = "sync_key";
     private Function<Float, String> avgFormatter;
+    private Function<Float, String> yAxisFormatter;
     private MyViewModel viewModel;
     private int themeColor;
     private String funcKey;
@@ -117,13 +117,19 @@ public class ReportDetailRestPageFragment extends Fragment {
      * @param averageFormatter 对于每个BarEntry中的数据，怎么转化为字符串，比如9.20是9小时12分钟
      * @return 返回这个类的一个新的实例
      */
-    public static Fragment getInstance(int themeColor, Function<FuncParam, Pair<Long, List<BarEntry>>> logicFunc, String funcKey, SumType sumType, Function<Float, String> averageFormatter) {
+    public static Fragment getInstance(
+            int themeColor,
+            @NonNull Function<FuncParam, Pair<Long, List<BarEntry>>> logicFunc,
+            @NonNull String funcKey, SumType sumType,
+            @NonNull Function<Float, String> averageFormatter,
+            @NonNull Function<Float, String> yAxisFormatter) {
         Fragment fragment = new ReportDetailRestPageFragment();
         Bundle bundle = new Bundle();
         bundle.putInt(THEME_COLOR_KEY, themeColor);
         bundle.putString(SYNC_FUNC_KEY, funcKey);
         FUNC_CACHE.put(funcKey, new Pair<>(sumType, logicFunc));
         FUNC_AVG_FORMATTER.put(funcKey, averageFormatter);
+        FUNC_YAXIS_FORMATTER.put(funcKey, yAxisFormatter);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -144,6 +150,7 @@ public class ReportDetailRestPageFragment extends Fragment {
             viewModel = new ViewModelProvider(this).get(MyViewModel.class);
         }
         avgFormatter = FUNC_AVG_FORMATTER.get(funcKey);
+        yAxisFormatter = FUNC_YAXIS_FORMATTER.get(funcKey);
     }
 
     @Nullable
@@ -210,6 +217,8 @@ public class ReportDetailRestPageFragment extends Fragment {
                     }
                 });
             }
+            //再刷一次y轴
+            avoidMinClipped(barChart.getAxisRight(), entries);
             barDataSet.setValues(entries);
             barChart.notifyDataSetChanged();
             barChart.invalidate();
@@ -217,7 +226,6 @@ public class ReportDetailRestPageFragment extends Fragment {
         }
         //第一次执行
         barDataSet = new BarDataSet(entries, "");
-        Log.v("myTag", Arrays.toString(entries.toArray()));
         barDataSet.setColors(ContextCompat.getColor(requireContext(), themeColor));
         float barWidth = 0.2f;
         if (sumType == SumType.YEAR) {
@@ -250,11 +258,14 @@ public class ReportDetailRestPageFragment extends Fragment {
         YAxis yAxis = barChart.getAxisRight();
         yAxis.setDrawAxisLine(false);
         yAxis.setDrawGridLines(false);
-        LimitLine limitLine = new LimitLine((float) entries.stream().mapToDouble(BarEntry::getY).average().orElse(0), "");
-        limitLine.setLineWidth(2.5f);
-        limitLine.setLineColor(themeColor);
-        yAxis.addLimitLine(limitLine);
-        yAxis.setAxisMinimum(0f);
+        yAxis.setValueFormatter(new ValueFormatter() {
+            @Override
+            public String getAxisLabel(float value, AxisBase axis) {
+                return yAxisFormatter.apply(value);
+            }
+        });
+        avoidMinClipped(yAxis, entries);
+
 
         barChart.setDescription(null);
         barChart.setTouchEnabled(false);
@@ -262,6 +273,30 @@ public class ReportDetailRestPageFragment extends Fragment {
         barChart.setFitBars(true);
         barChart.notifyDataSetChanged();
         barChart.invalidate();
+    }
+
+    private void avoidMinClipped(@NonNull YAxis yAxis, @NonNull List<BarEntry> entries) {
+        LimitLine limitLine = new LimitLine((float) entries.stream().mapToDouble(BarEntry::getY).average().orElse(0), "");
+        limitLine.setLineWidth(2.5f);
+        limitLine.setLineColor(themeColor);
+        yAxis.removeAllLimitLines();
+        yAxis.addLimitLine(limitLine);
+        if (entries.size() > 1) {
+            float yMax = entries.get(0).getY();
+            float yMin = entries.get(0).getY();
+            for (int i = 1; i < entries.size(); ++i) {
+                if (entries.get(i).getY() > yMax) {
+                    yMax = entries.get(i).getY();
+                }
+                if (entries.get(i).getY() < yMin) {
+                    yMin = entries.get(i).getY();
+                }
+            }
+            //避免最小值缩放到最底下
+            if (yMin > 0) {
+                yAxis.setAxisMinimum(Math.max(0, yMin - (yMax - yMin) * .5f));
+            }
+        }
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -369,6 +404,7 @@ public class ReportDetailRestPageFragment extends Fragment {
         super.onDestroy();
         FUNC_CACHE.remove(funcKey);
         FUNC_AVG_FORMATTER.remove(funcKey);
+        FUNC_YAXIS_FORMATTER.remove(funcKey);
     }
 
     @SuppressLint("DefaultLocale")

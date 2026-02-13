@@ -49,4 +49,10 @@ public class ReportDetailCaloricFragment extends ReportDetailBaseFragment {
         return "消耗热量";
     }
 
+    @SuppressLint("DefaultLocale")
+    @Override
+    protected Function<Float, String> getYAxisFormatter() {
+        return f->String.format("%.0f",f);
+    }
+
 }

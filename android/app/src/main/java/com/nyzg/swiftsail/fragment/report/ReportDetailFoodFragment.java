@@ -46,4 +46,10 @@ public class ReportDetailFoodFragment extends ReportDetailBaseFragment {
         return "饮食";
     }
 
+    @SuppressLint("DefaultLocale")
+    @Override
+    protected Function<Float, String> getYAxisFormatter() {
+        return f->String.format("%.0f",f);
+    }
+
 }

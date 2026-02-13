@@ -135,7 +135,8 @@ abstract public class ReportDetailBaseFragment extends Fragment {
                             },
                             "ReportDetail" + getPageType() + "Week",
                             SumType.WEEK,
-                            getAvgFormatter()
+                            getAvgFormatter(),
+                            getYAxisFormatter()
                     );
                 case 2://month
                     return ReportDetailRestPageFragment.getInstance(
@@ -153,7 +154,8 @@ abstract public class ReportDetailBaseFragment extends Fragment {
                             },
                             "ReportDetail" + getPageType() + "Month",
                             SumType.MONTH,
-                            getAvgFormatter()
+                            getAvgFormatter(),
+                            getYAxisFormatter()
                     );
                 case 3://year
                     return ReportDetailRestPageFragment.getInstance(
@@ -171,7 +173,8 @@ abstract public class ReportDetailBaseFragment extends Fragment {
                             },
                             "ReportDetail" + getPageType() + "Year",
                             SumType.YEAR,
-                            getAvgFormatter()
+                            getAvgFormatter(),
+                            getYAxisFormatter()
                     );
                 default://total
                     return ReportDetailRestPageFragment.getInstance(
@@ -185,7 +188,8 @@ abstract public class ReportDetailBaseFragment extends Fragment {
                             },
                             "ReportDetail" + getPageType() + "Total",
                             SumType.TOTAL,
-                            getAvgFormatter()
+                            getAvgFormatter(),
+                            getYAxisFormatter()
                     );
             }
         };
@@ -222,4 +226,6 @@ abstract public class ReportDetailBaseFragment extends Fragment {
     protected abstract Function<Double, Float> getDataFormatter();
 
     protected abstract String getTitleText();
+
+    protected abstract Function<Float, String> getYAxisFormatter();
 }

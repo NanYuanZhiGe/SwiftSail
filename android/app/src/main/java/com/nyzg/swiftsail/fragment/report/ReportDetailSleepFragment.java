@@ -54,4 +54,10 @@ public class ReportDetailSleepFragment extends ReportDetailBaseFragment {
     protected String getTitleText() {
         return "睡觉";
     }
+
+    @SuppressLint("DefaultLocale")
+    @Override
+    protected Function<Float, String> getYAxisFormatter() {
+        return f->String.format("%.0f 小时",f);
+    }
 }

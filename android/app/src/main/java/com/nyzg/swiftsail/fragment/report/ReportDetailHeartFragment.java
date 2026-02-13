@@ -1,5 +1,7 @@
 package com.nyzg.swiftsail.fragment.report;
 
+import android.annotation.SuppressLint;
+
 import androidx.fragment.app.Fragment;
 
 import com.nyzg.swiftsail.R;
@@ -44,5 +46,11 @@ public class ReportDetailHeartFragment extends ReportDetailBaseFragment {
     @Override
     protected String getTitleText() {
         return "心率";
+    }
+
+    @SuppressLint("DefaultLocale")
+    @Override
+    protected Function<Float, String> getYAxisFormatter() {
+        return f->String.format("%.0f bpm",f);
     }
 }

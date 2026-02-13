@@ -16,7 +16,7 @@ public class ReportDetailDistanceFragment extends ReportDetailBaseFragment {
     }
 
     @SuppressLint("DefaultLocale")
-    private final static Function<Float, String> AVG_FORMATTER = aFloat -> String.format("%.2f公里", aFloat/1000f);
+    private final static Function<Float, String> AVG_FORMATTER = aFloat -> String.format("%.2f公里", aFloat / 1000f);
     private final static Function<Double, Float> POST_PROCESSOR = d -> (float) (double) d;
 
     @Override
@@ -47,6 +47,12 @@ public class ReportDetailDistanceFragment extends ReportDetailBaseFragment {
     @Override
     protected String getTitleText() {
         return "运动距离";
+    }
+
+    @SuppressLint("DefaultLocale")
+    @Override
+    protected Function<Float, String> getYAxisFormatter() {
+        return f -> String.format("%.1f km", f / 1000f);
     }
 
 
