@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/dateSelectorContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@color/white"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_marginStart="12dp"
+                android:src="@drawable/chevron_left"
+                app:layout_constraintBottom_toBottomOf="@id/dateSelector"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/dateSelector"
+                app:tint="@color/black" />
+
+            <TextView
+                android:id="@+id/dateSelector"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="今天"
+                android:textSize="18sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_marginEnd="12dp"
+                android:src="@drawable/chevron_right"
+                app:layout_constraintBottom_toBottomOf="@id/dateSelector"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/dateSelector"
+                app:tint="@color/black" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <TextView
+            android:id="@+id/total"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/mediumMarginTop"
+            android:gravity="end"
+            android:text="总共"
+            app:layout_constraintBaseline_toBaselineOf="@id/totalDistance"
+            app:layout_constraintEnd_toEndOf="@id/moderate" />
+        
+        <TextView
+            android:id="@+id/totalDistance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/mediumMarginTop"
+            android:gravity="end"
+            android:minWidth="100dp"
+            android:text="0"
+            android:textSize="36sp"
+            app:layout_constraintStart_toEndOf="@id/total"
+            app:layout_constraintTop_toBottomOf="@id/dateSelectorContainer" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/tinyMarginStart"
+            android:gravity="end"
+            android:text="@string/km"
+            app:layout_constraintBaseline_toBaselineOf="@id/totalDistance"
+            app:layout_constraintStart_toEndOf="@id/totalDistance" />
+
+        <TextView
+            android:id="@+id/specifically"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/smallMarginStart"
+            android:layout_marginTop="@dimen/bigMarginTop"
+            android:text="@string/specifically"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/totalDistance" />
+
+        <TextView
+            android:id="@+id/walk"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="步行"
+            app:layout_constraintBaseline_toBaselineOf="@id/walkDistance"
+            app:layout_constraintEnd_toEndOf="@id/moderate" />
+
+        <TextView
+            android:id="@+id/walkDistance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/smallMarginTop"
+            android:gravity="end"
+            android:minWidth="100dp"
+            android:text="0"
+            android:textSize="36sp"
+            app:layout_constraintStart_toEndOf="@id/walk"
+            app:layout_constraintTop_toBottomOf="@id/specifically" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/tinyMarginStart"
+            android:gravity="end"
+            android:text="@string/km"
+            app:layout_constraintBaseline_toBaselineOf="@id/walkDistance"
+            app:layout_constraintStart_toEndOf="@id/walkDistance" />
+
+        <TextView
+            android:id="@+id/light"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="轻度活动距离"
+            app:layout_constraintBaseline_toBaselineOf="@id/lightDistance"
+            app:layout_constraintEnd_toEndOf="@id/moderate" />
+
+        <TextView
+            android:id="@+id/lightDistance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/tinyMarginTop"
+            android:gravity="end"
+            android:minWidth="100dp"
+            android:text="0"
+            android:textSize="36sp"
+            app:layout_constraintStart_toEndOf="@id/light"
+            app:layout_constraintTop_toBottomOf="@id/walkDistance" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/tinyMarginStart"
+            android:gravity="end"
+            android:text="@string/km"
+            app:layout_constraintBaseline_toBaselineOf="@id/lightDistance"
+            app:layout_constraintStart_toEndOf="@id/lightDistance" />
+
+        <TextView
+            android:id="@+id/moderate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="中等强度运动距离"
+            app:layout_constraintBaseline_toBaselineOf="@id/moderateDistance"
+            app:layout_constraintStart_toStartOf="@id/specifically" />
+
+        <TextView
+            android:id="@+id/moderateDistance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/tinyMarginTop"
+            android:gravity="end"
+            android:minWidth="100dp"
+            android:text="0"
+            android:textSize="36sp"
+            app:layout_constraintStart_toEndOf="@id/moderate"
+            app:layout_constraintTop_toBottomOf="@id/lightDistance" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/tinyMarginStart"
+            android:gravity="end"
+            android:text="@string/km"
+            app:layout_constraintBaseline_toBaselineOf="@id/moderateDistance"
+            app:layout_constraintStart_toEndOf="@id/moderateDistance" />
+
+        <TextView
+            android:id="@+id/active"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="高强度运动距离"
+            app:layout_constraintBaseline_toBaselineOf="@id/activeDistance"
+            app:layout_constraintEnd_toEndOf="@id/moderate" />
+
+        <TextView
+            android:id="@+id/activeDistance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/tinyMarginTop"
+            android:gravity="end"
+            android:minWidth="100dp"
+            android:text="0"
+            android:textSize="36sp"
+            app:layout_constraintStart_toEndOf="@id/active"
+            app:layout_constraintTop_toBottomOf="@id/moderateDistance" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/tinyMarginStart"
+            android:gravity="end"
+            android:text="@string/km"
+            app:layout_constraintBaseline_toBaselineOf="@id/activeDistance"
+            app:layout_constraintStart_toEndOf="@id/activeDistance" />
+
+        <com.github.mikephil.charting.charts.PieChart
+            android:id="@+id/pieChart"
+            android:layout_width="350dp"
+            android:layout_height="350dp"
+            android:layout_marginTop="@dimen/mediumMarginTop"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/activeDistance" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>

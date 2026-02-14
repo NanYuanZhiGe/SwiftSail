@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment;
 import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.bean.RecordType;
 import com.nyzg.swiftsail.fragment.report.detail.ReportDetailCommDayFragment;
+import com.nyzg.swiftsail.fragment.report.detail.ReportDetailHeartRateDayFragment;
 
 import java.util.function.Function;
 
@@ -21,7 +22,7 @@ public class ReportDetailHeartFragment extends ReportDetailBaseFragment {
 
     @Override
     protected Fragment getFirstPage() {
-        return ReportDetailCommDayFragment.getInstance(R.layout.fragment_report_detail_day_common);
+        return ReportDetailHeartRateDayFragment.getInstance(R.layout.fragment_report_detail_heart_rate_day);
     }
 
     @Override

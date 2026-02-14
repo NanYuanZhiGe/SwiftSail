@@ -16,12 +16,9 @@ public class MineUserDataSelectLayout extends ConstraintLayout {
     public MineUserDataSelectLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         LayoutInflater.from(context).inflate(R.layout.layout_mine_user_data_select, this, true);
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.MineUserDataSelectLayout);
         TextView attribute = findViewById(R.id.attribute);
-        try {
+        try (TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.MineUserDataSelectLayout)){
             attribute.setText(a.getString(R.styleable.MineUserDataSelectLayout_attributeName));
-        } finally {
-            a.recycle();
         }
         this.setClickable(true);
         this.setFocusable(true);

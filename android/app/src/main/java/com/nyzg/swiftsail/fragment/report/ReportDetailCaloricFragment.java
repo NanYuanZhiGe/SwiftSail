@@ -6,11 +6,13 @@ import androidx.fragment.app.Fragment;
 
 import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.bean.RecordType;
+import com.nyzg.swiftsail.fragment.report.detail.ReportDetailCaloricDayFragment;
 import com.nyzg.swiftsail.fragment.report.detail.ReportDetailCommDayFragment;
 
 import java.util.function.Function;
 
 public class ReportDetailCaloricFragment extends ReportDetailBaseFragment {
+
     public static Fragment getInstance() {
         return new ReportDetailCaloricFragment();
     }
@@ -21,7 +23,7 @@ public class ReportDetailCaloricFragment extends ReportDetailBaseFragment {
 
     @Override
     protected Fragment getFirstPage() {
-        return ReportDetailCommDayFragment.getInstance(R.layout.fragment_report_detail_day_common);
+        return ReportDetailCaloricDayFragment.getInstance(R.layout.fragment_report_detail_caloric_day);
     }
 
     @Override
@@ -52,7 +54,7 @@ public class ReportDetailCaloricFragment extends ReportDetailBaseFragment {
     @SuppressLint("DefaultLocale")
     @Override
     protected Function<Float, String> getYAxisFormatter() {
-        return f->String.format("%.0f",f);
+        return f -> String.format("%.0f", f);
     }
 
 }

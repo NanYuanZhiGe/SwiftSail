@@ -134,7 +134,7 @@ public class MailLoginFragment extends Fragment {
             }
         }, resp -> {
             quitForbidden = false;
-            if (!resp.isSuccess()) {
+            if (resp.isFail()) {
                 GlobalToast.COMMON_TOAST.accept("请求失败：" + resp.getMessage());
                 return;
             }

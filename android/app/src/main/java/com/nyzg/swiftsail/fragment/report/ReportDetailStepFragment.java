@@ -7,6 +7,8 @@ import androidx.fragment.app.Fragment;
 import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.bean.RecordType;
 import com.nyzg.swiftsail.fragment.report.detail.ReportDetailCommDayFragment;
+import com.nyzg.swiftsail.fragment.report.detail.ReportDetailStepDayFragment;
+
 import java.util.function.Function;
 
 public class ReportDetailStepFragment extends ReportDetailBaseFragment {
@@ -19,7 +21,7 @@ public class ReportDetailStepFragment extends ReportDetailBaseFragment {
 
     @Override
     protected Fragment getFirstPage() {
-        return ReportDetailCommDayFragment.getInstance(R.layout.fragment_report_detail_day_common);
+        return ReportDetailStepDayFragment.getInstance(R.layout.fragment_report_detail_step_day);
     }
 
     @Override

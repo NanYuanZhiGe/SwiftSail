@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/dateSelectorContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@color/white"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_marginStart="12dp"
+                android:src="@drawable/chevron_left"
+                app:layout_constraintBottom_toBottomOf="@id/dateSelector"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/dateSelector"
+                app:tint="@color/black" />
+
+            <TextView
+                android:id="@+id/dateSelector"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="今天"
+                android:textSize="18sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_marginEnd="12dp"
+                android:src="@drawable/chevron_right"
+                app:layout_constraintBottom_toBottomOf="@id/dateSelector"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/dateSelector"
+                app:tint="@color/black" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <TextView
+            android:id="@+id/total"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/mediumMarginTop"
+            android:text="总能量消耗"
+            app:layout_constraintBaseline_toBaselineOf="@id/totalCaloric"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/totalCaloric"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/mediumMarginTop"
+            android:gravity="end"
+            android:minWidth="100dp"
+            android:text="0"
+            android:textSize="36sp"
+            app:layout_constraintStart_toEndOf="@id/total"
+            app:layout_constraintTop_toBottomOf="@id/dateSelectorContainer" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/tinyMarginStart"
+            android:text="卡"
+            app:layout_constraintBaseline_toBaselineOf="@id/totalCaloric"
+            app:layout_constraintStart_toEndOf="@id/totalCaloric" />
+
+        <TextView
+            android:id="@+id/t1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/mediumMarginTop"
+            android:text="其中，因为运动消耗了"
+            app:layout_constraintStart_toStartOf="@id/total"
+            app:layout_constraintTop_toBottomOf="@id/totalCaloric" />
+
+        <TextView
+            android:id="@+id/activityCaloric"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/tinyMarginTop"
+            android:gravity="end"
+            android:minWidth="100dp"
+            android:text="0"
+            android:textSize="36sp"
+            app:layout_constraintEnd_toEndOf="@id/totalCaloric"
+            app:layout_constraintTop_toBottomOf="@id/t1" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/tinyMarginStart"
+            android:text="卡"
+            app:layout_constraintBaseline_toBaselineOf="@id/activityCaloric"
+            app:layout_constraintStart_toEndOf="@id/activityCaloric" />
+
+        <TextView
+            android:id="@+id/t2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/tinyMarginTop"
+            android:text="占比"
+            app:layout_constraintStart_toStartOf="@id/total"
+            app:layout_constraintTop_toBottomOf="@id/activityCaloric" />
+
+        <TextView
+            android:id="@+id/activityPercentage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/tinyMarginTop"
+            android:text="0"
+            android:textSize="36sp"
+            app:layout_constraintStart_toStartOf="@id/total"
+            app:layout_constraintTop_toBottomOf="@id/t2" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/tinyMarginStart"
+            android:text="%"
+            app:layout_constraintBaseline_toBaselineOf="@id/activityPercentage"
+            app:layout_constraintStart_toEndOf="@id/activityPercentage" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/t3"
+            android:layout_width="350dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="@dimen/bigMarginTop"
+            android:background="@drawable/fragment_report_detail_caloric_bk1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/activityPercentage">
+
+            <View
+                android:id="@+id/activityView"
+                android:layout_width="10dp"
+                android:layout_height="30dp"
+                android:background="@drawable/fragment_report_detail_caloric_bk2"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <com.nyzg.swiftsail.view.RoundedBarChart
+            android:id="@+id/pieChart"
+            android:layout_width="350dp"
+            android:layout_height="350dp"
+            android:layout_marginTop="@dimen/bigMarginTop"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:radius="24dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/t3" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>

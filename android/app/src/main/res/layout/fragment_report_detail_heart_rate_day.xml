@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/dateSelectorContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@color/white"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_marginStart="12dp"
+                android:src="@drawable/chevron_left"
+                app:layout_constraintBottom_toBottomOf="@id/dateSelector"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/dateSelector"
+                app:tint="@color/black" />
+
+            <TextView
+                android:id="@+id/dateSelector"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="今天"
+                android:textSize="18sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_marginEnd="12dp"
+                android:src="@drawable/chevron_right"
+                app:layout_constraintBottom_toBottomOf="@id/dateSelector"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/dateSelector"
+                app:tint="@color/black" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <TextView
+            android:id="@+id/rest"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/smallMarginStart"
+            android:text="静息心率"
+            app:layout_constraintBaseline_toBaselineOf="@id/restHeartRate"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/restHeartRate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/mediumMarginTop"
+            android:gravity="end"
+            android:minWidth="100dp"
+            android:text="0"
+            android:textSize="36sp"
+            app:layout_constraintStart_toEndOf="@id/rest"
+            app:layout_constraintTop_toBottomOf="@id/dateSelectorContainer" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/smallMarginStart"
+            android:text="bpm"
+            app:layout_constraintBaseline_toBaselineOf="@id/restHeartRate"
+            app:layout_constraintStart_toEndOf="@id/restHeartRate" />
+
+        <TextView
+            android:id="@+id/t1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/bigMarginTop"
+            android:text="心率区间热量消耗"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@id/rest"
+            app:layout_constraintTop_toBottomOf="@id/restHeartRate" />
+
+        <View
+            android:id="@+id/t2"
+            android:layout_width="20dp"
+            android:layout_height="180dp"
+            android:layout_marginTop="@dimen/mediumMarginTop"
+            android:background="@drawable/fragment_report_detail_heartrate_bk1"
+            app:layout_constraintStart_toStartOf="@id/rest"
+            app:layout_constraintTop_toBottomOf="@id/t1" />
+
+        <TextView
+            android:id="@+id/t21"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/smallMarginStart"
+            android:text="静息区间"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@id/t2"
+            app:layout_constraintTop_toTopOf="@id/t2" />
+
+        <TextView
+            android:id="@+id/t22"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="消耗"
+            app:layout_constraintBaseline_toBaselineOf="@id/t23"
+            app:layout_constraintStart_toStartOf="@id/t21" />
+
+        <TextView
+            android:id="@+id/t23"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/tinyMarginTop"
+            android:gravity="end"
+            android:minWidth="80dp"
+            android:text="0"
+            android:textSize="36sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@id/t22"
+            app:layout_constraintTop_toBottomOf="@id/t21" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/tinyMarginStart"
+            android:text="卡"
+            app:layout_constraintBaseline_toBaselineOf="@id/t23"
+            app:layout_constraintStart_toEndOf="@id/t23" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxWidth="260dp"
+            android:text="心率过低，未进入有效训练状态，通常为日常活动或静息状态"
+            app:layout_constraintBottom_toBottomOf="@id/t2"
+            app:layout_constraintStart_toStartOf="@id/t22"
+            app:layout_constraintTop_toBottomOf="@id/t23" />
+
+        <View
+            android:id="@+id/t3"
+            android:layout_width="20dp"
+            android:layout_height="180dp"
+            android:layout_marginTop="@dimen/mediumMarginTop"
+            android:background="@drawable/fragment_report_detail_heartrate_bk2"
+            app:layout_constraintStart_toStartOf="@id/rest"
+            app:layout_constraintTop_toBottomOf="@id/t2" />
+
+        <TextView
+            android:id="@+id/t31"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/smallMarginStart"
+            android:text="燃脂区"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@id/t3"
+            app:layout_constraintTop_toTopOf="@id/t3" />
+
+        <TextView
+            android:id="@+id/t32"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="消耗"
+            app:layout_constraintBaseline_toBaselineOf="@id/t33"
+            app:layout_constraintStart_toStartOf="@id/t31" />
+
+        <TextView
+            android:id="@+id/t33"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/tinyMarginTop"
+            android:gravity="end"
+            android:minWidth="80dp"
+            android:text="0"
+            android:textSize="36sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@id/t32"
+            app:layout_constraintTop_toBottomOf="@id/t31" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/tinyMarginStart"
+            android:text="卡"
+            app:layout_constraintBaseline_toBaselineOf="@id/t33"
+            app:layout_constraintStart_toEndOf="@id/t33" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxWidth="260dp"
+            android:text="脂肪供能比例最高，适合长时间中低强度有氧运动（如快走、慢跑）"
+            app:layout_constraintBottom_toBottomOf="@id/t3"
+            app:layout_constraintStart_toStartOf="@id/t32"
+            app:layout_constraintTop_toBottomOf="@id/t33" />
+
+        <View
+            android:id="@+id/t4"
+            android:layout_width="20dp"
+            android:layout_height="180dp"
+            android:layout_marginTop="@dimen/mediumMarginTop"
+            android:background="@drawable/fragment_report_detail_heartrate_bk3"
+            app:layout_constraintStart_toStartOf="@id/rest"
+            app:layout_constraintTop_toBottomOf="@id/t3" />
+
+        <TextView
+            android:id="@+id/t41"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/smallMarginStart"
+            android:text="有氧区"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@id/t4"
+            app:layout_constraintTop_toTopOf="@id/t4" />
+
+        <TextView
+            android:id="@+id/t42"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="消耗"
+            app:layout_constraintBaseline_toBaselineOf="@id/t43"
+            app:layout_constraintStart_toStartOf="@id/t41" />
+
+        <TextView
+            android:id="@+id/t43"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/tinyMarginTop"
+            android:gravity="end"
+            android:minWidth="80dp"
+            android:text="0"
+            android:textSize="36sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@id/t42"
+            app:layout_constraintTop_toBottomOf="@id/t41" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/tinyMarginStart"
+            android:text="卡"
+            app:layout_constraintBaseline_toBaselineOf="@id/t43"
+            app:layout_constraintStart_toEndOf="@id/t43" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxWidth="260dp"
+            android:text="提升心肺功能、耐力和心血管健康，典型有氧训练区间"
+            app:layout_constraintBottom_toBottomOf="@id/t4"
+            app:layout_constraintStart_toStartOf="@id/t42"
+            app:layout_constraintTop_toBottomOf="@id/t43" />
+
+        <View
+            android:id="@+id/t5"
+            android:layout_width="20dp"
+            android:layout_height="180dp"
+            android:layout_marginTop="@dimen/mediumMarginTop"
+            android:background="@drawable/fragment_report_detail_heartrate_bk4"
+            app:layout_constraintStart_toStartOf="@id/rest"
+            app:layout_constraintTop_toBottomOf="@id/t4" />
+
+        <TextView
+            android:id="@+id/t51"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/smallMarginStart"
+            android:text="高强度区"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@id/t5"
+            app:layout_constraintTop_toTopOf="@id/t5" />
+
+        <TextView
+            android:id="@+id/t52"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="消耗"
+            app:layout_constraintBaseline_toBaselineOf="@id/t53"
+            app:layout_constraintStart_toStartOf="@id/t51" />
+
+        <TextView
+            android:id="@+id/t53"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/tinyMarginTop"
+            android:gravity="end"
+            android:minWidth="80dp"
+            android:text="0"
+            android:textSize="36sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@id/t52"
+            app:layout_constraintTop_toBottomOf="@id/t51" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/tinyMarginStart"
+            android:text="卡"
+            app:layout_constraintBaseline_toBaselineOf="@id/t53"
+            app:layout_constraintStart_toEndOf="@id/t53" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxWidth="260dp"
+            android:text="提高无氧能力、速度和爆发力，适合 HIIT、冲刺等短时高强度训练"
+            app:layout_constraintBottom_toBottomOf="@id/t5"
+            app:layout_constraintStart_toStartOf="@id/t52"
+            app:layout_constraintTop_toBottomOf="@id/t53" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>

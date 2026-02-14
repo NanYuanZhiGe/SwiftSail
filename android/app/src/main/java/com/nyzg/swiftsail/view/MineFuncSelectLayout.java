@@ -19,12 +19,11 @@ public class MineFuncSelectLayout extends ConstraintLayout {
     public MineFuncSelectLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         LayoutInflater.from(context).inflate(R.layout.layout_mine_func_select, this, true);
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.MineFuncSelectLayout);
         ImageView funcIcon = findViewById(R.id.funcIcon);
         TextView funcName = findViewById(R.id.funcDesc);
         this.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.layout_mine_func_select, context.getTheme()));
         this.setPadding(0, 32, 0, 32);
-        try {
+        try (TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.MineFuncSelectLayout)) {
             int resourceId = a.getResourceId(R.styleable.MineFuncSelectLayout_funcIcon, R.drawable.cancel);
             int tint = a.getResourceId(R.styleable.MineFuncSelectLayout_iconTint, R.color.black);
             funcIcon.setImageDrawable(ResourcesCompat.getDrawable(getResources(), resourceId, context.getTheme()));
@@ -36,8 +35,6 @@ public class MineFuncSelectLayout extends ConstraintLayout {
             if (textColor != R.color.black) {
                 funcName.setTextColor(ResourcesCompat.getColor(getResources(), textColor, context.getTheme()));
             }
-        } finally {
-            a.recycle();
         }
     }
 }

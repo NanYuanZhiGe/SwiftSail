@@ -57,6 +57,21 @@
     <color name="sleepLight">#574F83</color>
     <color name="sleepDeep">#262339</color>
 
+    <!-- distance-->
+    <color name="distanceWalk">#81C196</color>
+    <color name="distanceLight">#57A26F</color>
+    <color name="distanceModerate">#287C44</color>
+    <color name="distanceActive">#104B26</color>
+
+    <!-- heartRate -->
+    <color name="outOfRange">#8AA9C4</color>   <!-- Soft Gray-Blue -->
+
+    <!-- fatBurn: 燃脂区 → 自然、温和，用青绿色 -->
+    <color name="fatBurn">#4CAF50</color>      <!-- Healthy Green (Material Design) -->
+
+    <!-- cardio: 有氧区 → 活力、耐力，用活力橙 -->
+    <color name="cardio">#FF9800</color>
+    <color name="peak">#2A6791</color>
 
     <array name="reportRecovery">
         <item>@color/heavyPurple</item>

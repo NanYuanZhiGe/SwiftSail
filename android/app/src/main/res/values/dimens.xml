@@ -11,11 +11,16 @@
     <dimen name="paddingInput">12dp</dimen>
 
     <dimen name="avoidDrop">35dp</dimen>
+    <dimen name="tinyMarginStart">8dp</dimen>
+    <dimen name="smallMarginStart">12dp</dimen>
     <dimen name="commonMarginStart">18dp</dimen>
+    <dimen name="largeMarginStart">30dp</dimen>
     <dimen name="enyMarginTop">4dp</dimen>
     <dimen name="tinyMarginTop">8dp</dimen>
     <dimen name="smallMarginTop">12dp</dimen>
     <dimen name="mediumMarginTop">18dp</dimen>
+    <dimen name="bigMarginTop">24dp</dimen>
+    <dimen name="largeMarginTop">36dp</dimen>
 
     <!-- record record-->
     <dimen name="recordRecordTextSize">20sp</dimen>

@@ -26,11 +26,10 @@ public class SportLayout extends ConstraintLayout {
     public SportLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         LayoutInflater.from(context).inflate(R.layout.sport_layout, this, true);
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.SportLayout);
         TextView textView = findViewById(R.id.sportName);
         ImageView imageView = findViewById(R.id.sportIcon);
         String type;
-        try {
+        try (TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.SportLayout)){
              type= a.getString(R.styleable.SportLayout_sportName);
             if (type == null || type.isEmpty()) {
                 type = "未知项目";
@@ -38,8 +37,6 @@ public class SportLayout extends ConstraintLayout {
             textView.setText(type);
             int resource = a.getResourceId(R.styleable.SportLayout_sportIcon, R.drawable.add);
             imageView.setImageDrawable(ContextCompat.getDrawable(context, resource));
-        } finally {
-            a.recycle();
         }
         this.type=type;
     }

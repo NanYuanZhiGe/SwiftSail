@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/dateSelectorContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@color/white"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_marginStart="12dp"
+                android:src="@drawable/chevron_left"
+                app:layout_constraintBottom_toBottomOf="@id/dateSelector"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/dateSelector"
+                app:tint="@color/black" />
+
+            <TextView
+                android:id="@+id/dateSelector"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="今天"
+                android:textSize="18sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_marginEnd="12dp"
+                android:src="@drawable/chevron_right"
+                app:layout_constraintBottom_toBottomOf="@id/dateSelector"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/dateSelector"
+                app:tint="@color/black" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <TextView
+            android:id="@+id/hasStep"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/commonMarginStart"
+            android:layout_marginTop="@dimen/mediumMarginTop"
+            android:text="已走"
+            app:layout_constraintBaseline_toBaselineOf="@id/step"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/step"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/commonMarginStart"
+            android:layout_marginTop="@dimen/mediumMarginTop"
+            android:gravity="end"
+            android:minWidth="100dp"
+            android:text="6462"
+            android:textSize="36sp"
+            app:layout_constraintStart_toEndOf="@id/hasStep"
+            app:layout_constraintTop_toBottomOf="@id/dateSelectorContainer" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/tinyMarginStart"
+            android:text="步"
+            app:layout_constraintBaseline_toBaselineOf="@id/step"
+            app:layout_constraintStart_toEndOf="@id/step" />
+
+        <TextView
+            android:id="@+id/stepDesc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/smallMarginTop"
+            android:maxWidth="260dp"
+            app:layout_constraintStart_toStartOf="@id/hasStep"
+            app:layout_constraintTop_toBottomOf="@id/step" />
+
+        <TextView
+            android:id="@+id/hasFloor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="爬楼"
+            app:layout_constraintBaseline_toBaselineOf="@id/floor"
+            app:layout_constraintStart_toStartOf="@id/hasStep" />
+
+        <TextView
+            android:id="@+id/floor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/largeMarginTop"
+            android:text="400"
+            android:textSize="36sp"
+            app:layout_constraintEnd_toEndOf="@id/step"
+            app:layout_constraintTop_toBottomOf="@id/stepDesc" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/tinyMarginStart"
+            android:text="阶梯"
+            app:layout_constraintBaseline_toBaselineOf="@id/floor"
+            app:layout_constraintStart_toEndOf="@id/floor" />
+
+        <TextView
+            android:id="@+id/floorDesc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/smallMarginTop"
+            android:maxWidth="260dp"
+            app:layout_constraintStart_toStartOf="@id/hasStep"
+            app:layout_constraintTop_toBottomOf="@id/floor" />
+
+        <TextView
+            android:id="@+id/hasSeat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="静坐"
+            app:layout_constraintBaseline_toBaselineOf="@id/seat"
+            app:layout_constraintStart_toStartOf="@id/hasStep" />
+
+        <TextView
+            android:id="@+id/seat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/largeMarginStart"
+            android:layout_marginTop="@dimen/largeMarginTop"
+            android:gravity="end"
+            android:minWidth="100dp"
+            android:text="12小时"
+            android:textSize="36sp"
+            app:layout_constraintStart_toEndOf="@id/hasSeat"
+            app:layout_constraintTop_toBottomOf="@id/floorDesc" />
+
+        <TextView
+            android:id="@+id/seatDesc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/smallMarginTop"
+            android:maxWidth="260dp"
+            app:layout_constraintStart_toStartOf="@id/hasStep"
+            app:layout_constraintTop_toBottomOf="@id/seat" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>

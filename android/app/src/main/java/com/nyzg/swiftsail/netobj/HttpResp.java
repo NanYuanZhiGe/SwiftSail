@@ -8,9 +8,8 @@ public class HttpResp{
     String message;
     Map<String,Object> content;
 
-
-    public boolean isSuccess() {
-        return success;
+    public boolean isFail() {
+        return !success;
     }
 
     public void setSuccess(boolean success) {

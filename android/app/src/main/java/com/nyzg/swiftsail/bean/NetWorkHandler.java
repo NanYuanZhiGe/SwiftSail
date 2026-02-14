@@ -41,7 +41,7 @@ public class NetWorkHandler {
         }
         try {
             HttpResp httpResp = MyJsonSerializer.deSerialize(response.body() != null ? response.body().string() : null, HttpResp.class);
-            if (httpResp == null || !httpResp.isSuccess()) {
+            if (httpResp == null || httpResp.isFail()) {
                 onFail.accept(String.format("%s,%s", HTTP_SUCCESS_BUT_WITH, httpResp == null ? "（缺失错误信息）" : httpResp.getMessage()));
                 response.close();
                 return;
@@ -82,7 +82,7 @@ public class NetWorkHandler {
         }
         try (response) {
             HttpResp httpResp = MyJsonSerializer.deSerialize(response.body() != null ? response.body().string() : null, HttpResp.class);
-            if (httpResp == null || !httpResp.isSuccess()) {
+            if (httpResp == null || httpResp.isFail()) {
                 GlobalToast.RESPONSE_NOT_SUCCESS.accept(httpResp == null ? null : httpResp.getMessage());
                 onFail.run();
                 response.close();
@@ -154,7 +154,7 @@ public class NetWorkHandler {
         T content;
         try {
             HttpResp httpResp = MyJsonSerializer.deSerialize(response.body() != null ? response.body().string() : null, HttpResp.class);
-            if (httpResp == null || !httpResp.isSuccess()) {
+            if (httpResp == null || httpResp.isFail()) {
                 GlobalToast.RESPONSE_NOT_SUCCESS.accept(httpResp == null ? statusCode + "" : httpResp.getMessage());
                 onFail.run();
                 response.close();
@@ -226,7 +226,7 @@ public class NetWorkHandler {
                 onFail.accept(CONTENT_PARSE_ERROR);
                 response.close();
                 return;
-            } else if (!httpResp.isSuccess()) {
+            } else if (httpResp.isFail()) {
                 onFail.accept(httpResp.getMessage());
                 response.close();
                 return;

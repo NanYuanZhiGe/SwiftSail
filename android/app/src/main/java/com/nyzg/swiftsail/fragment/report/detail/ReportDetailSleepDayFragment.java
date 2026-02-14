@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
+
 public class ReportDetailSleepDayFragment extends ReportDetailDayBaseFragment {
 
     public static Fragment getInstance(int layoutResource) {
@@ -97,6 +98,7 @@ public class ReportDetailSleepDayFragment extends ReportDetailDayBaseFragment {
                     ContextCompat.getColor(requireContext(), R.color.sleepDeep)
             ));
             pieDataSet.setValueFormatter(new ValueFormatter() {
+                @SuppressLint("DefaultLocale")
                 @Override
                 public String getPieLabel(float value, PieEntry pieEntry) {
                     int hour = (int) value;
