@@ -82,4 +82,10 @@ dependencies {
 
     //websocket支持
     implementation("org.java-websocket:Java-WebSocket:1.6.0")
+
+    //矩阵计算支持
+    implementation("org.ejml:ejml-all:0.41")
+
+    //FFT支持
+    implementation("com.github.wendykierp:JTransforms:3.1")
 }

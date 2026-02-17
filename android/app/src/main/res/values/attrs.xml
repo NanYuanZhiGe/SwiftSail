@@ -8,6 +8,11 @@
         <attr name="rCircleBk2" format="color|reference" />
         <attr name="rImageBk" format="reference" />
     </declare-styleable>
+
+    <declare-styleable name="BackWardLayout">
+        <attr name="bwTitle" format="string"/>
+    </declare-styleable>
+
     <declare-styleable name="SportLayout">
         <attr name="sportName" format="string" />
         <attr name="sportIcon" format="reference" />

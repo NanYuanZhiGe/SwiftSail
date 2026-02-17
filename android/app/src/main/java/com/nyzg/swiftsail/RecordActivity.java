@@ -10,6 +10,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.nyzg.swiftsail.fragment.record.RecordJumpFragment;
 import com.nyzg.swiftsail.fragment.record.RecordRecordFragment;
 import com.nyzg.swiftsail.view.SportLayout;
 import com.nyzg.swiftsail.viewmodel.RecordSelectViewModel;
@@ -27,6 +28,7 @@ public class RecordActivity extends AppCompatActivity {
 
         ((SportLayout) findViewById(R.id.walkOrRun)).setRecordSelectViewModel(recordSelectViewModel);
         ((SportLayout) findViewById(R.id.bike)).setRecordSelectViewModel(recordSelectViewModel);
+        ((SportLayout)findViewById(R.id.jump)).setRecordSelectViewModel(recordSelectViewModel);
     }
 
     @Override
@@ -44,6 +46,7 @@ public class RecordActivity extends AppCompatActivity {
             } else {
                 switch (type) {
                     case TYPE_JUMP:
+                        transaction.replace(R.id.baseFragment, RecordJumpFragment.getInstance());
                         break;
                     case TYPE_YOGA:
                         break;

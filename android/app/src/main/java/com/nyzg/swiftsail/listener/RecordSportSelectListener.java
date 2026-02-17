@@ -1,5 +1,6 @@
 package com.nyzg.swiftsail.listener;
 
+import android.annotation.SuppressLint;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -14,6 +15,7 @@ public class RecordSportSelectListener implements View.OnTouchListener {
         this.type = type;
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
         if (recordSelectViewModel == null) {

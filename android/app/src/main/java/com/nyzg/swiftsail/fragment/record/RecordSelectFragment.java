@@ -36,7 +36,6 @@ public class RecordSelectFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View father = inflater.inflate(R.layout.fragment_record_select, container, false);
-
         return father;
     }
 }

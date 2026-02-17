@@ -81,7 +81,7 @@ public class RecordRecordFragment extends Fragment {
             Manifest.permission.WAKE_LOCK
     };
 
-    @SuppressLint("InlinedApi")//api的问题后面会if区分
+    @SuppressLint("InlinedApi")//api的问题之后会处理
     private static final String[] LOCATION_PERMISSIONS_29 = {
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -162,9 +162,7 @@ public class RecordRecordFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View father = inflater.inflate(R.layout.fragment_record_record, container, false);
         TextView title = father.findViewById(R.id.title);
-        father.findViewById(R.id.backward).setOnClickListener(v -> {
-            doBackPressedLogic();
-        });
+        father.findViewById(R.id.backward).setOnClickListener(v -> doBackPressedLogic());
         //设置标题
         title.setText(this.type);
         //设置地图

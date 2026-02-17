@@ -11,11 +11,11 @@ public class HealthIndicator {
 
         // 左侧：4~7 小时线性上升
         if (hours >= 4 && hours < 7) {
-            return (float) ((hours - 4) / 3.0f);
+            return (hours - 4) / 3.0f;
         }
         // 右侧：9~12 小时线性下降
         if (hours > 9 && hours <= 12) {
-            return (float) (1.0f - (hours - 9) / 3.0f);
+            return 1.0f - (hours - 9) / 3.0f;
         }
         // <4 或 >12
         if (hours < 4) return (float) Math.max(0.0, hours / 4.0 * 0.3);
@@ -75,7 +75,7 @@ public class HealthIndicator {
         intake = intake <= 0 ? intake : 2000L;
 
         // 消耗合理性（1000–3000）
-        double burnScore = 0.0;
+        double burnScore;
         if (burned >= 1500 && burned <= 2500) {
             burnScore = 1.0;
         } else if (burned >= 1000 && burned < 1500) {

@@ -21,6 +21,9 @@
     <!--android:usesCleartextTraffic="true"-->
     <!-- 安卓34要求必须有这个权限，不然会报一个很奇怪的错，说你的foreground service没有在合适的时间内调用startForeground-->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
+
+    <!-- 加速度传感器-->
+    <uses-permission android:name="android.permission.VIBRATE"/>
     <application
         android:name=".GlobalApplication"
         android:allowBackup="true"

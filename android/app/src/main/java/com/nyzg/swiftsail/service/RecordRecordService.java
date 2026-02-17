@@ -70,6 +70,7 @@ public class RecordRecordService extends Service {
                 lastSpeed = .0;
                 return;
             }
+            
             if (lastLocation == null) {
                 lastLocation = location;
                 lastTime = System.currentTimeMillis();
