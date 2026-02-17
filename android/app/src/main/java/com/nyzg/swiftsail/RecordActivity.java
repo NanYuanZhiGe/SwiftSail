@@ -1,34 +1,23 @@
 package com.nyzg.swiftsail;
 
-import static com.nyzg.swiftsail.fragment.record.RecordSelectFragment.*;
-
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.ViewModelProvider;
 
+import com.nyzg.swiftsail.bean.RecordType;
 import com.nyzg.swiftsail.fragment.record.RecordJumpFragment;
 import com.nyzg.swiftsail.fragment.record.RecordRecordFragment;
-import com.nyzg.swiftsail.view.SportLayout;
-import com.nyzg.swiftsail.viewmodel.RecordSelectViewModel;
+import com.nyzg.swiftsail.repository.RecordRecordRepository;
 
 public class RecordActivity extends AppCompatActivity {
-    private RecordSelectViewModel recordSelectViewModel;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.activity_record);
-
-        this.recordSelectViewModel = new ViewModelProvider(this).get(RecordSelectViewModel.class);
-        recordSelectViewModel.getSelectType().observe(this, this::changeFragment);
-
-        ((SportLayout) findViewById(R.id.walkOrRun)).setRecordSelectViewModel(recordSelectViewModel);
-        ((SportLayout) findViewById(R.id.bike)).setRecordSelectViewModel(recordSelectViewModel);
-        ((SportLayout)findViewById(R.id.jump)).setRecordSelectViewModel(recordSelectViewModel);
+        RecordRecordRepository.getInstance().SELECT_TYPE.observe(this, this::changeFragment);
     }
 
     @Override
@@ -37,26 +26,26 @@ public class RecordActivity extends AppCompatActivity {
     }
 
     private void changeFragment(String type) {
-        if (type != null && TYPE_SET.contains(type)) {
+        if (type != null) {
             FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction transaction = fragmentManager.beginTransaction();
             //走路或骑行模式
-            if (type.equals(TYPE_WALK_OR_RUN) || type.equals(TYPE_BIKE)) {
-                transaction.replace(R.id.baseFragment, RecordRecordFragment.getInstance(type));
+            if (type.equals(RecordType.WALK_OR_RUN) || type.equals(RecordType.BIKE)) {
+                transaction.replace(R.id.baseFragment, RecordRecordFragment.getInstance());
             } else {
                 switch (type) {
-                    case TYPE_JUMP:
+                    case RecordType.JUMP_ROPE:
                         transaction.replace(R.id.baseFragment, RecordJumpFragment.getInstance());
                         break;
-                    case TYPE_YOGA:
+                    case RecordType.YOGA:
                         break;
-                    case TYPE_BALL:
+                    case RecordType.BALL:
                 }
             }
             transaction.addToBackStack(null);
             transaction.commit();
             //切换完fragment后一定要重新置空viewModel，不然用户的下一次点击同一个选项是没有效果的
-            recordSelectViewModel.setNull();
+            RecordRecordRepository.getInstance().SELECT_TYPE.setValue(null);
         }
     }
 }

@@ -57,22 +57,7 @@ public class RecordFragment extends MainBase {
         TextView numberDistance = father.findViewById(R.id.numberDistance);
         TextView numberStep = father.findViewById(R.id.numberStep);
         TextView numberKalo = father.findViewById(R.id.numberKa);
-        recordRepository.getLiveRecordData().observe(getViewLifecycleOwner(), recordData -> {
-            List<BarEntry> entries = new ArrayList<>(6);
-            Pair<float[], float[]> pair = recordData.getPercentage();
-            //更新柱状图
-            for (int i = 0; i < 6; ++i) {
-                entries.add(new BarEntry(i, new float[]{
-                        pair.getA()[i], pair.getB()[i]
-                }));
-            }
-            updateBarChart(entries);
-            //更新文字
-            numberDistance.setText(DISTANCE_FORMATTER.format(recordData.getKiloMeters()));
-            numberStep.setText(String.format("%d", recordData.getSteps()));
-            //无所谓了都是保留两位小数
-            numberKalo.setText(DISTANCE_FORMATTER.format(recordData.getConsumption()));
-        });
+
         return father;
     }
 

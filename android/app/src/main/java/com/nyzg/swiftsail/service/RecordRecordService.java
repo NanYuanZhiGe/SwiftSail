@@ -21,25 +21,14 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 
-import com.google.gson.Gson;
 import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.RecordActivity;
-import com.nyzg.swiftsail.bean.GlobalInstance;
-import com.nyzg.swiftsail.dbobj.RecordBackUp;
-import com.nyzg.swiftsail.dbobj.User;
-import com.nyzg.swiftsail.encrypt.Uuid;
-import com.nyzg.swiftsail.bean.DateUtils;
-import com.nyzg.swiftsail.repository.LoginRepository;
+import com.nyzg.swiftsail.bean.MyJsonSerializer;
+import com.nyzg.swiftsail.bean.RecordType;
+import com.nyzg.swiftsail.obj.record.DistanceAlgorithm;
+import com.nyzg.swiftsail.obj.record.DistanceSimple;
+import com.nyzg.swiftsail.obj.record.MyManualDistance;
 import com.nyzg.swiftsail.repository.RecordRecordRepository;
-
-import java.text.DecimalFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
 
 public class RecordRecordService extends Service {
     public class MyBinder extends Binder {
@@ -49,14 +38,18 @@ public class RecordRecordService extends Service {
     }
 
     private class MyLocationListener implements LocationListener {
-        double accumulateDistance;//单位米
         double accumulateTime;//单位秒
-        Location lastLocation;
         long lastTime = 0L;
-        double lastSpeed = .0;
-        private final DecimalFormat kilo = new DecimalFormat("0.000");
-        private final DecimalFormat speed = new DecimalFormat("0.00");
-        private final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss");
+        final private DistanceAlgorithm distanceAlgorithm;
+
+        public MyLocationListener() {
+            String type = RecordRecordRepository.getInstance().SELECT_TYPE.getValue();
+            if (type != null && type.equals(RecordType.BIKE)) {
+                this.distanceAlgorithm = new DistanceSimple(6.5f);
+            } else {
+                this.distanceAlgorithm = new DistanceSimple(10f);
+            }
+        }
 
         @SuppressLint("DefaultLocale")
         @Override
@@ -64,51 +57,18 @@ public class RecordRecordService extends Service {
             if (quit) {
                 return;
             }
-            if (pause) {
-                lastLocation = null;
+            if (pause) {//如果暂停了
                 lastTime = 0L;
-                lastSpeed = .0;
                 return;
             }
-            
-            if (lastLocation == null) {
-                lastLocation = location;
+            if (lastTime == 0L) {
                 lastTime = System.currentTimeMillis();
-                return;
+            } else {
+                long currentTime = System.currentTimeMillis();
+                accumulateTime += (currentTime - lastTime) / 1000.0;
+                lastTime = currentTime;
             }
-            double deltaDistance = location.distanceTo(lastLocation);//米，这个不一定准确
-            long currentTime = System.currentTimeMillis();
-            double deltaTime = (currentTime - lastTime) / 1000.0;//秒，这个一定准确
-            RecordRecordRepository repository = RecordRecordRepository.INSTANCE;
-
-            //检查位移是否合法
-            //deltaDistance<=(lastSpeed+maxAccelerate*deltaTime)*deltaTime*0.5
-            double legalDistance = (lastSpeed + maxAccelerate * deltaTime) * deltaTime * 0.5;
-
-            if (deltaDistance > legalDistance) {//不合法，使用上一次的速度*时间记录位移
-                deltaDistance = lastSpeed * deltaTime;
-            }
-            //如果用户的速度很小，比如0.2m/s，这个时候就认为是小波动，不会累计数据
-            //防止deltaTime过小，如果时间过小，认为速度为0
-            double currentSpeed = deltaTime > 1e-3 ? deltaDistance / deltaTime : .0;
-            if (currentSpeed >= 0.2) {
-                accumulateTime += deltaTime;
-                accumulateDistance += deltaDistance;
-                //========更新fragment中的UI=============
-                //单位是公里，所以需要除以1000
-                repository.setDistanceKilo(this.kilo.format(accumulateDistance / 1000));
-                //速度是米每秒，不需要转化单位
-                repository.setSpeedMeterSecond(this.speed.format(currentSpeed));
-                long minutes = ((long) accumulateTime) / 60;
-                long second = ((long) accumulateTime) % 60;
-                //显示用户运动的分和秒
-                repository.setMinuteSecond(String.format("%02d:%02d", minutes, second));
-                repository.setLocation(location);
-            }
-            //更新上一次的数据
-            lastLocation = location;
-            lastTime = currentTime;
-            lastSpeed = currentSpeed;
+            distanceAlgorithm.update(location);
         }
 
         public void quit() {
@@ -119,69 +79,22 @@ public class RecordRecordService extends Service {
 
         //reset仅仅是清除当前的状态变量，累积的记录不会清除
         public void reset() {
-            lastSpeed = 0.;
-            lastLocation = null;
             lastTime = 0L;
+            accumulateTime = 0L;
+            distanceAlgorithm.reset();
         }
 
-        //cancel是重置所有东西，包括累积的记录
-        public void cancel() {
-            lastSpeed = 0.;
-            lastLocation = null;
-            lastTime = 0L;
-            accumulateDistance = .0;
-            accumulateTime = 0L;
-        }
 
         /**
          * summary不要重置信息，重置信息由cancel触发
          */
         public void summary() {
-            User currentUser = LoginRepository.getInstance().getCurrentUser().getValue();
-            if (currentUser == null) {
-                currentUser = GlobalInstance.LOCAL_USER;
-            }
-            RecordRecordRepository rRRepository = RecordRecordRepository.INSTANCE;
-            RecordBackUp recordBackUp = new RecordBackUp();
-            recordBackUp.recordId = Uuid.getUuidString36();//运动记录的id
-            //运动记录绑定到当前用户
-            recordBackUp.userId = currentUser.id;
-            LocalDate nowDate = LocalDate.now();
-            recordBackUp.epochDay = nowDate.toEpochDay();
-            recordBackUp.epochWeek = DateUtils.getEpochWeek(recordBackUp.epochDay);
-            recordBackUp.epochMonth = DateUtils.getEpochMonth(nowDate);
-            recordBackUp.epochYear = DateUtils.getEpochYear(nowDate);
-            Map<String, Object> map = new HashMap<>();
-            /*数据的格式
-            "type":"useFeet",
-            "duration":100,
-            "distance":10,
-            "startTime":"yyyy:MM:dd HH:mm:ss",
-            "endTime":"yyyy:MM:dd HH:mm:ss"
-             */
-            LocalDateTime startTime = LocalDateTime.ofInstant(
-                    Instant.ofEpochMilli(sportStartTime),
-                    ZoneId.systemDefault()
+            double distance = distanceAlgorithm.summary();
+            MyManualDistance myManualDistance = new MyManualDistance(
+                    accumulateTime, distance
             );
-            LocalDateTime endTime = LocalDateTime.now();
-            map.put("type", type);//useFeet userWheel
-            map.put("duration", accumulateTime);//米
-            map.put("distance", accumulateDistance);//秒
-            map.put("startTime", startTime.format(DATE_TIME_FORMATTER));//yyyy:MM:dd hh:mm:ss
-            map.put("endTime", endTime.format(DATE_TIME_FORMATTER));
-            recordBackUp.detailValue = new Gson().toJson(map);
-            RecordRecordRepository.INSTANCE.getSportStartTime().setValue(sportStartTime);
-            recordBackUp.sync = 0;
-            if (currentUser.id == 0L) {//如果是本地用户，不会上传至云端，就直接标记为已同步
-                recordBackUp.sync = 1;
-            }
-            sportStartTime = 0L;
-            rRRepository.getRecordBackUp().setValue(recordBackUp);
-            //这里之前犯了错误，在这里更新了RecordFragment的柱状图
-            //这个是错误的，summary只能够返回总结的数据，不能做其他的事情
-            //因为用户是有可能取消summary的，如果你更新了，虽然数据库的数据没有影响，但是但钱的UI
-            //显示的数据就和数据库中的数据不一致了
-            //另外，由于这里更新了，后面用户submit了数据之后，又会提交一次，这就会导致数据是两倍
+            RecordRecordRepository.getInstance().exposeRecord0.setValue((long) distance);
+            RecordRecordRepository.getInstance().detailRecord0.setValue(MyJsonSerializer.serialize(myManualDistance));
         }
     }
 
@@ -191,10 +104,7 @@ public class RecordRecordService extends Service {
     private volatile boolean pause = false;
     private volatile boolean quit = false;
     private LocationManager locationManager;
-    private volatile float maxAccelerate = 10f;
-    private volatile String type;
     private final MyLocationListener locationListener = new MyLocationListener();
-    private long sportStartTime = 0L;
 
     @Nullable
     @Override
@@ -218,13 +128,10 @@ public class RecordRecordService extends Service {
                 5,
                 locationListener
         );
-        sportStartTime = System.currentTimeMillis();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        this.maxAccelerate = intent.getFloatExtra("maxAccelerate", 10f);
-        this.type = intent.getStringExtra("recordType");
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -278,17 +185,13 @@ public class RecordRecordService extends Service {
         this.locationListener.summary();
     }
 
-    public void cancel() {
-        this.locationListener.cancel();
-        //cancel之后需要更新一波UI，因为这个时候还是没有位置记录，不会触发UI的自动更新
-        RecordRecordRepository.INSTANCE.initValue();
+
+    public void reset() {
+        locationListener.reset();
     }
 
     public void resume() {
         pause = false;
-        if (sportStartTime == 0L) {
-            sportStartTime = System.currentTimeMillis();
-        }
     }
 
     public void destroy() {

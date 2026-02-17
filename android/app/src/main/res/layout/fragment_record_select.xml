@@ -2,79 +2,109 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/veryLiteWhite">
+
+    <com.nyzg.swiftsail.view.BackWardLayout
+        android:id="@+id/backward"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:bwTitle="选择锻炼项目"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/title"
+        android:id="@+id/title1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="选择锻炼项目"
-        android:textAlignment="center"
-        android:textSize="24sp"
-        app:layout_constraintBottom_toTopOf="@id/walkOrRun"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="@dimen/smallMarginStart"
+        android:layout_marginTop="@dimen/mediumMarginTop"
+        android:text="长途跋涉"
+        android:textSize="20sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_chainStyle="packed" />
+        app:layout_constraintTop_toBottomOf="@id/backward" />
 
-    <com.nyzg.swiftsail.view.SportLayout
+    <com.nyzg.swiftsail.view.record.SportLayout2
         android:id="@+id/walkOrRun"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginHorizontal="@dimen/smallMarginStart"
         android:layout_marginTop="4dp"
-        app:layout_constraintBottom_toTopOf="@id/bike"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/title"
+        app:layout_constraintTop_toBottomOf="@id/title1"
         app:sportIcon="@drawable/step"
-        app:sportName="走路/跑步" />
+        app:sportName="走路或跑步"
+        app:sportType="WalkOrRun" />
 
-    <com.nyzg.swiftsail.view.SportLayout
+    <com.nyzg.swiftsail.view.record.SportLayout2
         android:id="@+id/bike"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        app:layout_constraintBottom_toTopOf="@id/jump"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginHorizontal="@dimen/smallMarginStart"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/walkOrRun"
         app:sportIcon="@drawable/bike"
-        app:sportName="骑行" />
+        app:sportName="骑行"
+        app:sportType="Bike" />
 
-    <com.nyzg.swiftsail.view.SportLayout
-        android:id="@+id/jump"
-        android:layout_width="wrap_content"
+    <TextView
+        android:id="@+id/title2"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        app:layout_constraintBottom_toTopOf="@id/yoga"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="@dimen/smallMarginStart"
+        android:layout_marginTop="@dimen/mediumMarginTop"
+        android:text="就在此处"
+        android:textSize="20sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/bike"
-        app:sportIcon="@drawable/jump"
-        app:sportName="跳绳" />
+        app:layout_constraintTop_toBottomOf="@id/bike" />
 
-    <com.nyzg.swiftsail.view.SportLayout
+    <com.nyzg.swiftsail.view.record.SportLayout2
+        android:id="@+id/jump"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginHorizontal="@dimen/smallMarginStart"
+        android:layout_marginTop="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/title2"
+        app:sportIcon="@drawable/jump"
+        app:sportName="跳绳"
+        app:sportType="JumpRope" />
+
+    <com.nyzg.swiftsail.view.record.SportLayout2
         android:id="@+id/yoga"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        app:layout_constraintBottom_toTopOf="@id/ball"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginHorizontal="@dimen/smallMarginStart"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/jump"
         app:sportIcon="@drawable/yoga"
-        app:sportName="瑜伽" />
+        app:sportName="瑜伽"
+        app:sportType="Yoga" />
 
-    <com.nyzg.swiftsail.view.SportLayout
-        android:id="@+id/ball"
-        android:layout_width="wrap_content"
+    <TextView
+        android:id="@+id/title3"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="@dimen/smallMarginStart"
+        android:layout_marginTop="@dimen/mediumMarginTop"
+        android:text="场地限制"
+        android:textSize="20sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/yoga"
+        app:layout_constraintTop_toBottomOf="@id/yoga" />
+
+    <com.nyzg.swiftsail.view.record.SportLayout2
+        android:id="@+id/ball"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginHorizontal="@dimen/smallMarginStart"
+        android:layout_marginTop="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/title3"
         app:sportIcon="@drawable/ball"
-        app:sportName="球类运动" />
+        app:sportName="球类运动"
+        app:sportType="Ball" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

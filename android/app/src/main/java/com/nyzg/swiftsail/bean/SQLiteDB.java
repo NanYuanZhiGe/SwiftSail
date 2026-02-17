@@ -7,23 +7,23 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
 import com.nyzg.swiftsail.dao.LastLoginTable;
-import com.nyzg.swiftsail.dao.RecordBackUpTable;
+import com.nyzg.swiftsail.dao.RecordManualTable;
 import com.nyzg.swiftsail.dao.RecordTable;
 import com.nyzg.swiftsail.dao.UserTable;
 import com.nyzg.swiftsail.dbobj.LastLogin;
 import com.nyzg.swiftsail.dbobj.Record;
-import com.nyzg.swiftsail.dbobj.RecordBackUp;
+import com.nyzg.swiftsail.dbobj.RecordManual;
 import com.nyzg.swiftsail.dbobj.User;
 
 @Database(
         entities = {
                 User.class,
                 LastLogin.class,
-                RecordBackUp.class,
+                RecordManual.class,
                 //和fitbit的同步数据的类
                 Record.class
         },
-        version = 16,
+        version = 17,
         exportSchema = false)
 public abstract class SQLiteDB extends RoomDatabase {
     private volatile static SQLiteDB self;
@@ -32,7 +32,7 @@ public abstract class SQLiteDB extends RoomDatabase {
 
     public abstract LastLoginTable lastLoginTable();
 
-    public abstract RecordBackUpTable recordBackUpTable();
+    public abstract RecordManualTable recordManualTable();
 
     //fitbit同步数据库表
     public abstract RecordTable recordTable();

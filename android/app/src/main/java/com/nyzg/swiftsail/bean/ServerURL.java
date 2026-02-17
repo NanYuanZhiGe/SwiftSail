@@ -21,7 +21,7 @@ public class ServerURL {
     final public static String URL_LOGIN_WITH_KEY = BASE_URL + URL_USER_PREFIX + "/login/verify/secret/key";
     final public static String URL_REGISTER_BIOMETRIC = BASE_URL + URL_USER_PREFIX + "/login/biometric/add";
     //dock
-    final public static URL URL_SYNC_BACKUP_RECORD;
+    final public static URL URL_SYNC_BACKUP_MANUAL;
     final public static URL URL_IS_WATCH_ADDED;
     final public static URL URL_SYNC_STOP;
     final public static URL URL_CHECK_SYNC_STATUS;
@@ -34,7 +34,7 @@ public class ServerURL {
 
     static {
         try {
-            URL_SYNC_BACKUP_RECORD = new URL(BASE_URL + URL_DOCK_PREFIX + "/sync/record/backup");
+            URL_SYNC_BACKUP_MANUAL = new URL(BASE_URL + URL_DOCK_PREFIX + "/sync/record/manual");
             URL_IS_WATCH_ADDED = new URL(BASE_URL + URL_DOCK_PREFIX + "/is/watch/added");
             URL_SYNC_STOP = new URL(BASE_URL + URL_DOCK_PREFIX + "/sync/stop");
             URL_CHECK_SYNC_STATUS = new URL(BASE_URL + URL_DOCK_PREFIX + "/check/sync/status");

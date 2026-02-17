@@ -30,6 +30,7 @@ import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.nyzg.swiftsail.GlobalApplication;
 import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.bean.GlobalToast;
+import com.nyzg.swiftsail.bean.RecordType;
 import com.nyzg.swiftsail.view.record.StageLayout;
 
 import org.jtransforms.fft.DoubleFFT_1D;
@@ -154,8 +155,7 @@ public class RecordJumpFragment extends RecordBaseFragment {
         }
     }
 
-    private MutableLiveData<Integer> numberCount = new MutableLiveData<>(0);
-    private StageLayout stageLayout;
+    private final MutableLiveData<Integer> numberCount = new MutableLiveData<>(0);
     private LineChart lineChart;
 
     private SensorManager sensorManager;
@@ -192,10 +192,6 @@ public class RecordJumpFragment extends RecordBaseFragment {
         lineDataSet.setAxisDependency(YAxis.AxisDependency.RIGHT);
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
 
     private TextView jumpCount;
 
@@ -205,13 +201,8 @@ public class RecordJumpFragment extends RecordBaseFragment {
         View father = inflater.inflate(R.layout.fragment_record_jump, container, false);
 
         jumpCount = father.findViewById(R.id.t11);
-        numberCount.observe(getViewLifecycleOwner(), i -> jumpCount.setText((i>>1) + ""));
+        numberCount.observe(getViewLifecycleOwner(), i -> jumpCount.setText((i >> 1) + ""));
 
-        stageLayout = father.findViewById(R.id.stageLayout);
-        stageLayout.setMCancel(this::myOnCancel);
-        stageLayout.setMStart(this::myOnStart);
-        stageLayout.setMStop(this::myOnStop);
-        stageLayout.setMSubmit(this::myOnSubmit);
 
         lineChart = father.findViewById(R.id.lineChart);
         lineChart.setTouchEnabled(false);
@@ -261,35 +252,23 @@ public class RecordJumpFragment extends RecordBaseFragment {
         }
     }
 
-    private void myOnCancel() {
+    @Override
+    protected void doStop() {
+
+    }
+
+    @Override
+    protected boolean doStart() {
+return true;
+    }
+
+    @Override
+    protected void reset() {
         numberCount.setValue(0);
     }
 
-    private void myOnStart() {
-
-    }
-
-    private void myOnStop() {
-
-    }
-
-    private void myOnSubmit() {
-
-    }
-
-
     @Override
-    protected boolean needToAlert() {
-        return true;
-    }
-
-    @Override
-    protected boolean containsBackward() {
-        return true;
-    }
-
-    @Override
-    protected void onSaveQuit() {
+    protected void summary() {
 
     }
 }

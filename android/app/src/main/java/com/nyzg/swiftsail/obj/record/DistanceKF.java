@@ -1,11 +1,11 @@
-package com.nyzg.swiftsail.obj;
+package com.nyzg.swiftsail.obj.record;
 
 import androidx.annotation.Keep;
 
 import org.ejml.simple.SimpleMatrix;
 
 @Keep
-public class DistanceKF {
+public class DistanceKF extends DistanceAlgorithm {
     private SimpleMatrix xk = new SimpleMatrix(4, 1);
     final private SimpleMatrix H = new SimpleMatrix(2, 4);
     final private SimpleMatrix HT;
@@ -14,6 +14,7 @@ public class DistanceKF {
     private SimpleMatrix Pk = new SimpleMatrix(4, 4);
     final private SimpleMatrix I = SimpleMatrix.diag(1, 1, 1, 1);
     private long lastUpdateTime = -1L;
+    private double mAccumulateDistance;
 
     public DistanceKF(double gx, double gy) {
         //初始状态向量
@@ -42,6 +43,10 @@ public class DistanceKF {
         //GPS 的不确定性
         R.setRow(0, 0, 25, 0);
         R.setRow(1, 0, 0, 25);
+    }
+
+    private void init() {
+
     }
 
     public void predict(double ax, double ay) {
@@ -96,21 +101,18 @@ public class DistanceKF {
 
         double deltaGx = newGx - oldGx;
         double deltaGy = newGy - oldGy;
-        return Math.sqrt(deltaGx * deltaGx + deltaGy * deltaGy);
+        double deltaDistance = Math.sqrt(deltaGx * deltaGx + deltaGy * deltaGy);
+        mAccumulateDistance += deltaDistance;
+        return deltaDistance;
     }
 
+    @Override
+    public double summary() {
+        return mAccumulateDistance;
+    }
 
-    public static double[] gpsLocationToPlatformLocation(double gLat, double gLon,double refLat,double refLon) {
-        double[] pair = new double[]{gLat, gLon};
-        final double R = 6378137; // 地球半径（米）
-        double dLat = Math.toRadians(gLat - refLat);
-        double dLon = Math.toRadians(gLon - refLon);
-        double refLatRad = Math.toRadians(refLat);
-
-        double x = dLon * R * Math.cos(refLatRad);
-        double y = dLat * R;
-        pair[0] = x;
-        pair[1] = y;
-        return pair;
+    @Override
+    protected void reset0() {
+        init();
     }
 }
