@@ -2,15 +2,14 @@ package com.nyzg.dock.controller;
 
 import com.nyzg.common.Pair;
 import com.nyzg.common.netobj.HttpResp;
+import com.nyzg.dock.dbobj.RecordManual;
 import com.nyzg.dock.dbobj.Watch;
-import com.nyzg.dock.netobj.DayRecord;
-import com.nyzg.dock.netobj.GetDataDayReq;
-import com.nyzg.dock.netobj.RecordBackUpAndroid;
-import com.nyzg.dock.netobj.SyncRecordBackUpReq;
+import com.nyzg.dock.netobj.*;
 import com.nyzg.dock.service.FitbitWebApiService;
 import com.nyzg.dock.service.SyncService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -81,21 +80,43 @@ public class SyncController {
         return new HttpResp(true, pair.getB());
     }
 
+
+    private final static HttpResp INVALID_MANUAL_RECORD = new HttpResp(false, HttpResp.COMMON_ERROR_CODE, "不合法的手动记录数据");
+    @Resource
+    JdbcTemplate jdbcTemplate;
+
     /**
-     * 是由可能出现token过期的现象（一般都是服务器自己内部的问题），需要返回给用户自己处理
+     * HttpResp的content为Void
      */
-    @PostMapping(path = "/sync/record/backup")
-    public HttpResp syncRecordBackUp(@RequestBody SyncRecordBackUpReq req) {
-        if (req == null || req.getRecordList() == null || req.getRecordList().isEmpty()) {
+    @PostMapping(path = "/sync/record/manual")
+    public HttpResp syncRecordBackUp(@RequestBody RecordManual record) {
+        if (record == null) {
             return HttpResp.COMMON_SUCCESS;
         }
-        //禁止脏数据进入
-        for (RecordBackUpAndroid record : req.getRecordList()) {
-            if (record.getUserId() == 0L) {
-                return HttpResp.COMMON_SUCCESS;
-            }
+        if (!record.isValid()) {
+            return INVALID_MANUAL_RECORD;
         }
-        return syncService.syncBackUpRecord(req.getRecordList());
+        try {
+            jdbcTemplate.update("""
+                            INSERT INTO `recordManualTable`\s
+                            (userId, recordId, type,
+                            exposeValue, detailValue,
+                            startEpochSecond, endEpochSecond,
+                            epochDay, epochWeek, epochMonth, epochYear) VALUES (
+                            ?,?,?,
+                            ?,?,
+                            ?,?,
+                            ?,?,?,?
+                            );
+                            """,
+                    record.userId, record.recordId, record.type,
+                    record.exposeValue, record.detailValue,
+                    record.startEpochSecond, record.endEpochSecond,
+                    record.epochDay, record.epochWeek, record.epochMonth, record.epochYear);
+        } catch (Exception e) {
+            return FinalHttpResp.SERVER_INTERNAL_WRITE_FAIL;
+        }
+        return HttpResp.COMMON_SUCCESS;
     }
 
     @GetMapping("/test/connection")

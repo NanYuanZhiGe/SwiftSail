@@ -116,23 +116,24 @@ public class FitbitWebApiService {
             return Optional.empty();
         }
         Watch watch = watchList.get(0);
-        //先通过range获取睡眠数据
         List<Record> resultList = new ArrayList<>((int) (endEpoch - fromEpoch + 1) * 5);
-        for (int i = 0; ; ++i) {
-            Optional<List<Record>> sleepRange = getSleepRangeNullAtFail(
-                    watch.getAccessToken(),
-                    watch.getWatchUserId(),
-                    LocalDate.ofEpochDay(fromEpoch),
-                    LocalDate.ofEpochDay(endEpoch),
-                    watch.getUserId(),
-                    log::info
-            );
-            if (sleepRange.isEmpty() && i == 2) {
-                log.info("睡眠数据请求失败");
-                return Optional.empty();
-            } else if (sleepRange.isPresent()) {
-                resultList.addAll(sleepRange.get());
-                break;
+        //逐一获取sleep的数据
+        for (long i = fromEpoch; i <= endEpoch; ++i) {
+            for (int j = 0; ; ++j) {
+                Optional<Record> record = getSleepRecordNullAtFail(
+                        watch.getAccessToken(),
+                        watch.getWatchUserId(),
+                        LocalDate.ofEpochDay(i),
+                        watch.getUserId(),
+                        log::info
+                );
+                if (record.isEmpty() && j == 2) {
+                    log.info("睡眠数据请求失败");
+                    return Optional.empty();
+                } else if (record.isPresent()) {
+                    resultList.add(record.get());
+                    break;
+                }
             }
         }
         //然后逐一获取activity的summary
@@ -200,43 +201,6 @@ public class FitbitWebApiService {
                 onError,
                 resp -> convertFitbitSleepResp(resp, date, userId, result::set),
                 FitbitSleepResp.class);
-        if (result.get() == null) {
-            return Optional.empty();
-        }
-        return Optional.of(result.get());
-    }
-
-    public Optional<List<Record>> getSleepRangeNullAtFail(
-            @NonNull String accessToken,
-            @NonNull String watchUserId,
-            @NonNull LocalDate fromDate,
-            @NonNull LocalDate endDate,
-            long userId, Consumer<String> onError) {
-        AtomicReference<List<Record>> result = new AtomicReference<>();
-        getWatchDataSync(
-                accessToken,
-                String.format("https://api.fitbit.com/1.2/user/%s/sleep/date/%s/%s.json", watchUserId, fromDate.format(DATE_FORMATTER), endDate.format(DATE_FORMATTER)),
-                onError,
-                resp -> {
-                    if (resp == null || resp.getSleep() == null) {
-                        return;
-                    }
-                    List<Record> list = new ArrayList<>(resp.getSleep().size());
-                    for (FitbitSleepResp single : resp.getSleep()) {
-                        if (single.getSleep() == null || single.getSleep().isEmpty()) {
-                            continue;
-                        }
-                        try {
-                            LocalDate date = LocalDate.parse(single.getSleep().get(0).getDateOfSleep(), DATE_FORMATTER);
-                            convertFitbitSleepResp(single, date, userId, list::add);
-                        } catch (Exception e) {
-                            log.info(Arrays.toString(e.getStackTrace()));
-                        }
-                    }
-                    if (!list.isEmpty()) {
-                        result.set(list);
-                    }
-                }, FitbitSleepRangeResp.class);
         if (result.get() == null) {
             return Optional.empty();
         }
@@ -422,7 +386,11 @@ public class FitbitWebApiService {
 
     private <T> void getWatchDataSync(String accessToken, String url, Consumer<String> onFail, Consumer<T> onSuccess, Class<T> clz) {
         HttpClient httpClient = HttpClient.newBuilder().proxy(PROXY_SELECTOR).build();
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken).header(HttpHeaders.ACCEPT, "application/json").GET().build();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+                .header(HttpHeaders.ACCEPT, "application/json")
+                .GET().build();
         HttpResponse<String> response;
         try {
             response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));

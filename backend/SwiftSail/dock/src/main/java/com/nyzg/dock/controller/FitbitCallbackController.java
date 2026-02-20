@@ -59,7 +59,6 @@ public class FitbitCallbackController {
      */
     @PostMapping(value = "/get/watchList",produces = "application/json")
     public HttpResp getWatchList(@RequestHeader("userId") String userId) {
-        log.info("getting");
         List<Watch> watchList = watchTableMapper.selectWatchByUserId(Long.parseLong(userId));
         return new HttpResp(true, HttpResp.COMMON_SUCCESS_CODE, "", new WatchGetResp(watchList));
     }

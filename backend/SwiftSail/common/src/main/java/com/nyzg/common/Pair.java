@@ -1,5 +1,8 @@
 package com.nyzg.common;
 
+import lombok.Getter;
+
+@Getter
 public class Pair <A,B>{
     A a;
     B b;
@@ -10,16 +13,8 @@ public class Pair <A,B>{
     }
     public Pair(){}
 
-    public A getA() {
-        return a;
-    }
-
     public void setA(A a) {
         this.a = a;
-    }
-
-    public B getB() {
-        return b;
     }
 
     public void setB(B b) {

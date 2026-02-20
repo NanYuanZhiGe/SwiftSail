@@ -3,6 +3,7 @@ package com.nyzg.common;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.lang.NonNull;
 
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
@@ -38,13 +39,6 @@ public class CommonApplication {
     static final private DelayQueue<Message> delayQueue = new DelayQueue<>();
 
     public static void main(String[] args) throws InterruptedException {
-        try{
-            Optional.of("abc").ifPresent(str->{
-                System.out.println(str);
-                throw  new RuntimeException("");
-            });
-        }catch (Exception e){
-            System.out.println("hello");
-        }
+        System.out.println(LocalDate.ofEpochDay(20490));
     }
 }

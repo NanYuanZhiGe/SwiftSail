@@ -9,4 +9,6 @@ public class FinalHttpResp {
     public final static HttpResp UNKNOWN_DEVICE = new HttpResp(false, HttpResp.COMMON_ERROR_CODE, "未知设备");
     public final static HttpResp LACK_USER_ID = new HttpResp(false, HttpResp.COMMON_ERROR_CODE, "缺少登录用户id");
     public final static HttpResp USER_ID_NOT_MATCH_TOKEN = new HttpResp(false, HttpResp.COMMON_ERROR_CODE, "请求中的userId和token中的userId不一致");
+
+    public final static HttpResp SERVER_INTERNAL_WRITE_FAIL=new HttpResp(false,HttpResp.COMMON_ERROR_CODE,"服务器内部写入错误");
 }

@@ -1,11 +1,8 @@
 package com.nyzg.dock.service;
 
-import com.nyzg.common.netobj.HttpResp;
 import com.nyzg.dock.dbobj.Record;
 import com.nyzg.dock.dbobj.Watch;
-import com.nyzg.dock.mapper.RecordBackUpTableMapper;
 import com.nyzg.dock.netobj.DayRecord;
-import com.nyzg.dock.netobj.RecordBackUpAndroid;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.Resource;
 import lombok.NonNull;
@@ -24,10 +21,6 @@ import java.util.UUID;
 @Service
 @Slf4j
 public class SyncService {
-    private final HttpResp SYNC_BACKUP_FAIL = new HttpResp(false, HttpResp.COMMON_ERROR_CODE, "运动记录同步失败");
-    private final HttpResp SYNC_BACKUP_SUCCEED = new HttpResp(true, HttpResp.COMMON_SUCCESS_CODE, "运动记录同步成功");
-    @Resource
-    RecordBackUpTableMapper recordBackUpMapper;
     @Resource
     JdbcTemplate jdbcTemplate;
     @Resource
@@ -100,14 +93,5 @@ public class SyncService {
             log.info(e.getCause().getMessage());
             return null;
         }
-    }
-
-    public HttpResp syncBackUpRecord(List<RecordBackUpAndroid> recordList) {
-        try {
-            recordBackUpMapper.insertRecordBackUpAndroid(recordList);
-        } catch (Exception e) {
-            return SYNC_BACKUP_FAIL;
-        }
-        return SYNC_BACKUP_SUCCEED;
     }
 }
