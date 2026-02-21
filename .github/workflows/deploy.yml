@@ -4,31 +4,33 @@ on:
   push:
     branches: [ "backend" ]
 jobs:
-  test:
+  deploy:
     runs-on: self-hosted
+    env:
+      MODULE_NAME: user
     steps:
       - name: clone files
         uses: actions/checkout@v4
 
-      - name: Maven clean and build dock
+      - name: Maven clean and build ${{ env.MODULE_NAME }}
         working-directory: ./backend/SwiftSail
-        run: mvn clean package -pl dock -am
+        run: mvn clean package -pl ${{ env.MODULE_NAME }} -am
 
       - name: stop last
-        run: sudo systemctl stop swiftsail.dock.service
+        run: sudo systemctl stop swiftsail.${{ env.MODULE_NAME }}.service
 
       - name: Wait for process to exit
-        run: timeout 10s bash -c 'while pgrep -f dock-0.0.1-SNAPSHOT\.jar > /dev/null; do sleep 1; done' || true
+        run: timeout 10s bash -c 'while pgrep -f ${{ env.MODULE_NAME }}-0.0.1-SNAPSHOT\.jar > /dev/null; do sleep 1; done' || true
 
       - name: remove last
-        run: rm -rf /usr/swiftsail/target/dock-0.0.1-SNAPSHOT.jar
+        run: rm -rf /usr/swiftsail/target/${{ env.MODULE_NAME }}-0.0.1-SNAPSHOT.jar
 
       - name: move target
         working-directory: ./backend/SwiftSail
-        run: mv dock/target/dock-0.0.1-SNAPSHOT.jar /usr/swiftsail/target/
+        run: mv ${{ env.MODULE_NAME }}/target/${{ env.MODULE_NAME }}-0.0.1-SNAPSHOT.jar /usr/swiftsail/target/
 
-      - name: reload SwiftSail.dock service
+      - name: reload SwiftSail.${{ env.MODULE_NAME }} service
         run: sudo -n systemctl daemon-reload
 
-      - name: restart SwiftSail.dock service
-        run: sudo -n systemctl restart swiftsail.dock.service
+      - name: restart SwiftSail.${{ env.MODULE_NAME }} service
+        run: sudo -n systemctl restart swiftsail.${{ env.MODULE_NAME }}.service

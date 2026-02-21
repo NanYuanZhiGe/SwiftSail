@@ -9,6 +9,7 @@ import com.nyzg.user.service.DbService;
 import com.nyzg.user.service.SmtpService;
 import com.nyzg.user.service.TokenService;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +20,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 @RestController
+@Slf4j
 public class LoginController {
     private final Pattern EMAIL_PATTERN = Pattern.compile("^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$");
     private final HttpResp ILLEGAL_MAIL_ADDR = new HttpResp(false, HttpResp.INVALID_USER_INPUT, "非法邮箱地址");
@@ -44,6 +46,7 @@ public class LoginController {
 
     @GetMapping("/login/test/connection")
     public HttpResp testConnection() {
+        log.info(Thread.currentThread().getName());
         return new HttpResp(true, 0, "测试成功");
     }
 

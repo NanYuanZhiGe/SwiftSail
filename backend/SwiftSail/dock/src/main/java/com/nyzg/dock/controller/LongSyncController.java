@@ -82,6 +82,7 @@ public class LongSyncController extends TextWebSocketHandler {
                     userId = Long.parseLong((statusMapPair.getB().get("userId")).toString());
                     try {
                         //检查是否有activate的手表，如果有，就同步从createTime到昨天
+                        //不能是今天，因为今天的数据可能是不完整的
                         jdbcTemplate.query("""
                                         SELECT `clientId`,`createTime` FROM `watchTable`\s
                                         WHERE `userId`=? AND `expireTime`>? AND `activate`=1;
@@ -106,6 +107,9 @@ public class LongSyncController extends TextWebSocketHandler {
                                             });
                                         },
                                         //没有正在工作的手表，返回本地数据的范围
+                                        //本地的数据一定是完整的，因为本地的数据只有两个来源
+                                        //用户单次同步，如果是今天的数据，不会写入数据库
+                                        //用户全量同步，根本不会查询今天的数据
                                         () -> AFTER_SUCCESS.add(session -> {
                                                     try {
                                                         List<Long> epochList = jdbcTemplate.query("""
@@ -222,14 +226,14 @@ public class LongSyncController extends TextWebSocketHandler {
                                 }
                             }
                         }
-                        log.info(String.format("email:%s 进行数据同步，采用local-network模式, 请求数据结束",email));
+                        log.info(String.format("email:%s 进行数据同步，采用local-network模式, 请求数据结束", email));
                         AFTER_SUCCESS.add(session -> {
                             try {
                                 session.sendMessage(new TextMessage(String.format(
                                         DT_PATTERN, OBJECT_MAPPER.writeValueAsString(new LongSyncResp(dayRecords))
                                 )));
                             } catch (Exception e) {
-                                log.info(String.format("email:%s 进行数据同步，采用local-network模式，数据发送失败%s", email,e.getCause()));
+                                log.info(String.format("email:%s 进行数据同步，采用local-network模式，数据发送失败%s", email, e.getCause()));
                                 return Result.NETWORK_ERROR;
                             }
                             log.info(String.format("email:%s 进行数据同步，采用local-network模式，数据成功发送", email));
@@ -237,7 +241,7 @@ public class LongSyncController extends TextWebSocketHandler {
                         });
                         return Result.SUCCESS;
                     } catch (Exception e) {
-                        log.error("email: {} 进行数据同步时发生异常{}", email,e.getCause(), e);
+                        log.error("email: {} 进行数据同步时发生异常{}", email, e.getCause(), e);
                         return Result.UNKNOWN_ERROR;
                     }
                 }
