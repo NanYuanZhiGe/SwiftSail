@@ -21,3 +21,4 @@ spring:
       - nacos:${spring.application.name}-dev.yaml?refreshEnabled=true
       - nacos:swift-sail-smtp-dev.yaml?refreshEnabled=true
       - nacos:swift-sail-share-dev.yaml?refreshEnabled=true
+      - nacos:swift-sail-redisson-common.yaml?refreshEnabled=true
