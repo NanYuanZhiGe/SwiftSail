@@ -17,7 +17,7 @@ import com.nyzg.swiftsail.R;
 
 public class SportLayout extends ConstraintLayout {
 
-    final protected String type;
+    final protected String mType;
     final protected String name;
 
     @SuppressLint("ClickableViewAccessibility")
@@ -37,7 +37,7 @@ public class SportLayout extends ConstraintLayout {
             int resource = a.getResourceId(R.styleable.SportLayout_sportIcon, R.drawable.add);
             imageView.setImageDrawable(ContextCompat.getDrawable(context, resource));
         }
-        this.type = type;
+        this.mType = type;
     }
 
     protected void initLayout(@NonNull Context context) {
@@ -49,6 +49,6 @@ public class SportLayout extends ConstraintLayout {
     }
 
     public String getType() {
-        return type;
+        return mType;
     }
 }

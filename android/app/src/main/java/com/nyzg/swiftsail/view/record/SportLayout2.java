@@ -2,6 +2,7 @@ package com.nyzg.swiftsail.view.record;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 
 import androidx.annotation.NonNull;
@@ -15,8 +16,8 @@ public class SportLayout2 extends SportLayout {
     public SportLayout2(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         this.setOnClickListener(v -> {
-            RecordRecordRepository.getInstance().SELECT_TYPE.setValue(this.getType());
-            RecordRecordRepository.getInstance().SELECT_NAME.setValue(this.getName());
+            RecordRecordRepository.getInstance().SELECT_TYPE.setValue(SportLayout2.this.getType());;
+            RecordRecordRepository.getInstance().SELECT_NAME.setValue(SportLayout2.this.getName());
         });
     }
 

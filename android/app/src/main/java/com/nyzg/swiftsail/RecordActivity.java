@@ -44,8 +44,6 @@ public class RecordActivity extends AppCompatActivity {
             }
             transaction.addToBackStack(null);
             transaction.commit();
-            //切换完fragment后一定要重新置空viewModel，不然用户的下一次点击同一个选项是没有效果的
-            RecordRecordRepository.getInstance().SELECT_TYPE.setValue(null);
         }
     }
 }

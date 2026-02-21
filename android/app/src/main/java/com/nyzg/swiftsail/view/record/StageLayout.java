@@ -35,8 +35,6 @@ public class StageLayout extends ConstraintLayout {
         pauseOrResume = findViewById(R.id.pauseOrResume);
         mSubmitView = findViewById(R.id.submit);
         cancel.setOnClickListener(v -> {
-            mStop.run();
-            pauseOrResume.setImageDrawable(ContextCompat.getDrawable(GlobalApplication.getAppContext(), R.drawable.play));
             mCancel.run();
         });
         pauseOrResume.setOnClickListener(v -> {
@@ -58,11 +56,17 @@ public class StageLayout extends ConstraintLayout {
         });
     }
 
-    public void switchToPause(){
-        isStop=true;
+    public void switchToPause() {
+        isStop = true;
         mStop.run();
         pauseOrResume.setImageDrawable(ContextCompat.getDrawable(GlobalApplication.getAppContext(), R.drawable.play));
     }
+
+    public void switchUiToPause() {
+        isStop = true;
+        pauseOrResume.setImageDrawable(ContextCompat.getDrawable(GlobalApplication.getAppContext(), R.drawable.play));
+    }
+
     public void setSubmitDrawable(Drawable drawable) {
         mSubmitView.setImageDrawable(drawable);
     }

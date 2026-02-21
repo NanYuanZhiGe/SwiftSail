@@ -83,6 +83,8 @@ public class ReportSyncWorker extends Worker {
         boolean successLeave = true;
         final long heartBeatInterval = 25 * 1000;
         delayQueue.add(new Message(System.currentTimeMillis() + heartBeatInterval, Status.HEAR_BEAT));
+        //清空UI
+        SyncRepository.getInstance().syncTotal = 0;
         while (!isStopped()) {
             try {
                 Message message = delayQueue.take();
@@ -98,6 +100,7 @@ public class ReportSyncWorker extends Worker {
                     delayQueue.add(new Message(System.currentTimeMillis() + heartBeatInterval, Status.HEAR_BEAT));
                 }
             } catch (Exception ignore) {
+                SyncRepository.getInstance().currentSync.postValue(SyncRepository.SYNC_FAIL);
                 return Result.failure();
             }
         }
@@ -125,7 +128,7 @@ public class ReportSyncWorker extends Worker {
             final private Message MESSAGE_CLOSE = new Message(0, Status.CLOSE);
             private final List<Pair<Long, Long>> rangePair = new ArrayList<>();
             private int rangePointer = 0;
-            private int totalCount = 0;
+            private int totalCount;
             private int currentCount = 0;
 
             @Override
@@ -194,18 +197,17 @@ public class ReportSyncWorker extends Worker {
                             }
                         }
                     }
-                    Log.v("myTag", "开始同步数据" + from + " " + to + " totalCount=" + totalCount+" pairSize:"+rangePair.size());
+                    Log.v("myTag", "开始同步数据" + from + " " + to + " totalCount=" + totalCount + " pairSize:" + rangePair.size());
+                    SyncRepository.getInstance().currentSync.postValue(SyncRepository.SYNC_START);
                     //发送第一个mr
                     sendMr();
-                    //更新UI为progress=0的状态
-                    SyncRepository.getInstance().totalSyncProgress.postValue(0f);
                 } catch (Exception e) {
                     delayQueue.add(MESSAGE_ERROR);
                 }
             }
 
             private void putDays(long from, long to) {
-                totalCount += (int) (to-from + 1);
+                totalCount += (int) (to - from + 1);
                 for (long i = from; i <= to; i += 30) {
                     if (i + 29 >= to) {
                         rangePair.add(new Pair<>(i, to));
@@ -213,6 +215,7 @@ public class ReportSyncWorker extends Worker {
                     }
                     rangePair.add(new Pair<>(i, i + 29));
                 }
+                SyncRepository.getInstance().syncTotal = totalCount;
             }
 
             @SuppressLint("DefaultLocale")
@@ -223,11 +226,11 @@ public class ReportSyncWorker extends Worker {
                     LongSyncResp resp = MyJsonSerializer.deSerialize(payload, LongSyncResp.class);
                     for (DayRecord dayRecord : resp.dayRecordList) {
                         recordTable.insertRecordList(dayRecord.recordList);
-                        currentCount += dayRecord.recordList.size();
+                        ++currentCount;
                     }
                     //提醒UI发生变化
                     Log.v("myTag", "收到mr" + currentCount);
-                    SyncRepository.getInstance().totalSyncProgress.setValue(totalCount != 0 ? currentCount / (float) totalCount : 0f);
+                    SyncRepository.getInstance().currentSync.postValue(currentCount);
                     //然后看情况是发送下一个还是直接关闭连接
                     sendMr();
                 } catch (Exception e) {
@@ -249,9 +252,11 @@ public class ReportSyncWorker extends Worker {
             public void onClose(int code, String reason, boolean remote) {
                 if (code == 1000) { // 正常关闭
                     delayQueue.add(new Message(0, Status.CLOSE));
-                    Log.v("myTag","数据同步完成，安全关闭");
+                    SyncRepository.getInstance().currentSync.postValue(SyncRepository.SYNC_SUCCESS);
+                    Log.v("myTag", "数据同步完成，安全关闭");
                 } else {
                     Log.v("myTag", "websocket关闭，code: " + code);
+                    SyncRepository.getInstance().currentSync.postValue(SyncRepository.SYNC_FAIL);
                     delayQueue.add(MESSAGE_ERROR);
                 }
             }

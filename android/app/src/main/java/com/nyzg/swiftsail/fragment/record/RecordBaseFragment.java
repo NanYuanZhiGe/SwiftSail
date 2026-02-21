@@ -90,6 +90,13 @@ public abstract class RecordBaseFragment extends Fragment {
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        //切换完fragment后一定要重新置空viewModel，不然用户的下一次点击同一个选项是没有效果的
+        RecordRecordRepository.getInstance().SELECT_TYPE.setValue(null);
+    }
+
+    @Override
     final public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         stageLayout = view.findViewById(R.id.stageLayout);
@@ -189,7 +196,9 @@ public abstract class RecordBaseFragment extends Fragment {
             case ON_LOCAL_SAVE, ON_CLOUD_SAVE://已经在保存数据了
                 return;
             case ON_RECORD:
-                myOnStop();
+                doStop();
+                stageLayout.switchUiToPause();
+                mViewModel.mStatus.setValue(ON_PAUSE);
             case ON_PAUSE, LOCAL_SAVE_ERROR, CLOUD_SAVE_ERROR:
                 new AlertDialog.Builder(requireContext())
                         .setTitle("")
@@ -203,7 +212,9 @@ public abstract class RecordBaseFragment extends Fragment {
                             summary();
                             saveRecord(false);
                         })
-                        .setNegativeButton("取消", null);
+                        .setNegativeButton("取消", null)
+                        .create()
+                        .show();
         }
     }
 
@@ -214,6 +225,7 @@ public abstract class RecordBaseFragment extends Fragment {
                 return;
             case ON_RECORD:
                 doStop();
+                stageLayout.switchUiToPause();
                 mViewModel.mStatus.setValue(ON_PAUSE);
                 break;
             default://已经属于暂停的状态了
@@ -228,9 +240,10 @@ public abstract class RecordBaseFragment extends Fragment {
                         .setTitle("")
                         .setMessage("您正在保存数据，继续记录可能导致保存失败丢失数据！")
                         .setPositiveButton("继续记录", (d, i) -> {
-                            if(doStart()){
+                            mViewModel.mStartTime = LocalDateTime.now();
+                            if (doStart()) {
                                 mViewModel.mStatus.setValue(ON_RECORD);
-                            }else{
+                            } else {
                                 stageLayout.switchToPause();
                                 mViewModel.mStatus.setValue(ON_PAUSE);
                                 doReset();
@@ -248,9 +261,10 @@ public abstract class RecordBaseFragment extends Fragment {
                         .setPositiveButton("保存并上传云端", (d, i) -> saveRecord(true))
                         .setNeutralButton("仅保存本地", (d, i) -> saveRecord(false))
                         .setNegativeButton("不保存", (d, i) -> {
-                            if(doStart()){
+                            mViewModel.mStartTime = LocalDateTime.now();
+                            if (doStart()) {
                                 mViewModel.mStatus.setValue(ON_RECORD);
-                            }else{
+                            } else {
                                 stageLayout.switchToPause();
                                 mViewModel.mStatus.setValue(ON_PAUSE);
                                 doReset();
@@ -262,9 +276,10 @@ public abstract class RecordBaseFragment extends Fragment {
                 break;
             case ON_PAUSE://普通的暂停可以恢复
             case NO_DATA, SAVE_DONE, NO_DATA_TO_SAVE:
-                if(doStart()){
+                mViewModel.mStartTime = LocalDateTime.now();
+                if (doStart()) {
                     mViewModel.mStatus.setValue(ON_RECORD);
-                }else{
+                } else {
                     stageLayout.switchToPause();
                     mViewModel.mStatus.setValue(ON_PAUSE);
                     doReset();
@@ -286,17 +301,23 @@ public abstract class RecordBaseFragment extends Fragment {
                 return;
             case ON_RECORD:
                 doStop();
+                stageLayout.switchUiToPause();
                 mViewModel.mStatus.setValue(ON_PAUSE);
-                new AlertDialog.Builder(requireContext())
-                        .setTitle("")
-                        .setMessage("您确定要重新记录吗？")
-                        .setPositiveButton("确定", (d, i) -> {
-                            doReset();
-                            mViewModel.mStatus.setValue(NO_DATA);
-                        })
-                        .setNegativeButton("取消", null)
-                        .create()
-                        .show();
+                if (alertOnCancel()) {
+                    new AlertDialog.Builder(requireContext())
+                            .setTitle("")
+                            .setMessage("您确定要重新记录吗？")
+                            .setPositiveButton("确定", (d, i) -> {
+                                doReset();
+                                mViewModel.mStatus.setValue(NO_DATA);
+                            })
+                            .setNegativeButton("取消", null)
+                            .create()
+                            .show();
+                } else {
+                    doReset();
+                    mViewModel.mStatus.setValue(NO_DATA);
+                }
                 break;
             case ON_CLOUD_SAVE, ON_LOCAL_SAVE:
                 new AlertDialog.Builder(requireContext())
@@ -327,6 +348,11 @@ public abstract class RecordBaseFragment extends Fragment {
     protected abstract void reset();
 
     protected abstract void summary();
+
+    protected boolean alertOnCancel() {
+        return true;
+    }
+
 
     @SuppressWarnings(value = {"unused"})
     protected void myOnViewCreated(@NonNull View father) {
@@ -404,7 +430,7 @@ public abstract class RecordBaseFragment extends Fragment {
 
     private @NonNull String getType() {
         if (RecordRecordRepository.getInstance().SELECT_TYPE.getValue() == null) {
-            return "运动";
+            return "Sport";
         }
         return RecordRecordRepository.getInstance().SELECT_TYPE.getValue();
     }

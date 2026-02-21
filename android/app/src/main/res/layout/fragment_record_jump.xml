@@ -14,15 +14,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <com.github.mikephil.charting.charts.LineChart
-        android:id="@+id/lineChart"
-        android:layout_width="350dp"
-        android:layout_height="500dp"
-        app:layout_constraintBottom_toTopOf="@id/stageLayout"
-        android:layout_marginBottom="@dimen/bigMarginTop"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/tag"
@@ -99,6 +90,45 @@
             app:layout_constraintStart_toStartOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <TextView
+        android:id="@+id/countText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/bigMarginTop"
+        android:text="已跳个数"
+        app:layout_constraintBottom_toTopOf="@id/bigCount"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tag"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <TextView
+        android:id="@+id/bigCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/mediumMarginTop"
+        android:text="0"
+        android:textSize="88sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/tip"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/countText" />
+
+    <TextView
+        android:id="@+id/tip"
+        android:layout_width="350dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/smallMarginTop"
+        android:background="@drawable/record_record_backward_bk"
+        android:gravity="center"
+        android:paddingHorizontal="@dimen/smallMarginStart"
+        android:paddingVertical="@dimen/tinyMarginStart"
+        android:text="小贴士：\n跳绳时，人会不自觉稳住手机，导致计数不准！\n →最佳方式：把手机放裤兜或腰包里\n → 如果手持：请将手臂贴紧身体侧面，随身体一起跳！"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/stageLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <com.nyzg.swiftsail.view.record.StageLayout
         android:id="@+id/stageLayout"
