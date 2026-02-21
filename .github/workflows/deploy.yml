@@ -9,6 +9,9 @@ jobs:
     env:
       MODULE_NAME: user
     steps:
+      - name: show java version
+        run: java --version
+
       - name: clone files
         uses: actions/checkout@v4
 
