@@ -59,16 +59,8 @@
                 <version>${spring-boot.version}</version>
                 <configuration>
                     <mainClass>com.nyzg.common.CommonApplication</mainClass>
-                    <skip>false</skip>
+                    <skip>true</skip>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>repackage</id>
-                        <goals>
-                            <goal>repackage</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
