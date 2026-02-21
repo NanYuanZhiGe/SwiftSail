@@ -50,8 +50,8 @@ public class FitbitCallbackController {
      * @return 返回一个三元组，原始随机字符串，sha256过后的哈希字符串，base64编码的哈希字符串
      */
     @GetMapping("/oauth/code")
-    public Tuple<String, String, String> getCode() {
-        return EncryptThreadSafe.getBase64UrlSha256RandomString();
+    public String getCode() {
+        return EncryptThreadSafe.getBase64UrlSha256RandomString().toString()+Thread.currentThread().getName();
     }
 
     /**

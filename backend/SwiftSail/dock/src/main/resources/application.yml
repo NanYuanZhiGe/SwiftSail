@@ -1,0 +1,23 @@
+my:
+  nacos-namespace: 62d813f4-e610-4b31-8f87-24faeb0b8035
+spring:
+  application:
+    name: swift-sail-dock-service
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      config:
+        file-extension: yaml
+        group: DEFAULT_GROUP
+        namespace: ${my.nacos-namespace}
+      discovery:
+        namespace: 62d813f4-e610-4b31-8f87-24faeb0b8035
+      server-addr: 106.52.187.207:4090
+      username: swiftSailDeveloper
+      password: GiveMeACuteSister
+  config:
+    import:
+      - nacos:${spring.application.name}-dev.yaml?refreshEnabled=true
+      - nacos:swift-sail-share-dev.yaml?refreshEnabled=true
+      - nacos:swift-sail-redisson-common.yaml?refreshEnabled=true
