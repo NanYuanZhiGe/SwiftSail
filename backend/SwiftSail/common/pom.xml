@@ -59,7 +59,7 @@
                 <version>${spring-boot.version}</version>
                 <configuration>
                     <mainClass>com.nyzg.common.CommonApplication</mainClass>
-                    <skip>true</skip>
+                    <skip>false</skip>
                 </configuration>
                 <executions>
                     <execution>
