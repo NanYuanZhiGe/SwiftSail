@@ -46,8 +46,7 @@ public class LoginController {
 
     @GetMapping("/login/test/connection")
     public HttpResp testConnection() {
-        log.info(Thread.currentThread().getName());
-        return new HttpResp(true, 0, "测试成功");
+        return new HttpResp(true, 0, "测试成功"+Thread.currentThread().getName());
     }
 
     //申请注册，此时仅发送验证码

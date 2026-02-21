@@ -1,11 +1,11 @@
-package com.nyzg.gateway;
+package com.nyzg.geo;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class GatewayApplication {
+public class GeoApplication {
     public static void main(String[] args) {
-        SpringApplication.run(GatewayApplication.class, args);
+        SpringApplication.run(GeoApplication.class,args);
     }
 }

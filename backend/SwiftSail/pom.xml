@@ -3,27 +3,36 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.5.11</version>
+        <relativePath/> <!-- 从仓库获取 -->
+    </parent>
+
     <groupId>com.nyzg</groupId>
     <artifactId>SwiftSail</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
-
     <name>SwiftSail</name>
     <description>SwiftSail</description>
+
 
     <modules>
         <module>user</module>
         <module>dock</module>
         <module>common</module>
         <module>gateway</module>
+        <module>geo</module>
     </modules>
 
     <properties>
         <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <spring-boot.version>3.2.4</spring-boot.version>
+        <spring-boot.version>3.5.11</spring-boot.version>
     </properties>
+
 
     <dependencyManagement>
         <dependencies>
@@ -38,7 +47,7 @@
             <dependency>
                 <groupId>com.alibaba.cloud</groupId>
                 <artifactId>spring-cloud-alibaba-dependencies</artifactId>
-                <version>2023.0.1.0</version>
+                <version>2025.0.0.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -46,7 +55,7 @@
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-dependencies</artifactId>
-                <version>2023.0.1</version>
+                <version>2025.0.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

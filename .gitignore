@@ -65,3 +65,5 @@ build/
 
 ### VS Code ###
 .vscode/
+backend/demo1/  
+backend/virtual-thread/
