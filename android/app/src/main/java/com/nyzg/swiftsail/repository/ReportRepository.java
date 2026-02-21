@@ -22,6 +22,7 @@ import com.nyzg.swiftsail.obj.ParsedReport;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
+import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -158,6 +159,7 @@ public class ReportRepository {
         //进行网络操作
         AtomicBoolean success = new AtomicBoolean(false);
         AtomicReference<String> syncResult = new AtomicReference<>("");
+        long today = LocalDate.now().toEpochDay();
         NetWorkHandler.handleNetRespAfterLogin(
                 null,
                 NetWorkBuilder.doChunkRequest(NetWorkBuilder.buildJsonRequestJwt(
@@ -166,7 +168,9 @@ public class ReportRepository {
                 syncResult::set,
                 dayRecord -> {//写入数据库
                     try {
-                        sqLiteDB.recordTable().insertRecordList(dayRecord.recordList);
+                        if (today > day) {//今天的数据是不完整的，不能够写入数据库中
+                            sqLiteDB.recordTable().insertRecordList(dayRecord.recordList);
+                        }
                         syncResult.set("同步数据成功");
                     } catch (Exception e) {
                         syncResult.set("同步数据成功，但是写入数据库失败：" + e.getCause());
@@ -194,9 +198,9 @@ public class ReportRepository {
             }
             Long distance = sqLiteDB.recordTable().getExposeValue(userId, RecordType.DISTANCE, day);
             if (distance != null) {
-                double kilometers=distance/1000.0;
-                result.stepDistance = String.format("%.2f公里",kilometers);
-                result.distanceProgress=HealthIndicator.distanceIndicator(kilometers);
+                double kilometers = distance / 1000.0;
+                result.stepDistance = String.format("%.2f公里", kilometers);
+                result.distanceProgress = HealthIndicator.distanceIndicator(kilometers);
             }
             Long heartRate = sqLiteDB.recordTable().getExposeValue(userId, RecordType.HEART, day);
             if (heartRate != null && heartRate >= 1000000000L) {
