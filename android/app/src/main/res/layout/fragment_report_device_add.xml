@@ -70,8 +70,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxWidth="@dimen/reTextMaxLen"
+            android:layout_marginTop="@dimen/tinyMarginTop"
+            android:textColor="#545454"
             android:text="填写信息后，点击「授权」跳转浏览器完成授权，返回应用点击「我已授权」，我们将自动管理您的手表数据"
-            android:textSize="16sp"
+            android:textSize="15sp"
             app:layout_constraintStart_toStartOf="@id/backward"
             app:layout_constraintTop_toBottomOf="@id/companion" />
 
@@ -90,11 +92,11 @@
                     android:id="@+id/textDeviceName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="18dp"
-                    android:layout_marginTop="18dp"
+                    android:layout_marginTop="24dp"
                     android:text="设备名"
+                    android:textStyle="bold"
                     android:textSize="@dimen/textWithInput"
-                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintStart_toStartOf="@id/inputDeviceName"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -117,6 +119,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="18dp"
                     android:text="设备品牌"
+                    android:textStyle="bold"
                     android:textSize="@dimen/textWithInput"
                     app:layout_constraintStart_toStartOf="@id/textDeviceName"
                     app:layout_constraintTop_toBottomOf="@id/inputDeviceName" />
@@ -138,6 +141,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="18dp"
                     android:text="客户端ID"
+                    android:textStyle="bold"
                     android:textSize="@dimen/textWithInput"
                     app:layout_constraintStart_toStartOf="@id/textDeviceName"
                     app:layout_constraintTop_toBottomOf="@id/inputDeviceType" />
@@ -160,6 +164,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="18dp"
                     android:text="客户端密钥"
+                    android:textStyle="bold"
                     android:textSize="@dimen/textWithInput"
                     app:layout_constraintStart_toStartOf="@id/textDeviceName"
                     app:layout_constraintTop_toBottomOf="@id/inputClientId" />
@@ -174,6 +179,7 @@
                     app:layout_constraintStart_toStartOf="@id/inputDeviceName"
                     app:layout_constraintTop_toBottomOf="@id/textClientSecret" />
 
+                <!-- 你以前的按钮颜色 -->
                 <TextView
                     android:id="@+id/submit"
                     android:layout_width="@dimen/reInputWidth"

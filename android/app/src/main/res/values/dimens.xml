@@ -31,9 +31,9 @@
     <dimen name="rRTitleTextSize">20sp</dimen>
 
     <!-- report -->
-    <dimen name="reTextMaxLen">350dp</dimen>
+    <dimen name="reTextMaxLen">340dp</dimen>
     <dimen name="reInputWidth">340dp</dimen>
-    <dimen name="reInputHeight">60dp</dimen>
+    <dimen name="reInputHeight">48dp</dimen>
 
     <!-- 微信列表样式-->
     <dimen name="titleHeight">76dp</dimen>
