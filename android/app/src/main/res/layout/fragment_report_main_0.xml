@@ -5,12 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.sothree.slidinguppanel.SlidingUpPanelLayout
+    <com.sothree.slidinguppanel.RoundedSlidingUpPanelLayout
         android:id="@+id/slidingUpPanel"
         android:layout_width="match_parent"
         android:layout_height="800dp"
         android:background="@color/white"
         android:gravity="bottom"
+        app:umanoOverlay="true"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         sothree:umanoPanelHeight="68dp"
@@ -40,7 +41,7 @@
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="32dp"
+                        android:layout_marginBottom="100dp"
                         android:background="@color/white">
 
                         <androidx.constraintlayout.widget.ConstraintLayout
@@ -286,6 +287,8 @@
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:elevation="@dimen/slidingPanelShadow"
+            android:background="@drawable/layout_sliding_panel_bk"
             android:id="@+id/bottomContent"
             android:layout_width="match_parent"
             android:layout_height="500dp">
@@ -464,5 +467,5 @@
                     app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
-    </com.sothree.slidinguppanel.SlidingUpPanelLayout>
+    </com.sothree.slidinguppanel.RoundedSlidingUpPanelLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

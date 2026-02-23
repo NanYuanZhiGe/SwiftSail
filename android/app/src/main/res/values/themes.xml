@@ -10,6 +10,7 @@
         <item name="android:windowTranslucentStatus">true</item>
         <!-- 可选：如果底部也有导航栏，也透过去 -->
         <!-- <item name="android:windowTranslucentNavigation">true</item> -->
+        <item name="android:windowBackground">@android:color/white</item>
     </style>
 
     <style name="Theme.SwiftSail" parent="Base.Theme.SwiftSail" />

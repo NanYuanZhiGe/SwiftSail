@@ -23,6 +23,8 @@
     <dimen name="bigMarginTop">24dp</dimen>
     <dimen name="largeMarginTop">36dp</dimen>
 
+    <dimen name="slidingPanelShadow">8dp</dimen>
+
     <!-- record record-->
     <dimen name="recordRecordTextSize">20sp</dimen>
     <dimen name="rRBackWardOut">55dp</dimen>

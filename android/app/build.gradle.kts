@@ -48,8 +48,10 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     implementation("com.google.code.gson:gson:2.10.1")
+
     //底部滑出面板的组件
-    implementation("com.sothree.slidinguppanel:library:3.4.0")
+    //这个是我fork后的版本，使用的是本地仓库
+    implementation("com.sothree.slidinguppanel:slidinguppanel:1.0.0")
 
     //柱状图、折线图等报表组件
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
@@ -65,6 +67,9 @@ dependencies {
 
     //custom tabs用于站外导航
     implementation("androidx.browser:browser:1.2.0")
+
+
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
     //tab layout
     implementation("com.google.android.material:material:1.13.0")

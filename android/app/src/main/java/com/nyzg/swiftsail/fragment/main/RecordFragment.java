@@ -50,6 +50,7 @@ public class RecordFragment extends MainBase {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View father = inflater.inflate(R.layout.layout_record, container, false);
+        /*
         father.findViewById(R.id.new_record).setOnTouchListener(new RecordBtnListener(requireContext()));
         this.barChart = father.findViewById(R.id.barChart);
         initBarChart();
@@ -57,6 +58,8 @@ public class RecordFragment extends MainBase {
         TextView numberDistance = father.findViewById(R.id.numberDistance);
         TextView numberStep = father.findViewById(R.id.numberStep);
         TextView numberKalo = father.findViewById(R.id.numberKa);
+
+         */
 
         return father;
     }
