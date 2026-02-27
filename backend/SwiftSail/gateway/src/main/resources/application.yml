@@ -25,7 +25,7 @@ spring:
           enabled: false
       routes:
         - id: swift-sail-user-service
-          uri: http://127.0.0.1:5040
+          uri: lb://swift-sail-user-service
           predicates:
             - Path=/api/user/**
           filters:
