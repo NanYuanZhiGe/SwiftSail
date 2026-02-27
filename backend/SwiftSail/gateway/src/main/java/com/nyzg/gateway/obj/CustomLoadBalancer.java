@@ -1,5 +1,6 @@
 package com.nyzg.gateway.obj;
 
+
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.DefaultResponse;

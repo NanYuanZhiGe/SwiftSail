@@ -1,10 +1,15 @@
 server:
   port: 5050
+
 my:
   nacos-namespace: 62d813f4-e610-4b31-8f87-24faeb0b8035
+
 spring:
   application:
     name: swift-sail-gateway-service
+  config:
+    import:
+      - nacos:swift-sail-share-dev.yaml?refreshEnabled=true
   cloud:
     nacos:
       config:
@@ -13,51 +18,47 @@ spring:
         namespace: ${my.nacos-namespace}
       discovery:
         namespace: 62d813f4-e610-4b31-8f87-24faeb0b8035
-      server-addr: 127.0.0.1:4090
+      server-addr: 10.0.24.12:4090
       username: swiftSailDeveloper
       password: GiveMeACuteSister
-  config:
-    import:
-      - nacos:swift-sail-share-dev.yaml?refreshEnabled=true
     gateway:
-      discovery:
-        locator:
-          enabled: false
-      routes:
-        - id: swift-sail-user-service
-          uri: lb://swift-sail-user-service
-          predicates:
-            - Path=/api/user/**
-          filters:
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenishRate: 20   # 每秒填充令牌数
-                redis-rate-limiter.burstCapacity: 50   # 令牌桶最大容量
-                key-resolver: "#{@remoteAddrKeyResolver}" # 使用 SpEL 引用 Bean
-        - id: swift-sail-dock-websocket-service
-          uri: lb:ws://swift-sail-dock-service
-          predicates:
-            - Path=/api/dock/ws/dock/**
-        - id: swift-sail-dock-service
-          uri: lb://swift-sail-dock-service
-          predicates:
-            - Path=/api/dock/**
-          filters:
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenishRate: 20   # 每秒填充令牌数
-                redis-rate-limiter.burstCapacity: 50   # 令牌桶最大容量
-                key-resolver: "#{@remoteAddrKeyResolver}" # 使用 SpEL 引用 Bean
-        - id: swift-sail-geo-service
-          uri: lb://swift-sail-geo-service
-          predicates:
-            - Path=/api/geo/**
-          filters:
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenishRate: 20   # 每秒填充令牌数
-                redis-rate-limiter.burstCapacity: 50   # 令牌桶最大容量
-                key-resolver: "#{@remoteAddrKeyResolver}" # 使用 SpEL 引用 Bean
+      server:
+        webflux:
+          routes:
+            - id: swift-sail-user-service
+              uri: lb://swift-sail-user-service
+              predicates:
+                - Path=/api/user/**
+              filters:
+                - name: RequestRateLimiter
+                  args:
+                    redis-rate-limiter.replenishRate: 20   # 每秒填充令牌数
+                    redis-rate-limiter.burstCapacity: 50   # 令牌桶最大容量
+                    key-resolver: "#{@remoteAddrKeyResolver}" # 使用 SpEL 引用 Bean
+            - id: swift-sail-dock-websocket-service
+              uri: lb:ws://swift-sail-dock-service
+              predicates:
+                - Path=/api/dock/ws/dock/**
+            - id: swift-sail-dock-service
+              uri: lb://swift-sail-dock-service
+              predicates:
+                - Path=/api/dock/**
+              filters:
+                - name: RequestRateLimiter
+                  args:
+                    redis-rate-limiter.replenishRate: 20   # 每秒填充令牌数
+                    redis-rate-limiter.burstCapacity: 50   # 令牌桶最大容量
+                    key-resolver: "#{@remoteAddrKeyResolver}" # 使用 SpEL 引用 Bean
+            - id: swift-sail-geo-service
+              uri: lb://swift-sail-geo-service
+              predicates:
+                - Path=/api/geo/**
+              filters:
+                - name: RequestRateLimiter
+                  args:
+                    redis-rate-limiter.replenishRate: 20   # 每秒填充令牌数
+                    redis-rate-limiter.burstCapacity: 50   # 令牌桶最大容量
+                    key-resolver: "#{@remoteAddrKeyResolver}" # 使用 SpEL 引用 Bean
   data:
     redis:
       host: 10.0.8.11
