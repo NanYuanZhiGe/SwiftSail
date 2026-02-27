@@ -1,7 +1,22 @@
 server:
   port: 5050
+my:
+  nacos-namespace: 62d813f4-e610-4b31-8f87-24faeb0b8035
 spring:
   cloud:
+    nacos:
+      config:
+        file-extension: yaml
+        group: DEFAULT_GROUP
+        namespace: ${my.nacos-namespace}
+      discovery:
+        namespace: 62d813f4-e610-4b31-8f87-24faeb0b8035
+      server-addr: 127.0.0.1:4090
+      username: swiftSailDeveloper
+      password: GiveMeACuteSister
+  config:
+    import:
+      - nacos:swift-sail-share-dev.yaml?refreshEnabled=true
     gateway:
       discovery:
         locator:
@@ -41,7 +56,6 @@ spring:
                 redis-rate-limiter.replenishRate: 20   # 每秒填充令牌数
                 redis-rate-limiter.burstCapacity: 50   # 令牌桶最大容量
                 key-resolver: "#{@remoteAddrKeyResolver}" # 使用 SpEL 引用 Bean
-
   data:
     redis:
       host: 10.0.8.11
