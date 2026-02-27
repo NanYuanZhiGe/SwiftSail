@@ -7,7 +7,7 @@ jobs:
   deploy:
     runs-on: self-hosted
     env:
-      MODULE_NAME: gateway
+      MODULE_NAME: geo
     steps:
       - name: show java version
         run: java --version
