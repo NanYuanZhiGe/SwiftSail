@@ -13,7 +13,7 @@ spring:
         namespace: ${my.nacos-namespace}
       discovery:
         namespace: 62d813f4-e610-4b31-8f87-24faeb0b8035
-      server-addr: 106.52.187.207:4090
+      server-addr: 127.0.0.1:4090
       username: swiftSailDeveloper
       password: GiveMeACuteSister
   config:
