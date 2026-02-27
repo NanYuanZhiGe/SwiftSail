@@ -28,7 +28,11 @@ public class HttpResp {
         message = "";
         this.content = content;
     }
-
+    public HttpResp(boolean success,String message){
+        this.success=success;
+        this.code=COMMON_ERROR_CODE;
+        this.message=message;
+    }
     public HttpResp(boolean success, int code, String message) {
         this.success = success;
         this.code = code;

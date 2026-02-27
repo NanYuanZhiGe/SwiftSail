@@ -7,7 +7,7 @@ jobs:
   deploy:
     runs-on: self-hosted
     env:
-      MODULE_NAME: dock
+      MODULE_NAME: gateway
     steps:
       - name: show java version
         run: java --version
