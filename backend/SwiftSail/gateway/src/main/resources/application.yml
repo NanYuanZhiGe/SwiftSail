@@ -3,6 +3,8 @@ server:
 my:
   nacos-namespace: 62d813f4-e610-4b31-8f87-24faeb0b8035
 spring:
+  application:
+    name: swift-sail-gateway-service
   cloud:
     nacos:
       config:
