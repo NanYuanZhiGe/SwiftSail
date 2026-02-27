@@ -9,12 +9,19 @@
         <attr name="rImageBk" format="reference" />
     </declare-styleable>
 
+    <declare-styleable name="ScoreRankLayout">
+        <attr name="scoreNameText" format="string" />
+        <attr name="scoreNameTextSize" format="dimension"/>
+        <attr name="scoreViewLength" format="dimension" />
+        <attr name="scoreStatic" format="boolean"/>
+    </declare-styleable>
+
     <declare-styleable name="BackWardLayout">
-        <attr name="bwTitle" format="string"/>
+        <attr name="bwTitle" format="string" />
     </declare-styleable>
 
     <declare-styleable name="SportLayout">
-        <attr name="sportType" format="string"/>
+        <attr name="sportType" format="string" />
         <attr name="sportName" format="string" />
         <attr name="sportIcon" format="reference" />
     </declare-styleable>
@@ -38,7 +45,7 @@
         <attr name="imageSize" format="dimension" />
         <attr name="imageBk" format="reference" />
         <attr name="textSize" format="dimension" />
-        <attr name="detailName" format="string"/>
+        <attr name="detailName" format="string" />
     </declare-styleable>
 
     <declare-styleable name="RoundedBarChart">

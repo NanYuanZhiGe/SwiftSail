@@ -14,17 +14,22 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/headImage"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+        <androidx.cardview.widget.CardView
+            android:id="@+id/headImageContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="8dp"
             android:layout_marginStart="32dp"
             android:layout_marginTop="8dp"
-            android:src="@drawable/head_icon"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:shapeAppearanceOverlay="@style/mineHeadIcon" />
+            app:layout_constraintTop_toTopOf="parent">
+            <ImageView
+                android:id="@+id/headImage"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:src="@drawable/image" />
+        </androidx.cardview.widget.CardView>
 
         <TextView
             android:id="@+id/accountName"
@@ -35,8 +40,8 @@
             android:text="本地账户"
             android:textSize="22sp"
             android:textStyle="bold"
-            app:layout_constraintStart_toEndOf="@id/headImage"
-            app:layout_constraintTop_toTopOf="@id/headImage" />
+            app:layout_constraintStart_toEndOf="@id/headImageContainer"
+            app:layout_constraintTop_toTopOf="@id/headImageContainer" />
 
         <TextView
             android:id="@+id/accountId"

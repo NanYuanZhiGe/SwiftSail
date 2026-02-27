@@ -44,5 +44,4 @@
             app:layout_constraintTop_toTopOf="@id/dateSelector"
             app:tint="@color/black" />
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

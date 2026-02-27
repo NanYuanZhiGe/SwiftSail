@@ -3,6 +3,7 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="veryLiteWhite">#F9F9F9</color>
+    <color name="veryLiteWhiteTransparent">#EEF9F9F9</color>
     <color name="liteLiteWhite">#F5F5F5</color>
     <color name="liteWhite">#FFAAAAAA</color>
     <color name="darkGray">#2E2E2E</color>

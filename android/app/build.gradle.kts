@@ -36,6 +36,8 @@ dependencies {
 
     implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("androidx.constraintlayout:constraintlayout:2.2.1")
+    implementation("androidx.constraintlayout:constraintlayout-core:1.1.1")
+    implementation("androidx.constraintlayout:constraintlayout-solver:2.0.4")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
@@ -93,4 +95,13 @@ dependencies {
 
     //FFT支持
     implementation("com.github.wendykierp:JTransforms:3.1")
+
+    //时间线视图支持
+    implementation("com.github.vipulasri:timelineview:1.2.2")
+
+    //星星点评
+    implementation("com.iarcuschin:simpleratingbar:0.1.5")
+    //图片加载服务
+    implementation("com.github.bumptech.glide:glide:5.0.5")
+    annotationProcessor("com.github.bumptech.glide:compiler:5.0.5")
 }

@@ -7,9 +7,12 @@ import okhttp3.MediaType;
 
 public class ServerURL {
     final public static String BASE_URL = "https://sport.nyzghencute.top";
+    final public static String BASE_IMAGE_URL = BASE_URL + "/swift-sail-avatar-bucket/";
+    final public static String HEAD_ICON_SUFFIX="-headIcon.jpeg";
     final public static String BASE_WEBSOCKET = "wss://sport.nyzghencute.top";
     final public static String URL_USER_PREFIX = "/api/user";
     final public static String URL_DOCK_PREFIX = "/api/dock";
+    final public static String URL_GEO_PREFIX = "/api/geo";
 
     //login
     final public static String URL_REGISTER_VERIFY_CODE = BASE_URL + URL_USER_PREFIX + "/login/register/user";
@@ -31,9 +34,12 @@ public class ServerURL {
     final public static URL URL_GO_OFFLINE;
     final public static URL URL_GET_DAY_DATA;
     final public static URI URI_WEBSOCKET_REPORT_SYNC;
+    //geo
+    final public static URL URL_SEND_SMALL_IMAGE_HEAD;
 
     static {
         try {
+            //dock
             URL_SYNC_BACKUP_MANUAL = new URL(BASE_URL + URL_DOCK_PREFIX + "/sync/record/manual");
             URL_IS_WATCH_ADDED = new URL(BASE_URL + URL_DOCK_PREFIX + "/is/watch/added");
             URL_SYNC_STOP = new URL(BASE_URL + URL_DOCK_PREFIX + "/sync/stop");
@@ -44,6 +50,8 @@ public class ServerURL {
             URL_GO_OFFLINE = new URL(BASE_URL + URL_DOCK_PREFIX + "/go/offline");
             URL_GET_DAY_DATA = new URL(BASE_URL + URL_DOCK_PREFIX + "/get/data/day");
             URI_WEBSOCKET_REPORT_SYNC = new URI(BASE_WEBSOCKET + URL_DOCK_PREFIX + "/ws/dock/websocket/report/sync");
+            //geo
+            URL_SEND_SMALL_IMAGE_HEAD = new URL(BASE_URL + URL_GEO_PREFIX + "/send/small/image/head");
         } catch (Exception e) {//正常情况下是不会发生的
             throw new RuntimeException(e);
         }

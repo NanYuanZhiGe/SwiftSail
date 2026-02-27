@@ -2,6 +2,7 @@ package com.nyzg.swiftsail;
 
 import android.app.Application;
 import android.content.Context;
+import android.util.Log;
 
 import com.github.boybeak.skbglobal.SoftKeyboardGlobal;
 
