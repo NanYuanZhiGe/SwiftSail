@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PublicImageResp {
     String fileName;
-    
+
 
     public PublicImageResp(String fileName) {
         this.fileName = fileName;

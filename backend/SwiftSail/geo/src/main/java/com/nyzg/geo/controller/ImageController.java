@@ -2,6 +2,7 @@ package com.nyzg.geo.controller;
 
 import com.nyzg.common.netobj.BaseResp;
 import com.nyzg.common.netobj.HttpResp;
+import com.nyzg.geo.conf.KafkaTopicConf;
 import com.nyzg.geo.netobj.PublicImageReq;
 import com.nyzg.geo.netobj.PublicImageResp;
 import io.minio.BucketExistsArgs;
@@ -11,6 +12,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -41,11 +43,14 @@ public class ImageController {
 
     private final String mPublicBucket;
     private final MinioClient minioClient;
+    private final KafkaTemplate<String, String> mKafkaTemplate;
 
     public ImageController(
+            KafkaTemplate<String, String> kafkaTemplate,
             MinioClient minioClient,
             @Value("${minio.public-bucket}")
             String publicBucket) {
+        mKafkaTemplate = kafkaTemplate;
         this.minioClient = minioClient;
         mPublicBucket = publicBucket;
     }
@@ -156,12 +161,10 @@ public class ImageController {
         String minioFileName;
         String fileHash = Base64.getUrlEncoder().encodeToString(digest);
         if (fileHash.length() > 16) {
-            minioFileName = String.format("userIcon-%s.jpeg", fileHash.substring(0, 32));
-        } else {
-            minioFileName = String.format("userIcon-%s.jpeg", fileHash);
+            fileHash = fileHash.substring(0, 16);
         }
+        minioFileName = String.format("userIcon-%s.jpeg", fileHash);
         //写入对象存储
-        boolean success = true;
         try {
             minioClient.putObject(
                     PutObjectArgs.builder()
@@ -169,10 +172,11 @@ public class ImageController {
                             .object(minioFileName)
                             .stream(new ByteArrayInputStream(bos.toByteArray()), bos.size(), -1)
                             .build());
+            mKafkaTemplate.send(KafkaTopicConf.TOPIC_IMAGE_PROCESS, userId,String.format("%s|%s", userId, minioFileName));
         } catch (Exception e) {
             log.error("ImageController-sendSmallImageHead: ", e);
-            success = false;
+            return SERVER_LACK_STORAGE_SERVICE;
         }
-        return success ? new HttpResp(true, new PublicImageResp(minioFileName)) : SERVER_LACK_STORAGE_SERVICE;
+        return new HttpResp(true, new PublicImageResp(minioFileName));
     }
 }
