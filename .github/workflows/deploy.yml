@@ -13,10 +13,10 @@ jobs:
         run: java --version
 
       - name: set https proxy
-        run: git git config --global https.proxy http://127.0.0.1:7890
-        
+        run: git config --global https.proxy http://127.0.0.1:7890
+
       - name: set http proxy
-        run: git git config --global http.proxy http://127.0.0.1:7890
+        run: git config --global http.proxy http://127.0.0.1:7890
 
       - name: clone files
         uses: actions/checkout@v4
