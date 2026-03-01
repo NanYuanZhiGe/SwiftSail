@@ -69,10 +69,10 @@ public class PersonalInfoController {
             }, Long.parseLong(userId)).stream().findFirst().orElse(null);
             return new HttpResp(true, result);
         } catch (NumberFormatException e) {
-            log.error("getPersonalInfo",e);
+            log.error("getPersonalInfo", e);
             return BaseResp.WRONG_PARAM;
         } catch (Exception e) {
-            log.error("getPersonalInfo",e);
+            log.error("getPersonalInfo", e);
             return BaseResp.INTERNAL_ERROR;
         }
     }
@@ -240,7 +240,8 @@ public class PersonalInfoController {
             if (result.getLayoutImage() != null) {
                 if (lyImgTupleMap != null) {//有图片
                     //删除对象旧的、和新的图片不重复的
-                    Set<DeleteObject> list = Arrays.stream(result.getLayoutImage().split("\\|"))
+                    String[] tmpList = result.getLayoutImage().split("\\|");
+                    List<DeleteObject> list = Arrays.stream(tmpList)
                             .filter(str -> {
                                 boolean res = lyImageUrlSet.contains(str);
                                 if (res) {//删除重复的图片
@@ -249,7 +250,10 @@ public class PersonalInfoController {
                                 return res;
                             })
                             .map(DeleteObject::new)
-                            .collect(Collectors.toSet());
+                            .toList();
+                    int size1 = list.size();
+                    int size2 = lyImageUrlSet.size();
+                    list = list.subList(0, Math.max(size1, (size1 + size2) - 9));
                     try {
                         minioClient.removeObjects(RemoveObjectsArgs.builder()
                                 .bucket(publicBucket)
