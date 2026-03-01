@@ -4,6 +4,10 @@
     <array name="reportAddDeviceType">
         <item>Fitbit</item>
     </array>
+    <array name="gender">
+        <item>男</item>
+        <item>女</item>
+    </array>
     <string name="km">公里</string>
     <string name="specifically">其中</string>
 </resources>

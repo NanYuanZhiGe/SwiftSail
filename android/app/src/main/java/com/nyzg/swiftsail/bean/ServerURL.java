@@ -8,7 +8,6 @@ import okhttp3.MediaType;
 public class ServerURL {
     final public static String BASE_URL = "https://sport.nyzghencute.top";
     final public static String BASE_IMAGE_URL = BASE_URL + "/swift-sail-avatar-bucket/";
-    final public static String HEAD_ICON_SUFFIX="-headIcon.jpeg";
     final public static String BASE_WEBSOCKET = "wss://sport.nyzghencute.top";
     final public static String URL_USER_PREFIX = "/api/user";
     final public static String URL_DOCK_PREFIX = "/api/dock";
@@ -36,6 +35,8 @@ public class ServerURL {
     final public static URI URI_WEBSOCKET_REPORT_SYNC;
     //geo
     final public static URL URL_SEND_SMALL_IMAGE_HEAD;
+    final public static URL URL_UPDATE_PERSONAL_INFO;
+    final public static String STRING_GET_PERSONAL_INFO=BASE_URL+URL_GEO_PREFIX+"/get/personalInfo/";
 
     static {
         try {
@@ -52,6 +53,7 @@ public class ServerURL {
             URI_WEBSOCKET_REPORT_SYNC = new URI(BASE_WEBSOCKET + URL_DOCK_PREFIX + "/ws/dock/websocket/report/sync");
             //geo
             URL_SEND_SMALL_IMAGE_HEAD = new URL(BASE_URL + URL_GEO_PREFIX + "/send/small/image/head");
+            URL_UPDATE_PERSONAL_INFO=new URL(BASE_URL + URL_GEO_PREFIX + "/update/personalInfo");
         } catch (Exception e) {//正常情况下是不会发生的
             throw new RuntimeException(e);
         }

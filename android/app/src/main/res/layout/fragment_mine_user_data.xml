@@ -53,13 +53,13 @@
                 app:cardCornerRadius="4dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/arrow"
+                android:layout_marginEnd="4dp"
                 app:layout_constraintTop_toTopOf="parent">
                 <ImageView
                     android:id="@+id/headIcon"
                     android:layout_width="32dp"
                     android:layout_height="32dp"
-                    android:layout_marginEnd="4dp"
-                    android:src="@drawable/head_icon" />
+                    android:src="@drawable/image" />
             </androidx.cardview.widget.CardView>
 
             <ImageView

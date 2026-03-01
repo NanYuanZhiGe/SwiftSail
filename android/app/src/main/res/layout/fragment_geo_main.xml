@@ -75,12 +75,11 @@
                     app:cardPreventCornerOverlap="false"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="@id/searchBox">
-
                     <ImageView
                         android:id="@+id/headImage"
                         android:layout_width="48dp"
                         android:layout_height="48dp"
-                        android:src="@drawable/head_icon" />
+                        android:src="@drawable/image" />
                 </androidx.cardview.widget.CardView>
             </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>

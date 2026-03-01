@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.nyzg.swiftsail.view.BackWardLayout
+        android:id="@+id/backwardLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:bwTitle="编辑个人信息"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/nestedScrollView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/appellationTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/commonMarginStart"
+                    android:layout_marginTop="@dimen/smallMarginTop"
+                    android:text="您希望对方怎么称呼您？"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/appellationContainer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/tinyMarginTop"
+                    android:hint="称呼"
+                    app:hintEnabled="true"
+                    app:layout_constraintStart_toStartOf="@id/appellationTitle"
+                    app:layout_constraintTop_toBottomOf="@id/appellationTitle"
+                    app:placeholderText="称呼">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/appellationText"
+                        android:layout_width="240dp"
+                        android:maxLength="32"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/geo_input_bk"
+                        android:inputType="text" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:id="@+id/genderTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/commonMarginStart"
+                    android:text="性别"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toEndOf="@id/appellationContainer"
+                    app:layout_constraintTop_toTopOf="@id/appellationTitle" />
+
+                <Spinner
+                    android:id="@+id/genderText"
+                    android:layout_width="72dp"
+                    android:layout_height="48dp"
+                    android:gravity="center"
+                    android:background="@drawable/geo_input_bk"
+                    app:layout_constraintBottom_toBottomOf="@id/appellationContainer"
+                    app:layout_constraintStart_toStartOf="@id/genderTitle"
+                    app:layout_constraintTop_toTopOf="@id/appellationContainer" />
+
+                <TextView
+                    android:id="@+id/descriptionTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/commonMarginStart"
+                    android:text="介绍一下您？"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="@id/appellationTitle"
+                    app:layout_constraintTop_toBottomOf="@id/appellationContainer" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/descriptionContainer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/tinyMarginTop"
+                    android:hint="自我介绍"
+                    app:layout_constraintStart_toStartOf="@id/descriptionTitle"
+                    app:layout_constraintTop_toBottomOf="@id/descriptionTitle">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/descriptionText"
+                        android:layout_width="280dp"
+                        android:maxLength="1000"
+                        android:layout_height="120dp"
+                        android:background="@drawable/geo_input_bk2"
+                        android:gravity="top"
+                        android:inputType="textMultiLine"
+                        android:maxLines="53" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:id="@+id/descriptionHint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/smallMarginStart"
+                    android:text="0/1000"
+                    app:layout_constraintBottom_toBottomOf="@id/descriptionContainer"
+                    app:layout_constraintStart_toEndOf="@id/descriptionContainer" />
+
+                <TextView
+                    android:id="@+id/backgroundTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/commonMarginStart"
+                    android:text="选择您的主页背景"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="@id/appellationTitle"
+                    app:layout_constraintTop_toBottomOf="@id/descriptionContainer" />
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/backgroundButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/tinyMarginTop"
+                    android:background="@color/linkGray"
+                    app:cardCornerRadius="8dp"
+                    app:layout_constraintStart_toStartOf="@id/backgroundTitle"
+                    app:layout_constraintTop_toBottomOf="@id/backgroundTitle">
+
+                    <ImageView
+                        android:layout_width="72dp"
+                        android:layout_height="72dp"
+                        android:src="@drawable/add"
+                        app:tint="@color/linkGray" />
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginStart="@dimen/commonMarginStart"
+                    app:cardCornerRadius="8dp"
+                    app:layout_constraintBottom_toBottomOf="@id/backgroundButton"
+                    app:layout_constraintDimensionRatio="16:9"
+                    app:layout_constraintStart_toEndOf="@id/backgroundButton"
+                    app:layout_constraintTop_toTopOf="@id/backgroundButton">
+
+                    <ImageView
+                        android:id="@+id/backgroundPreview"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/image" />
+                </androidx.cardview.widget.CardView>
+
+                <TextView
+                    android:id="@+id/layoutTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/commonMarginStart"
+                    android:text="选择您要展示的图片"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="@id/backgroundTitle"
+                    app:layout_constraintTop_toBottomOf="@id/backgroundButton" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/layoutsRecycler"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/tinyMarginTop"
+                    app:layout_constraintStart_toStartOf="@id/layoutTitle"
+                    app:layout_constraintTop_toBottomOf="@id/layoutTitle">
+
+                </androidx.recyclerview.widget.RecyclerView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/layouts"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/tinyMarginTop"
+                    android:background="@color/linkGray"
+                    app:cardCornerRadius="8dp"
+                    app:layout_constraintStart_toStartOf="@id/layoutTitle"
+                    app:layout_constraintTop_toBottomOf="@id/layoutsRecycler">
+
+                    <ImageView
+                        android:layout_width="72dp"
+                        android:layout_height="72dp"
+                        android:src="@drawable/add"
+                        app:tint="@color/linkGray" />
+                </androidx.cardview.widget.CardView>
+
+                <TextView
+                    android:id="@+id/imageCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/smallMarginStart"
+                    android:text="0/9"
+                    app:layout_constraintBottom_toBottomOf="@id/layouts"
+                    app:layout_constraintStart_toEndOf="@id/layouts" />
+
+                <TextView
+                    android:id="@+id/confirmButton"
+                    android:layout_width="150dp"
+                    android:layout_height="60dp"
+                    android:layout_marginTop="@dimen/commonMarginStart"
+                    android:layout_marginEnd="@dimen/commonMarginStart"
+                    android:background="@drawable/report_add_device_grant_bk"
+                    android:elevation="4dp"
+                    android:gravity="center"
+                    android:text="提交"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/layouts" />
+
+                <View
+                    android:layout_width="wrap_content"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="@dimen/commonMarginStart"
+                    app:layout_constraintStart_toStartOf="@id/confirmButton"
+                    app:layout_constraintTop_toBottomOf="@id/confirmButton" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.core.widget.NestedScrollView>
+    </LinearLayout>
+</LinearLayout>

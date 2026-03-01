@@ -1,17 +1,9 @@
 package com.nyzg.swiftsail.repository;
 
-import android.content.Context;
-import android.widget.ImageView;
-
-import androidx.annotation.NonNull;
-import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.MutableLiveData;
 
-import com.bumptech.glide.Glide;
 import com.nyzg.swiftsail.GlobalApplication;
-import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.bean.GlobalInstance;
-import com.nyzg.swiftsail.bean.ImageUtils;
 import com.nyzg.swiftsail.bean.MyJsonSerializer;
 import com.nyzg.swiftsail.bean.NetWorkBuilder;
 import com.nyzg.swiftsail.bean.NetWorkHandler;
@@ -64,22 +56,6 @@ public class LoginRepository {
 
     public MutableLiveData<User> getCurrentUser() {
         return currentUser;
-    }
-
-    public void watchHeadIcon(
-            @NonNull LifecycleOwner owner,
-            @NonNull ImageView imageView,
-            @NonNull Context context) {
-        currentUser.observe(owner, user -> {
-            if (user == null
-                    || user.id == GlobalInstance.LOCAL_USER.id) {
-                return;
-            }
-            Glide.with(context)
-                    .load(ImageUtils.getHeadIconURI(user.id))
-                    .error(R.drawable.image)
-                    .into(imageView);
-        });
     }
 
     /**

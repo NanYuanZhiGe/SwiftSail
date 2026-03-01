@@ -2,10 +2,7 @@ package com.nyzg.swiftsail.fragment.mine;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,26 +15,16 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
 import com.nyzg.swiftsail.GlobalApplication;
 import com.nyzg.swiftsail.MainActivity;
 import com.nyzg.swiftsail.R;
-import com.nyzg.swiftsail.bean.GlobalInstance;
-import com.nyzg.swiftsail.bean.ImageUtils;
 import com.nyzg.swiftsail.bean.SQLiteDB;
-import com.nyzg.swiftsail.bean.ServerURL;
 import com.nyzg.swiftsail.dao.LastLoginTable;
 import com.nyzg.swiftsail.dbobj.User;
 import com.nyzg.swiftsail.fragment.login.LoginFragment;
 import com.nyzg.swiftsail.repository.LoginRepository;
 import com.nyzg.swiftsail.repository.NetDataRepository;
 
-import java.net.URI;
-import java.net.URL;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -66,12 +53,14 @@ public class MineMainFragment extends Fragment {
             }
             ((TextView) father.findViewById(R.id.accountName)).setText(user.nickName);
             ((TextView) father.findViewById(R.id.accountId)).setText(String.format("账户id：%d", user.id));
-            //--头像--
-            Glide.with(requireContext())
-                    .load(ImageUtils.getHeadIconURI(user.id))
-                    .error(R.drawable.image)
-                    .into((ImageView) father.findViewById(R.id.headImage));
         });
+        //--头像--
+        ImageView headImage =father.findViewById(R.id.headImage);
+        NetDataRepository.getInstance().headIconNotifier.observe(getViewLifecycleOwner(),
+                url -> Glide.with(requireContext())
+                .load(url)
+                .error(R.drawable.image)
+                .into(headImage));
         return father;
     }
 

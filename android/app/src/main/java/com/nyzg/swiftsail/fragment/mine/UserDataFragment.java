@@ -2,6 +2,7 @@ package com.nyzg.swiftsail.fragment.mine;
 
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
@@ -14,21 +15,23 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
-import com.google.android.material.imageview.ShapeableImageView;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.nyzg.swiftsail.GlobalApplication;
 import com.nyzg.swiftsail.R;
 import com.nyzg.swiftsail.bean.GlobalInstance;
 import com.nyzg.swiftsail.bean.GlobalToast;
-import com.nyzg.swiftsail.bean.ImageUtils;
 import com.nyzg.swiftsail.bean.NetWorkBuilder;
 import com.nyzg.swiftsail.bean.NetWorkHandler;
+import com.nyzg.swiftsail.bean.SQLiteDB;
 import com.nyzg.swiftsail.bean.ServerURL;
 import com.nyzg.swiftsail.netobj.PublicImageReq;
-import com.nyzg.swiftsail.obj.SucceedOrNot;
+import com.nyzg.swiftsail.netobj.PublicImageResp;
 import com.nyzg.swiftsail.repository.LoginRepository;
 import com.nyzg.swiftsail.repository.NetDataRepository;
 
@@ -38,7 +41,6 @@ import java.io.FileOutputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class UserDataFragment extends Fragment {
 
@@ -67,7 +69,7 @@ public class UserDataFragment extends Fragment {
                     }
                     final long userId = LoginRepository.getInstance().currentUser.getValue().id;
                     final String tempFileName = String.format("%d-headicon-temp.jpeg", userId);
-                    CompletableFuture.supplyAsync(() -> {
+                    CompletableFuture.runAsync(() -> {
                         try {
                             //压缩图片
                             Bitmap bitmap = MediaStore.Images.Media.getBitmap(requireContext().getContentResolver(), uri);
@@ -77,7 +79,6 @@ public class UserDataFragment extends Fragment {
                             int cropX = (width - size) >> 1;
                             int cropY = (height - size) >> 1;
                             Bitmap centerCropBitmap = Bitmap.createBitmap(bitmap, cropX, cropY, size, size);
-                            bitmap.recycle();
                             File tempFile = new File(requireContext().getCacheDir(), tempFileName);
                             int quality = 90;
                             if (tempFile.length() > 10 * 1024 * 1024) {
@@ -103,40 +104,35 @@ public class UserDataFragment extends Fragment {
                                     quality -= 10;
                                 }
                             }
+                            bitmap.recycle();
                             centerCropBitmap.recycle();
                             //上传至云
                             byte[] data = new byte[(int) tempFile.length()];
                             try (FileInputStream fis = new FileInputStream(tempFile)) {
                                 fis.read(data, 0, (int) tempFile.length());
                             }
-                            final AtomicReference<SucceedOrNot> atomicReference = new AtomicReference<>(SucceedOrNot.SUCCEED);
                             NetWorkHandler.handleNetRespAfterLogin(
                                     null,
                                     NetWorkBuilder.doChunkRequest(NetWorkBuilder.buildJsonRequestJwt(
                                             ServerURL.URL_SEND_SMALL_IMAGE_HEAD, ServerURL.POST, new PublicImageReq(data)
                                     )),
-                                    msg -> {
-                                        GlobalToast.COMMON_TOAST.accept("图片上传失败：" + msg);
-                                        atomicReference.set(SucceedOrNot.FAIL);
-                                    },
+                                    msg -> GlobalToast.COMMON_TOAST.accept("图片上传失败：" + msg),
                                     resp -> {
+                                        if (resp == null || resp.fileName == null) {
+                                            return;
+                                        }
+                                        String name = ServerURL.BASE_IMAGE_URL + resp.fileName;
+                                        NetDataRepository.getInstance().headIconNotifier.postValue(name);
+                                        SQLiteDB.getDatabase(GlobalApplication.getAppContext())
+                                                .shareTable()
+                                                .insertIfNotExist(userId, "headIconUrl", name);
                                     },
-                                    Void.class
+                                    PublicImageResp.class
                             );
-                            return atomicReference.get();
                         } catch (Exception e) {
                             GlobalToast.COMMON_TOAST.accept("图片上传失败");
-                            return SucceedOrNot.FAIL;
                         }
-                    }).thenAcceptAsync(action -> {
-                        if (action == SucceedOrNot.FAIL) {
-                            return;
-                        }
-                        //图片上传成功就刷新缓存
-                        NetDataRepository instance = NetDataRepository.getInstance();
-                        assert instance.headIconNotifier.getValue() != null;
-                        instance.headIconNotifier.setValue(instance.headIconNotifier.getValue() + 1);
-                    }, ContextCompat.getMainExecutor(GlobalApplication.getAppContext()));
+                    });
                 }
         );
     }
@@ -147,16 +143,11 @@ public class UserDataFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View father = inflater.inflate(R.layout.fragment_mine_user_data, container, false);
         ImageView headIcon = father.findViewById(R.id.headIcon);
-        LoginRepository.getInstance().currentUser.observe(getViewLifecycleOwner(), user -> {
-            if (user == null ||
-                    user.id == GlobalInstance.LOCAL_USER.id) {
-                return;
-            }
-            Glide.with(requireContext())
-                    .load(ImageUtils.getHeadIconURI(user.id))
-                    .error(R.drawable.image)
-                    .into(headIcon);
-        });
+        NetDataRepository.getInstance().headIconNotifier.observe(getViewLifecycleOwner(),
+                url -> Glide.with(requireContext())
+                        .load(url)
+                        .error(R.drawable.image)
+                        .into(headIcon));
         headIcon.setOnClickListener(v -> pickImageLauncher.launch("image/*"));
         LoginRepository.getInstance().getCurrentUser().observe(getViewLifecycleOwner(), user -> {
             ((TextView) father.findViewById(R.id.nickName).findViewById(R.id.content)).setText(user.nickName);
