@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayInputStream;
 import java.util.*;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @RestController
@@ -39,11 +41,14 @@ public class PersonalInfoController {
     @Value("${minio.public-bucket}")
     String publicBucket;
 
+    final private Semaphore imageProcessControl = new Semaphore(20);
+
 
     @PostMapping("/update/personalInfo")
     public HttpResp updatePersonalInfo(
             @RequestHeader("userId") String userId,
             @RequestBody PersonalInfo personalInfo) {
+        //--------------参数校验--------------------
         long lUserId;
         try {
             lUserId = Long.parseLong(userId);
@@ -85,138 +90,147 @@ public class PersonalInfoController {
                 }
             }
         }
-        //背景图片校准
-        final Tuple<ByteArrayInputStream, Integer, String> userBkTuple;
-        final String userBkUrl;
-        if (personalInfo.getBackground() != null) {
-            userBkTuple = imageService.getProgressiveImageNullAtFail(personalInfo.getBackground(), "userBk");
-            if (userBkTuple != null) {
-                userBkUrl = userBkTuple.getC();
+        //-------------------实际业务-----------------------
+        try {
+            if (!imageProcessControl.tryAcquire(1, 3, TimeUnit.SECONDS)) {
+                return BaseResp.SERVER_TOO_BUSY;
+            }
+            //背景图片校准
+            final Tuple<ByteArrayInputStream, Integer, String> userBkTuple;
+            final String userBkUrl;
+            if (personalInfo.getBackground() != null) {
+                userBkTuple = imageService.getProgressiveImageNullAtFail(personalInfo.getBackground(), "userBk");
+                if (userBkTuple != null) {
+                    userBkUrl = userBkTuple.getC();
+                } else {
+                    userBkUrl = null;
+                }
             } else {
                 userBkUrl = null;
+                userBkTuple = null;
             }
-        } else {
-            userBkUrl = null;
-            userBkTuple = null;
-        }
-        //展览图片校准
-        final Map<String, Tuple<ByteArrayInputStream, Integer, String>> lyImgTupleMap;
-        final Set<String> lyImageUrlSet = new HashSet<>();
-        final StringBuilder userLyUrlStringBuilder = new StringBuilder();
-        if (personalInfo.getLayouts() != null) {
-            lyImgTupleMap = new HashMap<>();
-            for (byte[] img : personalInfo.getLayouts()) {
-                Tuple<ByteArrayInputStream, Integer, String> temp = imageService.getProgressiveImageNullAtFail(img, "userLy");
-                if (temp != null) {
-                    lyImgTupleMap.put(temp.getC(), temp);
-                    lyImageUrlSet.add(temp.getC());
-                    userLyUrlStringBuilder.append(temp.getC()).append("|");
+            //展览图片校准
+            final Map<String, Tuple<ByteArrayInputStream, Integer, String>> lyImgTupleMap;
+            final Set<String> lyImageUrlSet = new HashSet<>();
+            final StringBuilder userLyUrlStringBuilder = new StringBuilder();
+            if (personalInfo.getLayouts() != null) {
+                lyImgTupleMap = new HashMap<>();
+                for (byte[] img : personalInfo.getLayouts()) {
+                    Tuple<ByteArrayInputStream, Integer, String> temp = imageService.getProgressiveImageNullAtFail(img, "userLy");
+                    if (temp != null) {
+                        lyImgTupleMap.put(temp.getC(), temp);
+                        lyImageUrlSet.add(temp.getC());
+                        userLyUrlStringBuilder.append(temp.getC()).append("|");
+                    }
                 }
+                if (userLyUrlStringBuilder.length() > 1) {
+                    userLyUrlStringBuilder.deleteCharAt(userLyUrlStringBuilder.length() - 1);
+                }
+            } else {
+                lyImgTupleMap = null;
             }
-            if (userLyUrlStringBuilder.length() > 1) {
-                userLyUrlStringBuilder.deleteCharAt(userLyUrlStringBuilder.length() - 1);
-            }
-        } else {
-            lyImgTupleMap = null;
-        }
-        final String userLyUrlStr = userLyUrlStringBuilder.toString();
-        //写用户数据到数据库
-        @Nonnull PersonalData result = new TransactionTemplate(transactionManager)
-                .execute(transactionStatus -> {
-                    PersonalData personalData = jdbcTemplate.query("""
-                                    SELECT `bkImage`,`layoutImage` FROM `personalDataTable` WHERE `userId`=?
-                                    """, (rs, num) -> {
-                                PersonalData data = new PersonalData();
-                                data.setBkImage(rs.getString("bkImage"));
-                                data.setLayoutImage(rs.getString("layoutImage"));
-                                return data;
-                            }, lUserId)
-                            .stream().findFirst().orElse(new PersonalData());
-                    jdbcTemplate.update("""
-                                    INSERT INTO `personalDataTable`\s
-                                    (`userId`, `appellation`, `gender`, `description`, `bkImage`, `layoutImage`)
-                                    VALUES (?, ?, ?, ?, ?, ?)
-                                    ON DUPLICATE KEY UPDATE
-                                        `appellation` = VALUES(`appellation`),
-                                        `gender` = VALUES(`gender`),
-                                        `description` = VALUES(`description`),
-                                        `bkImage` = VALUES(`bkImage`),
-                                        `layoutImage` = VALUES(`layoutImage`)
-                                    """,
-                            lUserId,
-                            personalInfo.getAppellation(),
-                            personalInfo.getGender(),
-                            personalInfo.getDescription(),
-                            userBkUrl,
-                            userLyUrlStr
-                    );
-                    return personalData;
-                });
-        //更新对象存储
-        //删除旧的图片，添加新的
-        //新的背景图和和旧的不一样才触发更新
-        if (userBkUrl != null && !userBkUrl.equals(result.getBkImage())) {
-            if (result.getBkImage() != null) {//如果旧的图片不为空，旧和三处
+            final String userLyUrlStr = userLyUrlStringBuilder.toString();
+            //写用户数据到数据库
+            @Nonnull PersonalData result = new TransactionTemplate(transactionManager)
+                    .execute(transactionStatus -> {
+                        PersonalData personalData = jdbcTemplate.query("""
+                                        SELECT `bkImage`,`layoutImage` FROM `personalDataTable` WHERE `userId`=?
+                                        """, (rs, num) -> {
+                                    PersonalData data = new PersonalData();
+                                    data.setBkImage(rs.getString("bkImage"));
+                                    data.setLayoutImage(rs.getString("layoutImage"));
+                                    return data;
+                                }, lUserId)
+                                .stream().findFirst().orElse(new PersonalData());
+                        jdbcTemplate.update("""
+                                        INSERT INTO `personalDataTable`\s
+                                        (`userId`, `appellation`, `gender`, `description`, `bkImage`, `layoutImage`)
+                                        VALUES (?, ?, ?, ?, ?, ?)
+                                        ON DUPLICATE KEY UPDATE
+                                            `appellation` = VALUES(`appellation`),
+                                            `gender` = VALUES(`gender`),
+                                            `description` = VALUES(`description`),
+                                            `bkImage` = VALUES(`bkImage`),
+                                            `layoutImage` = VALUES(`layoutImage`)
+                                        """,
+                                lUserId,
+                                personalInfo.getAppellation(),
+                                personalInfo.getGender(),
+                                personalInfo.getDescription(),
+                                userBkUrl,
+                                userLyUrlStr
+                        );
+                        return personalData;
+                    });
+            //更新对象存储
+            //删除旧的图片，添加新的
+            //新的背景图和和旧的不一样才触发更新
+            if (userBkUrl != null && !userBkUrl.equals(result.getBkImage())) {
+                if (result.getBkImage() != null) {//如果旧的图片不为空，旧和三处
+                    try {
+                        minioClient.removeObject(RemoveObjectArgs.builder()
+                                .bucket(publicBucket)
+                                .object(result.getBkImage())
+                                .build());
+                    } catch (Exception e) {
+                        log.error("删除旧的背景图片出错", e);
+                    }
+                }
+                //添加新的背景图
                 try {
-                    minioClient.removeObject(RemoveObjectArgs.builder()
-                            .bucket(publicBucket)
-                            .object(result.getBkImage())
-                            .build());
-                } catch (Exception e) {
-                    log.error("删除旧的背景图片出错", e);
-                }
-            }
-            //添加新的背景图
-            try {
-                minioClient.putObject(PutObjectArgs.builder()
-                        .bucket(publicBucket)
-                        .stream(userBkTuple.getA(), userBkTuple.getB(), -1)
-                        .object(userBkTuple.getC())
-                        .build());
-            } catch (Exception e) {
-                log.error("添加新的背景图片出错", e);
-            }
-        }
-        //处理展览图
-        if (result.getLayoutImage() != null) {
-            if (lyImgTupleMap != null) {//有图片
-                //删除对象旧的、和新的图片不重复的
-                Set<DeleteObject> list = Arrays.stream(result.getLayoutImage().split("\\|"))
-                        .filter(str -> {
-                            boolean res = lyImageUrlSet.contains(str);
-                            if (res) {//删除重复的图片
-                                lyImgTupleMap.remove(str);
-                            }
-                            return res;
-                        })
-                        .map(DeleteObject::new)
-                        .collect(Collectors.toSet());
-                try {
-                    minioClient.removeObjects(RemoveObjectsArgs.builder()
-                            .bucket(publicBucket)
-                            .objects(list)
-                            .build());
-                } catch (Exception e) {
-                    log.error("删除旧的展示图片出错", e);
-                }
-            }
-        }
-        //添加新的图片
-        if (lyImgTupleMap != null) {
-            try {
-                for (var v : lyImgTupleMap.entrySet()) {
                     minioClient.putObject(PutObjectArgs.builder()
                             .bucket(publicBucket)
-                            .stream(v.getValue().getA(), v.getValue().getB(), -1)
-                            .object(v.getKey())
+                            .stream(userBkTuple.getA(), userBkTuple.getB(), -1)
+                            .object(userBkTuple.getC())
                             .build());
+                } catch (Exception e) {
+                    log.error("添加新的背景图片出错", e);
                 }
-            } catch (Exception e) {
-                log.error("添加新的展示图片出错", e);
             }
+            //处理展览图
+            if (result.getLayoutImage() != null) {
+                if (lyImgTupleMap != null) {//有图片
+                    //删除对象旧的、和新的图片不重复的
+                    Set<DeleteObject> list = Arrays.stream(result.getLayoutImage().split("\\|"))
+                            .filter(str -> {
+                                boolean res = lyImageUrlSet.contains(str);
+                                if (res) {//删除重复的图片
+                                    lyImgTupleMap.remove(str);
+                                }
+                                return res;
+                            })
+                            .map(DeleteObject::new)
+                            .collect(Collectors.toSet());
+                    try {
+                        minioClient.removeObjects(RemoveObjectsArgs.builder()
+                                .bucket(publicBucket)
+                                .objects(list)
+                                .build());
+                    } catch (Exception e) {
+                        log.error("删除旧的展示图片出错", e);
+                    }
+                }
+            }
+            //添加新的图片
+            if (lyImgTupleMap != null) {
+                try {
+                    for (var v : lyImgTupleMap.entrySet()) {
+                        minioClient.putObject(PutObjectArgs.builder()
+                                .bucket(publicBucket)
+                                .stream(v.getValue().getA(), v.getValue().getB(), -1)
+                                .object(v.getKey())
+                                .build());
+                    }
+                } catch (Exception e) {
+                    log.error("添加新的展示图片出错", e);
+                }
+            }
+            resp.setBackgroundUrl(userBkUrl);
+            resp.setLayoutUrl(userLyUrlStr);
+        } catch (Exception ignore) {
+        } finally {
+            imageProcessControl.release();
         }
-        resp.setBackgroundUrl(userBkUrl);
-        resp.setLayoutUrl(userLyUrlStr);
         return new HttpResp(true, resp);
     }
 }
