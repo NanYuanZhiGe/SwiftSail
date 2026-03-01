@@ -5,7 +5,6 @@ import com.nyzg.common.netobj.HttpResp;
 import com.nyzg.common.ss_utils.Tuple;
 import com.nyzg.geo.dbobj.PersonalData;
 import com.nyzg.geo.netobj.PersonalInfo;
-import com.nyzg.geo.netobj.UpdatePersonalInfoResp;
 import com.nyzg.geo.service.ImageService;
 import io.minio.*;
 import io.minio.messages.DeleteObject;
@@ -44,6 +43,38 @@ public class PersonalInfoController {
     final private Semaphore imageProcessControl = new Semaphore(20);
 
 
+    @GetMapping("/get/personalInfo/{userId}")
+    public HttpResp getPersonalInfo(@PathVariable("userId") String userId) {
+        try {
+            PersonalData result = jdbcTemplate.query("""
+                    SELECT `userId`, `appellation`, gender,\s
+                    description, promiseScore, inTimeScore,\s
+                    levelScore, cooperationScore, communicateScore,\s
+                    bkImage, layoutImage FROM `personalDataTable`\s
+                    WHERE `userId`=?
+                    """, (rs, num) -> {
+                PersonalData personalData = new PersonalData();
+                personalData.setUserId(rs.getLong("userId"));
+                personalData.setAppellation(rs.getString("appellation"));
+                personalData.setGender(rs.getShort("gender"));
+                personalData.setDescription(rs.getString("description"));
+                personalData.setPromiseScore(rs.getShort("promiseScore"));
+                personalData.setInTimeScore(rs.getShort("inTimeScore"));
+                personalData.setLevelScore(rs.getShort("levelScore"));
+                personalData.setCooperationScore(rs.getShort("cooperationScore"));
+                personalData.setCommunicateScore(rs.getShort("communicationScore"));
+                personalData.setBkImage(rs.getString("bkImage"));
+                personalData.setLayoutImage(rs.getString("layoutImage"));
+                return personalData;
+            }, Long.parseLong(userId)).stream().findFirst().orElse(null);
+            return new HttpResp(true, result);
+        } catch (NumberFormatException e) {
+            return BaseResp.WRONG_PARAM;
+        } catch (Exception e) {
+            return BaseResp.INTERNAL_ERROR;
+        }
+    }
+
     @PostMapping("/update/personalInfo")
     public HttpResp updatePersonalInfo(
             @RequestHeader("userId") String userId,
@@ -58,9 +89,8 @@ public class PersonalInfoController {
         if (lUserId == 0L) {
             return BaseResp.LOGIN_REQUIRED;
         }
-        final UpdatePersonalInfoResp resp = new UpdatePersonalInfoResp();
         if (personalInfo == null) {
-            return new HttpResp(true, resp);
+            return BaseResp.WRONG_PARAM;
         }
         //性别校准
         if (personalInfo.getGender() < 0 || personalInfo.getGender() > 1) {
@@ -134,14 +164,31 @@ public class PersonalInfoController {
             @Nonnull PersonalData result = new TransactionTemplate(transactionManager)
                     .execute(transactionStatus -> {
                         PersonalData personalData = jdbcTemplate.query("""
-                                        SELECT `bkImage`,`layoutImage` FROM `personalDataTable` WHERE `userId`=?
+                                        SELECT `promiseScore`,`inTimeScore`,`levelScore`,`cooperationScore`,`communicateScore`,`bkImage`,`layoutImage` FROM `personalDataTable` WHERE `userId`=?
                                         """, (rs, num) -> {
                                     PersonalData data = new PersonalData();
+                                    data.setPromiseScore(rs.getShort("promiseScore"));
+                                    data.setInTimeScore(rs.getShort("inTimeScore"));
+                                    data.setInTimeScore(rs.getShort("levelScore"));
+                                    data.setInTimeScore(rs.getShort("cooperationScore"));
+                                    data.setInTimeScore(rs.getShort("communicateScore"));
                                     data.setBkImage(rs.getString("bkImage"));
                                     data.setLayoutImage(rs.getString("layoutImage"));
                                     return data;
                                 }, lUserId)
-                                .stream().findFirst().orElse(new PersonalData());
+                                .stream().findFirst().orElseGet(() -> {
+                                    PersonalData data = new PersonalData();
+                                    data.setUserId(lUserId);
+                                    data.setAppellation(personalInfo.getAppellation());
+                                    data.setGender(personalInfo.getGender());
+                                    data.setDescription(personalInfo.getDescription());
+                                    data.setPromiseScore((short) 5);
+                                    data.setInTimeScore((short) 5);
+                                    data.setLevelScore((short) 5);
+                                    data.setCooperationScore((short) 5);
+                                    data.setCommunicateScore((short) 5);
+                                    return data;
+                                });
                         jdbcTemplate.update("""
                                         INSERT INTO `personalDataTable`\s
                                         (`userId`, `appellation`, `gender`, `description`, `bkImage`, `layoutImage`)
@@ -225,12 +272,15 @@ public class PersonalInfoController {
                     log.error("添加新的展示图片出错", e);
                 }
             }
-            resp.setBackgroundUrl(userBkUrl);
-            resp.setLayoutUrl(userLyUrlStr);
-        } catch (Exception ignore) {
-        } finally {
+            //更新为新的url
+            result.setBkImage(userBkUrl);
+            result.setLayoutImage(userLyUrlStr);
             imageProcessControl.release();
+            return new HttpResp(true, result);
+        } catch (Exception e) {
+            imageProcessControl.release();
+            log.error("updatePersonalInfo-", e);
+            return BaseResp.INTERNAL_ERROR;
         }
-        return new HttpResp(true, resp);
     }
 }
