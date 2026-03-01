@@ -62,15 +62,17 @@ public class PersonalInfoController {
                 personalData.setInTimeScore(rs.getShort("inTimeScore"));
                 personalData.setLevelScore(rs.getShort("levelScore"));
                 personalData.setCooperationScore(rs.getShort("cooperationScore"));
-                personalData.setCommunicateScore(rs.getShort("communicationScore"));
+                personalData.setCommunicateScore(rs.getShort("communicateScore"));
                 personalData.setBkImage(rs.getString("bkImage"));
                 personalData.setLayoutImage(rs.getString("layoutImage"));
                 return personalData;
             }, Long.parseLong(userId)).stream().findFirst().orElse(null);
             return new HttpResp(true, result);
         } catch (NumberFormatException e) {
+            log.error("getPersonalInfo",e);
             return BaseResp.WRONG_PARAM;
         } catch (Exception e) {
+            log.error("getPersonalInfo",e);
             return BaseResp.INTERNAL_ERROR;
         }
     }
