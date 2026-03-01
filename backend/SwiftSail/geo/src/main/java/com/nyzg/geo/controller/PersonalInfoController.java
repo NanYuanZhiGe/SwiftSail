@@ -241,19 +241,29 @@ public class PersonalInfoController {
                 if (lyImgTupleMap != null) {//有图片
                     //删除对象旧的、和新的图片不重复的
                     String[] tmpList = result.getLayoutImage().split("\\|");
+                    List<String> urlList = new ArrayList<>(lyImgTupleMap.size());
                     List<DeleteObject> list = Arrays.stream(tmpList)
                             .filter(str -> {
                                 boolean res = lyImageUrlSet.contains(str);
                                 if (res) {//删除重复的图片
                                     lyImgTupleMap.remove(str);
                                 }
+                                urlList.add(str);
                                 return res;
                             })
                             .map(DeleteObject::new)
                             .toList();
                     int size1 = list.size();
                     int size2 = lyImageUrlSet.size();
-                    list = list.subList(0, Math.max(size1, (size1 + size2) - 9));
+                    int endIndex = Math.max(size1, (size1 + size2) - 9);
+                    list = list.subList(0, endIndex);
+                    for (int i = endIndex; i < urlList.size(); ++i) {
+                        if (i != list.size() - 1) {
+                            userLyUrlStringBuilder.append(urlList.get(i)).append("|");
+                        } else {
+                            userLyUrlStringBuilder.append(urlList.get(i));
+                        }
+                    }
                     try {
                         minioClient.removeObjects(RemoveObjectsArgs.builder()
                                 .bucket(publicBucket)
@@ -280,7 +290,7 @@ public class PersonalInfoController {
             }
             //更新为新的url
             result.setBkImage(userBkUrl);
-            result.setLayoutImage(userLyUrlStr);
+            result.setLayoutImage(userLyUrlStringBuilder.toString());
             imageProcessControl.release();
             return new HttpResp(true, result);
         } catch (Exception e) {
