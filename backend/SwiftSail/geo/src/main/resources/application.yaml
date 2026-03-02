@@ -13,8 +13,6 @@ spring:
         namespace: ${my.nacos-namespace}
       discovery:
         namespace: 62d813f4-e610-4b31-8f87-24faeb0b8035
-        ip: 10.8.0.2
-        ip-type: IPv4
       server-addr: 10.0.24.12:4090
       username: swiftSailDeveloper
       password: GiveMeACuteSister
