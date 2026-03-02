@@ -1,5 +1,6 @@
 package com.nyzg.geo.service;
 
+import com.nyzg.geo.conf.KryoSerializer;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
@@ -8,11 +9,13 @@ import io.minio.messages.DeleteObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -24,27 +27,51 @@ public class KafkaService {
     final private MinioClient mMinioClient;
 
     final private JdbcTemplate mJdbcTemplate;
+    final private KryoSerializer mKryoSerializer;
 
     public KafkaService(
+            KryoSerializer kryoSerializer,
             JdbcTemplate jdbcTemplate,
             MinioClient minioClient,
             @Value("${minio.public-bucket}")
             String publicBucket) {
+        mKryoSerializer = kryoSerializer;
         mJdbcTemplate = jdbcTemplate;
         mMinioClient = minioClient;
         mPublicBucket = publicBucket;
     }
 
-    @KafkaListener(topics = "ImageDelete", groupId = "imageGroup", concurrency = "1")
-    public void deleteImageList(List<DeleteObject> message, Acknowledgment ack) {
+    @SuppressWarnings("unchecked")
+    @KafkaListener(topics = "ImageAdd", groupId = "imageGroup", containerFactory = "container3")
+    public void addImageList(byte[] message, Acknowledgment ack) {
+        HashMap<String, byte[]> content = (HashMap<String, byte[]>) mKryoSerializer.deserialize(message, HashMap.class);
+        for (var v : content.entrySet()) {
+            try {
+                mMinioClient.putObject(PutObjectArgs.builder()
+                        .bucket(mPublicBucket)
+                        .object(v.getKey())
+                        .stream(new ByteArrayInputStream(v.getValue()), v.getValue().length, -1)
+                        .build());
+            } catch (Exception e) {
+                log.error("异步添加图片失败", e);
+            }
+        }
+        ack.acknowledge();
+    }
+
+    @SuppressWarnings("unchecked")
+    @KafkaListener(topics = "ImageDelete", groupId = "imageGroup", containerFactory = "container2")
+    public void deleteImageList(byte[] message, Acknowledgment ack) {
+        List<String> content = (List<String>) mKryoSerializer.deserialize(message, ArrayList.class);
         try {
             mMinioClient.removeObjects(RemoveObjectsArgs.builder()
                     .bucket(mPublicBucket)
-                    .objects(message)
+                    .objects(content.stream().map(DeleteObject::new).toList())
                     .build());
         } catch (Exception e) {
             log.error("异步删除展览图片失败", e);
         }
+        ack.acknowledge();
     }
 
     @KafkaListener(topics = "ImageProcess", groupId = "imageGroup", concurrency = "2")

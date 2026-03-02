@@ -16,6 +16,8 @@ public class KafkaTopicConf {
 
     public static final String TOPIC_IMAGE_DELETE = "ImageDelete";
 
+    public static final String TOPIC_IMAGE_ADD = "ImageAdd";
+
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootStrapAddr;
 
@@ -34,5 +36,10 @@ public class KafkaTopicConf {
     @Bean
     public NewTopic topicDelete() {
         return new NewTopic(TOPIC_IMAGE_DELETE, 1, (short) 1);
+    }
+
+    @Bean
+    public NewTopic topicAdd() {
+        return new NewTopic(TOPIC_IMAGE_ADD, 1, (short) 1);
     }
 }

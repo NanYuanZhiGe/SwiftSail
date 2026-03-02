@@ -1,6 +1,7 @@
 package com.nyzg.geo.service;
 
 import com.nyzg.common.ss_utils.Tuple;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -19,14 +20,32 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.Iterator;
 
 @Service
 @Slf4j
 public class ImageService {
+    private final static int HASH_LEN=16;
+    @Nonnull
+    public String getImageHash(@Nonnull byte[] image, @Nonnull String prefix) {
+        MessageDigest sha256;
+        try {
+            sha256 = MessageDigest.getInstance("SHA-256");
+        } catch (Exception e) {
+            log.error("处理文件哈希出错", e);
+            return String.format("%s-0.jpeg", prefix);
+        }
+        byte[] digest = sha256.digest(image);
+        String fileHash = Base64.getUrlEncoder().encodeToString(digest);
+        if (fileHash.length() > HASH_LEN) {
+            fileHash = fileHash.substring(0, HASH_LEN);
+        }
+        return String.format("%s-%s.jpeg", prefix, fileHash);
+    }
 
     @Nullable
-    public Tuple<ByteArrayInputStream,Integer, String> getProgressiveImageNullAtFail(@NotNull byte[] imageInput, @NotNull String hashPrefix) {
+    public Tuple<ByteArrayInputStream, Integer, String> getProgressiveImageNullAtFail(@NotNull byte[] imageInput, @NotNull String hashPrefix) {
         try {
             BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageInput));
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -90,11 +109,11 @@ public class ImageService {
             byte[] digest = sha256.digest();
             String minioFileName;
             String fileHash = Base64.getUrlEncoder().encodeToString(digest);
-            if (fileHash.length() > 16) {
-                fileHash = fileHash.substring(0, 16);
+            if (fileHash.length() > HASH_LEN) {
+                fileHash = fileHash.substring(0, HASH_LEN);
             }
             minioFileName = String.format("%s-%s.jpeg", hashPrefix, fileHash);
-            return new Tuple<>(new ByteArrayInputStream(bos.toByteArray()),bos.size(),minioFileName);
+            return new Tuple<>(new ByteArrayInputStream(bos.toByteArray()), bos.size(), minioFileName);
         } catch (Exception e) {
             log.error("ImageService", e);
             return null;
