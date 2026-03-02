@@ -3,25 +3,29 @@ package com.nyzg.geo.controller;
 import com.nyzg.common.netobj.BaseResp;
 import com.nyzg.common.netobj.HttpResp;
 import com.nyzg.common.ss_utils.Tuple;
+import com.nyzg.geo.conf.KafkaTopicConf;
 import com.nyzg.geo.dbobj.PersonalData;
 import com.nyzg.geo.netobj.PersonalInfo;
 import com.nyzg.geo.service.ImageService;
-import io.minio.*;
+import io.minio.MinioClient;
+import io.minio.PutObjectArgs;
 import io.minio.messages.DeleteObject;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayInputStream;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @RestController
 @Slf4j
@@ -39,6 +43,8 @@ public class PersonalInfoController {
 
     @Value("${minio.public-bucket}")
     String publicBucket;
+    @Resource
+    KafkaTemplate<String, List<DeleteObject>> kafkaTemplate;
 
     final private Semaphore imageProcessControl = new Semaphore(20);
 
@@ -58,14 +64,7 @@ public class PersonalInfoController {
                 personalData.setAppellation(rs.getString("appellation"));
                 personalData.setGender(rs.getShort("gender"));
                 personalData.setDescription(rs.getString("description"));
-                personalData.setPromiseScore(rs.getShort("promiseScore"));
-                personalData.setInTimeScore(rs.getShort("inTimeScore"));
-                personalData.setLevelScore(rs.getShort("levelScore"));
-                personalData.setCooperationScore(rs.getShort("cooperationScore"));
-                personalData.setCommunicateScore(rs.getShort("communicateScore"));
-                personalData.setBkImage(rs.getString("bkImage"));
-                personalData.setLayoutImage(rs.getString("layoutImage"));
-                return personalData;
+                return getPersonalData(rs, personalData);
             }, Long.parseLong(userId)).stream().findFirst().orElse(null);
             return new HttpResp(true, result);
         } catch (NumberFormatException e) {
@@ -116,6 +115,9 @@ public class PersonalInfoController {
             }
         }
         if (personalInfo.getLayouts() != null) {
+            //清除里面的null类，同时限制最大数量为9
+            personalInfo.setLayouts(personalInfo.getLayouts().stream().filter(Objects::nonNull)
+                    .limit(9).toList());
             for (byte[] img : personalInfo.getLayouts()) {
                 if (img.length > MAX_IMAGE_SIZE) {
                     return BaseResp.LARGE_IMAGE_IS_NOT_ALLOW;
@@ -124,10 +126,12 @@ public class PersonalInfoController {
         }
         //-------------------实际业务-----------------------
         try {
-            if (!imageProcessControl.tryAcquire(1, 3, TimeUnit.SECONDS)) {
+            //获取信号量，防止请求太多驻留在内存中导致oom
+            //拿不到直接返回服务繁忙
+            if (!imageProcessControl.tryAcquire(1)) {
                 return BaseResp.SERVER_TOO_BUSY;
             }
-            //背景图片校准
+            //背景图片转progressive jpeg
             final Tuple<ByteArrayInputStream, Integer, String> userBkTuple;
             final String userBkUrl;
             if (personalInfo.getBackground() != null) {
@@ -141,42 +145,26 @@ public class PersonalInfoController {
                 userBkUrl = null;
                 userBkTuple = null;
             }
-            //展览图片校准
-            final Map<String, Tuple<ByteArrayInputStream, Integer, String>> lyImgTupleMap;
-            final Set<String> lyImageUrlSet = new HashSet<>();
-            final StringBuilder userLyUrlStringBuilder = new StringBuilder();
+            //展示的图片转progressive jpeg
+            //key是hash name
+            final Map<String, Tuple<ByteArrayInputStream, Integer, String>> lyImgTupleMap = new HashMap<>(16);
             if (personalInfo.getLayouts() != null) {
-                lyImgTupleMap = new HashMap<>();
                 for (byte[] img : personalInfo.getLayouts()) {
                     Tuple<ByteArrayInputStream, Integer, String> temp = imageService.getProgressiveImageNullAtFail(img, "userLy");
                     if (temp != null) {
                         lyImgTupleMap.put(temp.getC(), temp);
-                        lyImageUrlSet.add(temp.getC());
-                        userLyUrlStringBuilder.append(temp.getC()).append("|");
                     }
                 }
-                if (userLyUrlStringBuilder.length() > 1) {
-                    userLyUrlStringBuilder.deleteCharAt(userLyUrlStringBuilder.length() - 1);
-                }
-            } else {
-                lyImgTupleMap = null;
             }
-            final String userLyUrlStr = userLyUrlStringBuilder.toString();
             //写用户数据到数据库
+            final List<DeleteObject> listToDelete = new ArrayList<>(9);
             @Nonnull PersonalData result = new TransactionTemplate(transactionManager)
                     .execute(transactionStatus -> {
                         PersonalData personalData = jdbcTemplate.query("""
                                         SELECT `promiseScore`,`inTimeScore`,`levelScore`,`cooperationScore`,`communicateScore`,`bkImage`,`layoutImage` FROM `personalDataTable` WHERE `userId`=?
                                         """, (rs, num) -> {
                                     PersonalData data = new PersonalData();
-                                    data.setPromiseScore(rs.getShort("promiseScore"));
-                                    data.setInTimeScore(rs.getShort("inTimeScore"));
-                                    data.setInTimeScore(rs.getShort("levelScore"));
-                                    data.setInTimeScore(rs.getShort("cooperationScore"));
-                                    data.setInTimeScore(rs.getShort("communicateScore"));
-                                    data.setBkImage(rs.getString("bkImage"));
-                                    data.setLayoutImage(rs.getString("layoutImage"));
-                                    return data;
+                                    return getPersonalData(rs, data);
                                 }, lUserId)
                                 .stream().findFirst().orElseGet(() -> {
                                     PersonalData data = new PersonalData();
@@ -191,6 +179,63 @@ public class PersonalInfoController {
                                     data.setCommunicateScore((short) 5);
                                     return data;
                                 });
+                        /*
+                        此时我们知道了旧的图片，我们要做这些事情：
+                        根据旧图片和新图片，把结果分为两部分，一个是拿出删除的
+                        一个是拿去添加的，
+                        其中拿去添加的保留着lyImageTupleMap里面
+                         */
+                        //保证有数据
+                        final StringBuilder userLyUrlStringBuilder = new StringBuilder();
+                        final String layoutImageStr;
+                        if (personalData.getLayoutImage() != null && !personalData.getLayoutImage().isEmpty()) {
+                            List<String> deleteList = Arrays.stream(personalData.getLayoutImage().split("\\|"))
+                                    //不要已经有的
+                                    .filter(name -> {
+                                        boolean res = lyImgTupleMap.containsKey(name);
+                                        if (res) {//对象存储中已经有了
+                                            //就不要额外添加了
+                                            lyImgTupleMap.remove(name);
+                                        }
+                                        return true;
+                                    })
+                                    //到这里的时候，已经是去重之后的结果了
+                                    // 【   【 】    】-----》 【   m   】【 n 】
+                                    .toList();
+                            //控制用户的总图片数量为9个
+                            //只删除多出来的
+                            if (deleteList.size() + lyImgTupleMap.size() > 9) {
+                                int endIndex = (deleteList.size() + lyImgTupleMap.size()) - 9;
+                                //∵ lyImgTupleMap.size()<=9
+                                //∴ deleteList.size() + lyImgTupleMap.size() > 9时
+                                //假设endIndex = (deleteList.size() + lyImgTupleMap.size()) - 9>=deleteList.size()
+                                //变化得到(deleteList.size() + lyImgTupleMap.size()) >=deleteList.size()+9
+                                //而由于lyImgTupleMap.size()<=9
+                                //所以endIndex = (deleteList.size() + lyImgTupleMap.size())-9 <=deleteList.size()
+                                //所以下面的这个for循环是安全的
+                                for (int i = 0; i < endIndex; ++i) {
+                                    listToDelete.add(new DeleteObject(deleteList.get(i)));
+                                }
+                                for (int i = endIndex; i < deleteList.size(); ++i) {
+                                    userLyUrlStringBuilder.append(deleteList.get(i)).append("|");
+                                }
+                            } else {//总元素个数小于等于9
+                                for (String s : deleteList) {
+                                    userLyUrlStringBuilder.append(s).append("|");
+                                }
+                            }
+                            for (var v : lyImgTupleMap.entrySet()) {
+                                userLyUrlStringBuilder.append(v.getKey()).append("|");
+                            }
+                            if (userLyUrlStringBuilder.length() > 1) {
+                                userLyUrlStringBuilder.deleteCharAt(userLyUrlStringBuilder.length() - 1);
+                            }
+                            layoutImageStr = userLyUrlStringBuilder.toString();
+                        } else {
+                            layoutImageStr = null;
+                        }
+                        //更新数据
+                        personalData.setLayoutImage(layoutImageStr);
                         jdbcTemplate.update("""
                                         INSERT INTO `personalDataTable`\s
                                         (`userId`, `appellation`, `gender`, `description`, `bkImage`, `layoutImage`)
@@ -207,23 +252,20 @@ public class PersonalInfoController {
                                 personalInfo.getGender(),
                                 personalInfo.getDescription(),
                                 userBkUrl,
-                                userLyUrlStr
+                                layoutImageStr
                         );
                         return personalData;
                     });
-            //更新对象存储
-            //删除旧的图片，添加新的
+            //----------------更新对象存储----------------------------
             //新的背景图和和旧的不一样才触发更新
             if (userBkUrl != null && !userBkUrl.equals(result.getBkImage())) {
                 if (result.getBkImage() != null) {//如果旧的图片不为空，旧和三处
-                    try {
-                        minioClient.removeObject(RemoveObjectArgs.builder()
-                                .bucket(publicBucket)
-                                .object(result.getBkImage())
-                                .build());
-                    } catch (Exception e) {
-                        log.error("删除旧的背景图片出错", e);
-                    }
+                    kafkaTemplate.send(KafkaTopicConf.TOPIC_IMAGE_DELETE, userId, List.of(new DeleteObject(result.getBkImage())))
+                            .whenComplete((res, ex) -> {
+                                if (ex != null) {
+                                    log.error("删除旧的背景图片出错", ex);
+                                }
+                            });
                 }
                 //添加新的背景图
                 try {
@@ -236,67 +278,50 @@ public class PersonalInfoController {
                     log.error("添加新的背景图片出错", e);
                 }
             }
+            //结果集里面是旧的，现在更新为新的
+            result.setBkImage(userBkUrl);
             //处理展览图
-            if (result.getLayoutImage() != null) {
-                if (lyImgTupleMap != null) {//有图片
-                    //删除对象旧的、和新的图片不重复的
-                    String[] tmpList = result.getLayoutImage().split("\\|");
-                    List<String> urlList = new ArrayList<>(lyImgTupleMap.size());
-                    List<DeleteObject> list = Arrays.stream(tmpList)
-                            .filter(str -> {
-                                boolean res = lyImageUrlSet.contains(str);
-                                if (res) {//删除重复的图片
-                                    lyImgTupleMap.remove(str);
-                                }
-                                urlList.add(str);
-                                return res;
-                            })
-                            .map(DeleteObject::new)
-                            .toList();
-                    int size1 = list.size();
-                    int size2 = lyImageUrlSet.size();
-                    int endIndex = Math.max(size1, (size1 + size2) - 9);
-                    list = list.subList(0, endIndex);
-                    for (int i = endIndex; i < urlList.size(); ++i) {
-                        if (i != list.size() - 1) {
-                            userLyUrlStringBuilder.append(urlList.get(i)).append("|");
-                        } else {
-                            userLyUrlStringBuilder.append(urlList.get(i));
-                        }
-                    }
-                    try {
-                        minioClient.removeObjects(RemoveObjectsArgs.builder()
-                                .bucket(publicBucket)
-                                .objects(list)
-                                .build());
-                    } catch (Exception e) {
-                        log.error("删除旧的展示图片出错", e);
-                    }
-                }
+            //需要删除的数据
+            //异步删除
+            if (!listToDelete.isEmpty()) {
+                kafkaTemplate.send(KafkaTopicConf.TOPIC_IMAGE_DELETE, userId, listToDelete)
+                        .whenCompleteAsync((res, ex) -> {
+                            if (ex != null) {
+                                log.error("kafka异步删除出错", ex);
+                            }
+                        });
             }
-            //添加新的图片
-            if (lyImgTupleMap != null) {
+            //需要添加的数据
+            for (var v : lyImgTupleMap.entrySet()) {
                 try {
-                    for (var v : lyImgTupleMap.entrySet()) {
-                        minioClient.putObject(PutObjectArgs.builder()
-                                .bucket(publicBucket)
-                                .stream(v.getValue().getA(), v.getValue().getB(), -1)
-                                .object(v.getKey())
-                                .build());
-                    }
+                    minioClient.putObject(PutObjectArgs.builder()
+                            .bucket(publicBucket)
+                            .stream(v.getValue().getA(), v.getValue().getB(), -1)
+                            .object(v.getKey())
+                            .build());
                 } catch (Exception e) {
                     log.error("添加新的展示图片出错", e);
                 }
             }
-            //更新为新的url
-            result.setBkImage(userBkUrl);
-            result.setLayoutImage(userLyUrlStringBuilder.toString());
+
             imageProcessControl.release();
             return new HttpResp(true, result);
         } catch (Exception e) {
             imageProcessControl.release();
-            log.error("updatePersonalInfo-", e);
+            log.error("updatePersonalInfo-Probably database transaction exception", e);
             return BaseResp.INTERNAL_ERROR;
         }
+    }
+
+    @NotNull
+    private PersonalData getPersonalData(ResultSet rs, PersonalData data) throws SQLException {
+        data.setPromiseScore(rs.getShort("promiseScore"));
+        data.setInTimeScore(rs.getShort("inTimeScore"));
+        data.setLevelScore(rs.getShort("levelScore"));
+        data.setCooperationScore(rs.getShort("cooperationScore"));
+        data.setCommunicateScore(rs.getShort("communicateScore"));
+        data.setBkImage(rs.getString("bkImage"));
+        data.setLayoutImage(rs.getString("layoutImage"));
+        return data;
     }
 }

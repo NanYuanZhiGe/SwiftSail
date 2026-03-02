@@ -13,6 +13,9 @@ import java.util.Map;
 @Configuration
 public class KafkaTopicConf {
     public static final String TOPIC_IMAGE_PROCESS = "ImageProcess";
+
+    public static final String TOPIC_IMAGE_DELETE = "ImageDelete";
+
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootStrapAddr;
 
@@ -26,5 +29,10 @@ public class KafkaTopicConf {
     @Bean
     public NewTopic topicImg() {
         return new NewTopic(TOPIC_IMAGE_PROCESS, 2, (short) 1);
+    }
+
+    @Bean
+    public NewTopic topicDelete() {
+        return new NewTopic(TOPIC_IMAGE_DELETE, 1, (short) 1);
     }
 }

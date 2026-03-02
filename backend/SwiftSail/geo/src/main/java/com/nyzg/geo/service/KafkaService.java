@@ -3,6 +3,8 @@ package com.nyzg.geo.service;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
+import io.minio.RemoveObjectsArgs;
+import io.minio.messages.DeleteObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -10,6 +12,8 @@ import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 
 @Service
@@ -29,6 +33,18 @@ public class KafkaService {
         mJdbcTemplate = jdbcTemplate;
         mMinioClient = minioClient;
         mPublicBucket = publicBucket;
+    }
+
+    @KafkaListener(topics = "ImageDelete", groupId = "imageGroup", concurrency = "1")
+    public void deleteImageList(List<DeleteObject> message, Acknowledgment ack) {
+        try {
+            mMinioClient.removeObjects(RemoveObjectsArgs.builder()
+                    .bucket(mPublicBucket)
+                    .objects(message)
+                    .build());
+        } catch (Exception e) {
+            log.error("异步删除展览图片失败", e);
+        }
     }
 
     @KafkaListener(topics = "ImageProcess", groupId = "imageGroup", concurrency = "2")
